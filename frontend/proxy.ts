@@ -3,7 +3,7 @@
  * Middleware allows you to intercept requests before they reach the server.
  * Learn more: https://nextjs.org/docs/app/building-your-application/routing/middleware
  *
- * Copyright © 2021-2025 Hoagie Club and affiliates.
+ * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree or at https://github.com/hoagieclub/template/LICENSE.
