@@ -1,5 +1,5 @@
 {
-	"name": "template",
+	"name": "calendar",
 	"version": "0.9.0",
 	"license": "MIT",
 	"private": false,
@@ -16,7 +16,7 @@
 		"analyze": "webpack-bundle-analyzer dist/stats.json"
 	},
 	"engines": {
-		"node": "22.9.0"
+		"node": "^22.9.0"
 	},
 	"trustedDependencies": [
 		"@vercel/speed-insights",
