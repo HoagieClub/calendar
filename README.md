@@ -6,10 +6,16 @@ Repository for HoagieCalendar
 
 ### Prerequisites
 
-Before you begin, ensure you have [Yarn](https://yarnpkg.com/) installed. You can install Yarn via [Homebrew](https://brew.sh/) using the following command:
+Before you begin, ensure you have [Yarn](https://yarnpkg.com/getting-started/install) installed. Make sure you have [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed before runnning this command:
 
 ```bash
-brew install yarn
+npm install -g corepack
+```
+
+You can set your yarn version to the latest version with:
+
+```bash
+yarn set version stable
 ```
 
 ### Installation
