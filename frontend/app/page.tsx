@@ -1,7 +1,7 @@
 /**
  * @overview Landing page for the template app.
  *
- * Copyright © 2021-2025 Hoagie Club and affiliates.
+ * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree or at https://github.com/hoagieclub/template/LICENSE.
@@ -111,7 +111,7 @@ export function Home() {
 						<br />
 					</Pane>
 				</div>
-				<div>© 2025 Hoagie Club.</div>
+				<div>© 2026 Hoagie Club.</div>
 			</Pane>
 		</Pane>
 	);
