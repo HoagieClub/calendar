@@ -4,6 +4,9 @@ jobs:
     run-linters:
         name: Run linters
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./frontend
 
         steps:
             - name: Check out Git repository
@@ -22,4 +25,6 @@ jobs:
               uses: wearerequired/lint-action@v2.3.0
               with:
                   eslint: true
+                  eslint_dir: ./frontend
                   prettier: true
+                  prettier_dir: ./frontend
