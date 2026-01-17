@@ -30,7 +30,6 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 
 import ProfileCard from '@/lib/hoagie-ui/ProfileCard';
-import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
 
 /**
  * Interface for tab items in the navigation bar.

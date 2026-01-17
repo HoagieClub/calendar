@@ -13,8 +13,6 @@
 import { type User } from '@auth0/nextjs-auth0/types';
 import { majorScale, Button, Heading, Card, Avatar, Text, useTheme } from 'evergreen-ui';
 
-import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
-
 /**
  * ProfileCard is a profile card meant for display of user information
  *  throughout different Hoagie applications.

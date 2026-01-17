@@ -2,8 +2,6 @@
 
 import { Pane, majorScale, useTheme } from 'evergreen-ui';
 
-import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
-
 /**
  * Footer is a generic page footer meant for use throughout
  * different Hoagie applications.
