@@ -107,12 +107,14 @@ backend/.venv/
 /backend/poetry.lock
 /backend/poetry.toml
 
-# Bun lock file (Frontend)
-/frontend/bun.lockb
-
-# Uncomment the following lines if you want to ignore lock files (not generally recommended)
-# package-lock.json
-# yarn.lock
+# Yarn
+/frontend/.pnp.*
+/frontend/.yarn/*
+!/frontend/.yarn/patches
+!/frontend/.yarn/plugins
+!/frontend/.yarn/releases
+!/frontend/.yarn/sdks
+!/frontend/.yarn/versions
 
 # ===============================
 # IDE & Editor Settings

@@ -47,7 +47,7 @@ const teamLeads = [
 		socials: {
 			linkedin: 'https://www.linkedin.com',
 		},
-	}
+	},
 ];
 
 const teamMembers = [
