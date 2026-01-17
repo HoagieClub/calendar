@@ -58,7 +58,7 @@ const teamLeads: member[] = [
 	{
 		name: 'Jenny Fan',
 		role: 'Team Lead',
-		imgSrc: 'https://github.com/HoagieClub/club/raw/refs/heads/source/src/assets/hoagie-hi.svg',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQFOQEWyofLFhw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1710648138236?e=1770249600&v=beta&t=YhbYphTxR6MEjk17qmvvw0dqbcdpbIwNrDs0oDU-BVM',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/jennyfan04/',
 		},
@@ -89,11 +89,11 @@ export function App() {
 				{/* Header */}
 				<Pane textAlign="center" marginBottom={majorScale(6)}>
 					<Heading size={900} fontSize="3rem" fontWeight={700} marginBottom={majorScale(4)}>
-						Meet the <Text size={900} fontSize="3rem" color={theme.colors.blue500}>HoagieSparks</Text> Team
+						Meet the <Text size={900} fontSize="3rem" color={theme.colors.blue500}>HoagieCalendar</Text> Team
 					</Heading>
 					<Text size={500} display="block" maxWidth={672} marginX="auto">
 						We&apos;re a passionate group of developers and designers
-						dedicated to improving your Princeton academic experience.
+						dedicated to improving your Princeton experience.
 					</Text>
 				</Pane>
 
