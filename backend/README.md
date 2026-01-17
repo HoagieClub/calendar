@@ -1,58 +1,41 @@
 # Hoagie Calendar Backend
 
-This is the backend directory for Hoagie Calendar.
-
-## Setup
-
-This project uses [uv](https://github.com/astral-sh/uv) as the package manager.
-
 ### Prerequisites
 
-- Python 3.12+
-- [uv](https://github.com/astral-sh/uv) installed
+Before you begin, ensure you have [uv](https://docs.astral.sh/uv/) installed. We will be using uv as our package manager for the backend. uv can be installed by running:
+
+```bash
+brew install uv
+```
 
 ### Installation
 
-1. Install dependencies:
-   ```bash
-   uv sync
-   ```
+Before beginning with the installation, make sure you are in the backend directory by running:
 
-2. Activate the virtual environment:
-   ```bash
-   source .venv/bin/activate
-   ```
-   
-   Or use uv to run commands directly:
-   ```bash
-   uv run python manage.py <command>
-   ```
+```bash
+cd backend
+```
 
-### Common Commands
+After installing uv, create a virtual environment using the following command:
 
-- **Run Django management commands:**
-  ```bash
-  uv run python manage.py migrate
-  uv run python manage.py runserver
-  uv run python manage.py createsuperuser
-  ```
+```bash
+uv venv --prompt hoagie-calendar --python 3.13 .venv
+```
 
-- **Add a new dependency:**
-  ```bash
-  uv add <package-name>
-  ```
+This creates a virtual environment named `hoagie-calendar` contained within the `.venv` directory. Activate the virtual environment with:
 
-- **Add a development dependency:**
-  ```bash
-  uv add --dev <package-name>
-  ```
+```bash
+source .venv/bin/activate
+```
 
-- **Update dependencies:**
-  ```bash
-  uv sync
-  ```
+To install the relevant backend depedencies, run:
+```bash
+uv sync
+```
 
-- **Run the development server:**
-  ```bash
-  uv run python manage.py runserver
-  ```
+This will install all required backend dependencies in the virtual environment.
+
+### Running the app
+```bash
+uv run manage.py runserver
+```
