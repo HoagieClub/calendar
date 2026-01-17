@@ -24,6 +24,7 @@ import {
 	Avatar,
 	TabNavigation,
 	Tab,
+	useTheme,
 } from 'evergreen-ui';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -74,7 +75,7 @@ export function Nav({
 	user,
 	beta = false,
 }: NavProps) {
-	const theme = hoagieTemplate;
+	const theme = useTheme();
 	const router = useRouter();
 	const pathname = usePathname();
 	const username = user?.name;
@@ -84,7 +85,7 @@ export function Nav({
 			{HeaderComponent ? (
 				<HeaderComponent />
 			) : (
-				<Pane width='100%' height={20} background={theme.colors.teal500} />
+				<Pane width='100%' height={20} background={theme.colors.blue500} />
 			)}
 			<Pane
 				display='flex'
@@ -121,7 +122,7 @@ export function Nav({
 										is='h2'
 										display='inline-block'
 										className='hoagie logo'
-										color={theme.colors.teal500}
+										color={theme.colors.blue500}
 									>
 										{name}
 									</Text>
@@ -164,7 +165,7 @@ export function Nav({
 										cursor: 'pointer',
 										border: `2px solid ${theme.colors.tealTint}`,
 									}}
-									backgroundColor={theme.colors.teal100}
+									backgroundColor={theme.colors.blue100}
 									size={40}
 									marginLeft={majorScale(4)}
 								/>

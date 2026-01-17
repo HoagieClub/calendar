@@ -11,7 +11,7 @@
  */
 
 import { type User } from '@auth0/nextjs-auth0/types';
-import { majorScale, Button, Heading, Card, Avatar, Text } from 'evergreen-ui';
+import { majorScale, Button, Heading, Card, Avatar, Text, useTheme } from 'evergreen-ui';
 
 import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
 
@@ -20,7 +20,7 @@ import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
  *  throughout different Hoagie applications.
  */
 export function ProfileCard({ user }: { user: User }) {
-	const theme = hoagieTemplate;
+	const theme = useTheme();
 	const name = user?.name;
 	const email = user?.email || (user?.sub?.includes('@') ? user.sub.split('|').pop() : 'N/A');
 
@@ -35,7 +35,7 @@ export function ProfileCard({ user }: { user: User }) {
 			flexDirection='column'
 			alignItems='center'
 		>
-			<Avatar name={name} backgroundColor={theme.colors.teal100} size={40} />
+			<Avatar name={name} backgroundColor={theme.colors.blue100} size={40} />
 			<Heading size={500} marginTop={majorScale(1)}>
 				{name}
 			</Heading>
