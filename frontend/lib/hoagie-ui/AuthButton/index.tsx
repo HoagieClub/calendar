@@ -1,18 +1,16 @@
 /**
- * @overview AuthButton component for the template app.
+ * @overview AuthButton component for the calendar app.
  *
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
  * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree or at https://github.com/hoagieclub/template/LICENSE.
+ * LICENSE file in the root directory of this source tree or at https://github.com/HoagieClub/calendar/blob/main/LICENSE.
  *
  * Permission is granted under the MIT License to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the software. This software is provided "as-is", without warranty of any kind.
  */
 
-import { Button, Pane, majorScale, minorScale } from 'evergreen-ui';
-
-import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
+import { Button, Pane, majorScale, minorScale, useTheme } from 'evergreen-ui';
 
 interface AuthButtonProps {
 	/** defines whether the button is for "login" or "logout" */
@@ -25,7 +23,7 @@ interface AuthButtonProps {
  * different Hoagie applications.
  */
 export function AuthButton({ variant = 'login', href = '' }: AuthButtonProps) {
-	const theme = hoagieTemplate;
+	const theme = useTheme();
 	const logo = (
 		<h2
 			style={{

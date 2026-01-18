@@ -4,7 +4,7 @@
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
  * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree or at https://github.com/hoagieclub/template/LICENSE.
+ * LICENSE file in the root directory of this source tree or at https://github.com/HoagieClub/calendar/blob/main/LICENSE.
  *
  * Permission is granted under the MIT License to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the software. This software is provided "as-is", without warranty of any kind.
@@ -14,19 +14,18 @@
 
 import type { ReactNode } from 'react';
 
-import { Pane } from 'evergreen-ui';
+import { Pane, useTheme } from 'evergreen-ui';
 
 import Footer from '@/lib/hoagie-ui/Footer';
-import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
 
 export function Layout({ children }: { children: ReactNode }) {
-	const theme = hoagieTemplate;
+	const theme = useTheme();
 	return (
 		<Pane
 			display='flex'
 			flexDirection='column'
 			minHeight='100vh'
-			background={theme.colors.teal100}
+			background={theme.colors.blue100}
 		>
 			<Pane flex='1'>{children}</Pane>
 			<Pane>

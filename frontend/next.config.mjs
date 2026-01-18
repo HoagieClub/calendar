@@ -16,6 +16,12 @@ const nextConfig = {
 				hostname: 'github.com',
 			},
 		],
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'media.licdn.com',
+			},
+		],
 	},
 };
 
