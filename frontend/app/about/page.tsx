@@ -61,11 +61,11 @@ const teamLeads: member[] = [
 const teamMembers = [
 	// Add your name, role, and image here!
 	{
-		name: 'Hoagie Member',
-		role: 'Frontend Developer',
-		imgSrc: 'https://github.com/HoagieClub/club/raw/refs/heads/source/src/assets/hoagie-hi.svg',
+		name: 'Chloe Lau',
+		role: 'Product Manager',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQFlLceS8QZODA/profile-displayphoto-crop_800_800/B4EZrciQfjKUAI-/0/1764636561365?e=1770854400&v=beta&t=qa6Xfoyb44M9dw9VHW_ofy9ChNiirP2hS6CMRYRWfto',
 		socials: {
-			linkedin: 'https://www.linkedin.com',
+			linkedin: 'https://www.linkedin.com/in/chloe-hc-lau/',
 		},
 	},
 ];
@@ -127,6 +127,7 @@ export function App() {
 											alt={lead.name}
 											height={128}
 											width={128}
+											objectFit='cover'
 										/>
 									</Pane>
 									<div className='text-center sm:text-left'>
@@ -163,8 +164,9 @@ export function App() {
 									src={member.imgSrc}
 									alt={member.name}
 									className='w-24 h-24 rounded-full mx-auto mb-4 border-4 border-slate-200 group-hover:border-emerald-300 transition-colors duration-300'
-									height={0}
-									width={0}
+									height={128}
+									width={128}
+									objectFit='cover'
 								/>
 								<h4 className='font-bold text-slate-800 text-lg'>{member.name}</h4>
 								<p className='text-emerald-600 text-sm'>{member.role}</p>
