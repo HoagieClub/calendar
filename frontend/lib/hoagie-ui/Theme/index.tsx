@@ -16,10 +16,10 @@ import type { ReactNode } from 'react';
 
 import { ThemeProvider } from 'evergreen-ui';
 
-import { hoagieTemplate, hoagieUI } from './themes';
+import { hoagieCalendar, hoagieUI } from './themes';
 
 type ThemeProps = {
-	// Options: "calendar")
+	// Options: "calendar"
 	palette?: string;
 
 	// React children (child components)
@@ -34,7 +34,7 @@ export function Theme({ palette = 'calendar', children }: ThemeProps) {
 	const colorTheme = (() => {
 		switch (palette) {
 			case 'calendar':
-				return hoagieTemplate;
+				return hoagieCalendar;
 			default:
 				return hoagieUI;
 		}
