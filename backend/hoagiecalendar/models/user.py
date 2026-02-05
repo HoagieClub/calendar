@@ -5,4 +5,4 @@ class User(AbstractUser):
 		return f"{self.get_full_name()} ({self.username})"
 
 	class Meta:
-		db_table = "User"
+		db_table = "User"		
