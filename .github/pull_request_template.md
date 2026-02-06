@@ -1,5 +1,5 @@
 **References**
-- Linear:
+- Linear: [DEV-529](https://linear.app/hoagie/issue/DEV-529/create-category-model)
 
 **Proposed Changes**
-- _Add your proposed changes here_
+- Copied category model from mail
