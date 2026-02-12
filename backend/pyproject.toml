@@ -20,6 +20,7 @@ maintainers = [
 # Project dependencies
 dependencies = [
     "django>=6.0",
+    "djangorestframework>=3.16.1",
     "python-dotenv>=1.2.1",
 ]
 
