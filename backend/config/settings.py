@@ -30,6 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+PROD = os.getenv("PROD", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
@@ -81,7 +82,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # Select the appropriate database URL based on DEBUG setting
-os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL") if DEBUG else os.getenv("DATABASE_URL")
+os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL") if PROD else os.getenv("DATABASE_URL")
 DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"), ssl_require=False)}
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
