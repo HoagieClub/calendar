@@ -2,6 +2,7 @@ from django.db import models
 
 from .user import User
 
+
 class Category(models.Model):
 	name = models.CharField(max_length=50)
 
@@ -11,9 +12,10 @@ class Category(models.Model):
 	class Meta:
 		db_table = "Category"
 
+
 class Event(models.Model):
 	start = models.DateTimeField()
-	end  = models.DateTimeField()
+	end = models.DateTimeField()
 	name = models.CharField(max_length=100)
 	location = models.CharField(max_length=100)
 	description = models.TextField()
