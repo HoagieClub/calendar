@@ -2,6 +2,14 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import serializers
+from ..models.event import Event
+
+class EventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = '__all__'
+        read_only_fields = ['owner']
 
 from ..models.event import Event
 
