@@ -68,6 +68,14 @@ const teamMembers = [
 			linkedin: 'https://www.linkedin.com/in/chloe-hc-lau/',
 		},
 	},
+	{
+		name: 'Angela Cai',
+		role: 'Software Engineer',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQHpPTd04eUfhQ/profile-displayphoto-crop_800_800/B4EZrXdJAUHEAI-/0/1764551332672?e=1772668800&v=beta&t=LsG7vZaIRyXzf_3-7lrJiu2z_Hokd46Kvv5-3d2_Wpc',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/angcai/',
+		},
+	},
 ];
 
 /**
