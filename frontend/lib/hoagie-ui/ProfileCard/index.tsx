@@ -1,26 +1,24 @@
 /**
- * @overview Profile card component for the template app.
+ * @overview Profile card component for the calendar app.
  *
- * Copyright © 2021-2025 Hoagie Club and affiliates.
+ * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
  * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree or at https://github.com/hoagieclub/template/LICENSE.
+ * LICENSE file in the root directory of this source tree or at https://github.com/HoagieClub/calendar/blob/main/LICENSE.
  *
  * Permission is granted under the MIT License to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the software. This software is provided "as-is", without warranty of any kind.
  */
 
 import { type User } from '@auth0/nextjs-auth0/types';
-import { majorScale, Button, Heading, Card, Avatar, Text } from 'evergreen-ui';
-
-import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
+import { majorScale, Button, Heading, Card, Avatar, Text, useTheme } from 'evergreen-ui';
 
 /**
  * ProfileCard is a profile card meant for display of user information
  *  throughout different Hoagie applications.
  */
 export function ProfileCard({ user }: { user: User }) {
-	const theme = hoagieTemplate;
+	const theme = useTheme();
 	const name = user?.name;
 	const email = user?.email || (user?.sub?.includes('@') ? user.sub.split('|').pop() : 'N/A');
 
@@ -35,7 +33,7 @@ export function ProfileCard({ user }: { user: User }) {
 			flexDirection='column'
 			alignItems='center'
 		>
-			<Avatar name={name} backgroundColor={theme.colors.teal100} size={40} />
+			<Avatar name={name} backgroundColor={theme.colors.blue100} size={40} />
 			<Heading size={500} marginTop={majorScale(1)}>
 				{name}
 			</Heading>

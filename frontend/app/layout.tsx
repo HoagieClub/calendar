@@ -1,10 +1,10 @@
 /**
- * @overview Root layout component for the template app. Styles apply to all children.
+ * @overview Root layout component for the calendar app. Styles apply to all children.
  *
- * Copyright © 2021-2025 Hoagie Club and affiliates.
+ * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
  * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree or at https://github.com/hoagieclub/template/LICENSE.
+ * LICENSE file in the root directory of this source tree or at https://github.com/HoagieClub/calendar/blob/main/LICENSE.
  *
  * Permission is granted under the MIT License to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the software. This software is provided "as-is", without warranty of any kind.
@@ -28,8 +28,8 @@ import Theme from '@/lib/hoagie-ui/Theme';
 import { hoagie } from './hoagie';
 
 export const metadata = {
-	title: 'Template App by Hoagie',
-	description: 'Build the next big thing.',
+	title: 'Calendar App by Hoagie',
+	description: 'A calendar of events.',
 };
 
 interface ContentProps {
@@ -48,15 +48,16 @@ async function Content({ children }: ContentProps): Promise<JSX.Element> {
 	const user = session?.user;
 
 	const tabs = [
+		{ title: 'About', href: '/about' },
 		{ title: 'Feature 1', href: '/feature1' },
 		{ title: 'Feature 2', href: '/feature2' },
 		{ title: 'Feature 3', href: '/feature3' },
 	];
 
 	return (
-		<Theme palette='template'>
+		<Theme palette='calendar'>
 			<Layout>
-				<Nav name='template' tabs={tabs} user={user} />
+				<Nav name='calendar' tabs={tabs} user={user} />
 				{children}
 				<Toaster />
 			</Layout>

@@ -1,5 +1,5 @@
 /**
- * @overview Auth0 client configuration for HoagieTemplate.
+ * @overview Auth0 client configuration for HoagieCalendar.
  *
  * By default, the following properties claims from the ID token are added to
  * the user object in the session automatically:
@@ -24,12 +24,12 @@
  *
  *    https://github.com/auth0/nextjs-auth0/tree/v4
  *
- * Copyright © 2021-2025 Hoagie Club and affiliates.
+ * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree or at
  *
- *    https://github.com/hoagieclub/template/LICENSE.
+ *    https://github.com/HoagieClub/calendar/blob/main/LICENSE.
  *
  * Permission is granted under the MIT License to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the software. This software is provided "as-is", without warranty of any kind.

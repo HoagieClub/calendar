@@ -1,10 +1,10 @@
 /**
- * @overview Navigation bar for the template app with a stateful profile.
+ * @overview Navigation bar for the calendar app with a stateful profile.
  *
- * Copyright © 2021-2025 Hoagie Club and affiliates.
+ * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
  * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree or at https://github.com/hoagieclub/template/LICENSE.
+ * LICENSE file in the root directory of this source tree or at https://github.com/HoagieClub/calendar/blob/main/LICENSE.
  *
  * Permission is granted under the MIT License to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the software. This software is provided "as-is", without warranty of any kind.
@@ -24,12 +24,12 @@ import {
 	Avatar,
 	TabNavigation,
 	Tab,
+	useTheme,
 } from 'evergreen-ui';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 
 import ProfileCard from '@/lib/hoagie-ui/ProfileCard';
-import { hoagieTemplate } from '@/lib/hoagie-ui/Theme/themes';
 
 /**
  * Interface for tab items in the navigation bar.
@@ -74,7 +74,7 @@ export function Nav({
 	user,
 	beta = false,
 }: NavProps) {
-	const theme = hoagieTemplate;
+	const theme = useTheme();
 	const router = useRouter();
 	const pathname = usePathname();
 	const username = user?.name;
@@ -84,7 +84,7 @@ export function Nav({
 			{HeaderComponent ? (
 				<HeaderComponent />
 			) : (
-				<Pane width='100%' height={20} background={theme.colors.teal500} />
+				<Pane width='100%' height={20} background={theme.colors.blue500} />
 			)}
 			<Pane
 				display='flex'
@@ -121,7 +121,7 @@ export function Nav({
 										is='h2'
 										display='inline-block'
 										className='hoagie logo'
-										color={theme.colors.teal500}
+										color={theme.colors.blue500}
 									>
 										{name}
 									</Text>
@@ -164,7 +164,7 @@ export function Nav({
 										cursor: 'pointer',
 										border: `2px solid ${theme.colors.tealTint}`,
 									}}
-									backgroundColor={theme.colors.teal100}
+									backgroundColor={theme.colors.blue100}
 									size={40}
 									marginLeft={majorScale(4)}
 								/>

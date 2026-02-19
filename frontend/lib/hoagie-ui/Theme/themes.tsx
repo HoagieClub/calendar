@@ -232,31 +232,24 @@ export const hoagieUI = mergeTheme(defaultTheme, {
 	},
 });
 
-/**
- * hoagieTemplate - Example theme that extends the base hoagieUI theme
- *
- * This template demonstrates how to create a custom theme by extending
- * the base hoagieUI theme with a new color palette. You can use this
- * as a starting point for creating your own branded themes.
- */
-export const hoagieTemplate = mergeTheme(hoagieUI, {
-	title: 'template',
+export const hoagieCalendar = mergeTheme(hoagieUI, {
+	title: 'calendar',
 	colors: {
 		...hoagieUI.colors,
 		// Teal color palette - primary brand color
-		teal900: '#0A2E2F',
-		teal800: '#0F5156',
-		teal700: '#146D73',
-		teal600: '#198A91',
-		teal500: '#1EA7AE',
-		teal400: '#4BBDC3',
-		teal300: '#7CE0E6',
-		teal200: '#A9EDF1',
-		teal100: '#D3F5F7',
-		teal50: '#E9FAFB',
-		teal25: '#F4FDFD',
+		blue900: '#0A2E2F',
+		blue800: '#145254',
+		blue700: '#1F7578',
+		blue600: '#29989C',
+		blue500: '#33BBBF',
+		blue400: '#5CCED3',
+		blue300: '#85DFE7',
+		blue200: '#ADCFEB',
+		blue100: '#D6EFF2',
+		blue50: '#E9FAFB',
+		blue25: '#F4FDFD',
 
-		// Override the selected color to use primary teal
+		// Override the selected color to use primary blue
 		selected: '#1EA7AE',
 
 		// Set the tints for custom theme
