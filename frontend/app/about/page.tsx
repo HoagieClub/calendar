@@ -76,6 +76,14 @@ const teamMembers = [
 			linkedin: 'https://www.linkedin.com/in/angcai/',
 		},
 	},
+	{
+		name: 'Karen Gao',
+		role: 'Software Engineer',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D5603AQH24u_lw8Ix2A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1727058129445?e=1773273600&v=beta&t=YPDY4mzM53X5QZaJI-8WmyAk32orQdwCMz7bBohkjgY',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/karen-a-gao/',
+		},
+	},
 ];
 
 /**
