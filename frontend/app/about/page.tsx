@@ -76,6 +76,14 @@ const teamMembers = [
 			linkedin: 'https://www.linkedin.com/in/angcai/',
 		},
 	},
+	{
+		name: 'Chloe Chen',
+		role: 'Software Engineer',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQGtOBqymzIJ6Q/profile-displayphoto-scale_400_400/B4EZyIt1WtJsAg-/0/1771820246551?e=1773273600&v=beta&t=oZxsneIF-hkukaX0rNoV7tt6NcpmgjYWALc5l8MRzp8',
+		socials: {
+			linkedin: 'www.linkedin.com/in/chloe-chen-7388243b2',
+		},
+	},
 ];
 
 /**
