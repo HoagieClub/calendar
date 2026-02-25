@@ -6,9 +6,23 @@ from ..models.event import Event
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = '__all__'
+        fields = ['start', 'end', 'name', 'location', 'description', 
+                  'host', 'owner', 'category', 'from_mail']
         read_only_fields = ['owner']
 
+        def validate_charfields(self, data):
+            errors = []
+            if len(data.get('name')) > 100 or len(data.get('name')) < 3:
+                errors.append('name')
+            if len(data.get('location')) > 100 or len(data.get('location')) < 3:
+                errors.append('location')
+            if len(data.get('host')) > 100 or len(data.get('host')) < 3:
+                errors.append('host')
+            if errors:
+                raise serializers.ValidationError(
+                    f"{", ".join(errors)} must be between 3 and 100 characters.")
+            return data
+        
 
 class EventView(APIView):
     def get(self, request) -> Response:
