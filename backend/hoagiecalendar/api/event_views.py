@@ -4,24 +4,38 @@ from rest_framework import serializers
 from ..models.event import Event
 
 class EventSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+		max_length=100,
+		min_length=3,
+		error_messages={
+			"required": "Name must be at least 3 characters.",
+			"min_length": "Name must be at least 3 characters.",
+			"max_length": "Name must be at most 100 characters.",
+		},
+	)
+    location = serializers.CharField(
+		max_length=100,
+		min_length=3,
+		error_messages={
+			"required": "Location must be at least 3 characters.",
+			"min_length": "Location must be at least 3 characters.",
+			"max_length": "Location must be at most 100 characters.",
+		},
+	)
+    host = serializers.CharField(
+		max_length=100,
+		min_length=3,
+		error_messages={
+			"required": "Host must be at least 3 characters.",
+			"min_length": "Host must be at least 3 characters.",
+			"max_length": "Host must be at most 100 characters.",
+		},
+	)
     class Meta:
         model = Event
         fields = ['start', 'end', 'name', 'location', 'description', 
                   'host', 'owner', 'category', 'from_mail']
         read_only_fields = ['owner']
-
-        def validate_charfields(self, data):
-            errors = []
-            if len(data.get('name')) > 100 or len(data.get('name')) < 3:
-                errors.append('name')
-            if len(data.get('location')) > 100 or len(data.get('location')) < 3:
-                errors.append('location')
-            if len(data.get('host')) > 100 or len(data.get('host')) < 3:
-                errors.append('host')
-            if errors:
-                raise serializers.ValidationError(
-                    f"{", ".join(errors)} must be between 3 and 100 characters.")
-            return data
         
 
 class EventView(APIView):
