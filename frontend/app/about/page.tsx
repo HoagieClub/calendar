@@ -59,7 +59,18 @@ const teamLeads: member[] = [
 ];
 
 const teamMembers = [
+
+	
 	// Add your name, role, and image here!
+	{
+		name: 'Niv Levy',
+		role: 'Software Engineer',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQE4AH3atv3zKA/profile-displayphoto-crop_800_800/B4EZxeBX4WHMAI-/0/1771103946598?e=1773878400&v=beta&t=bkgN8km17F6pWewBPjbb50kF5dA6HKZ4FNS7spBCnZs',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/niv-levy-012685258/',
+		},
+
+	},
 	{
 		name: 'Chloe Lau',
 		role: 'Product Manager',
