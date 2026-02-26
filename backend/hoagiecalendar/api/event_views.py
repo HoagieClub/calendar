@@ -1,6 +1,7 @@
+from urllib import request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import serializers
+from rest_framework import serializers, status
 from ..models.event import Event
 
 class EventSerializer(serializers.ModelSerializer):
@@ -45,9 +46,12 @@ class EventView(APIView):
 
     def post(self, request) -> Response:
         # Logic to create an event
-        pass
-
-
+		# deserialize the request data
+        serializer = EventSerializer(data=request.data)
+		# add user info (request.user) and save the model instance.
+        serializer.save(owner=request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+  
 class EventDetailView(APIView):
     def get(self, request, event_id) -> Response:
         # Logic to get details of an event
