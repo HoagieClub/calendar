@@ -1,6 +1,7 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import serializers
+from rest_framework import serializers, status
 from ..models.event import Event
 
 class EventSerializer(serializers.ModelSerializer):
@@ -40,8 +41,20 @@ class EventSerializer(serializers.ModelSerializer):
 
 class EventView(APIView):
     def get(self, request) -> Response:
-        # Logic to get events
-        pass
+        start_time = request.query_params.get('start_time')
+        end_time = request.query_params.get('end_time')
+        category_id = request.query_params.get('category_id')
+
+        # get all events that start within the given time interval
+        queryset = Event.objects.filter(start__gte=start_time, end__lte=end_time).order_by("-created_at")
+
+        # filter by matching category (assume only one category for now)
+        if category_id:
+            queryset = queryset.filter(category__id=category_id)
+
+        serializer = EventSerializer(queryset, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request) -> Response:
         # Logic to create an event
