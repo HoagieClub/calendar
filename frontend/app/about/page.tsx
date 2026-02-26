@@ -81,7 +81,15 @@ const teamMembers = [
 		role: 'Software Engineer',
 		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQGtOBqymzIJ6Q/profile-displayphoto-scale_400_400/B4EZyIt1WtJsAg-/0/1771820246551?e=1773273600&v=beta&t=oZxsneIF-hkukaX0rNoV7tt6NcpmgjYWALc5l8MRzp8',
 		socials: {
-			linkedin: 'www.linkedin.com/in/chloe-chen-7388243b2',
+			linkedin: 'https://www.linkedin.com/in/chloe-chen-7388243b2',
+		},
+	},
+	{
+		name: 'Karen Gao',
+		role: 'Software Engineer',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D5603AQH24u_lw8Ix2A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1727058129445?e=1773273600&v=beta&t=YPDY4mzM53X5QZaJI-8WmyAk32orQdwCMz7bBohkjgY',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/karen-a-gao/',
 		},
 	},
 ];
