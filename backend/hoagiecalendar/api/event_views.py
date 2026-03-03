@@ -1,8 +1,10 @@
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import serializers, status
 from ..models.event import Event
+from rest_framework import serializers, status
 from django.shortcuts import get_object_or_404
+
 
 class EventSerializer(serializers.ModelSerializer):
     name = serializers.CharField(
@@ -40,13 +42,13 @@ class EventSerializer(serializers.ModelSerializer):
         
 
 class EventView(APIView):
-    def get(self, request) -> Response:
-        # Logic to get events
-        pass
+	def get(self, request) -> Response:
+		# Logic to get events
+		pass
 
-    def post(self, request) -> Response:
-        # Logic to create an event
-        pass
+	def post(self, request) -> Response:
+		# Logic to create an event
+		pass
 
 
 class EventDetailView(APIView):
