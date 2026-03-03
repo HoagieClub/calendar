@@ -1,4 +1,5 @@
-from rest_framework import serializers
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -36,8 +37,8 @@ class EventSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Event
-		fields = ["start", "end", "name", "location", "description", "host", "owner", "category", "from_mail"]
-		read_only_fields = ["owner"]
+		fields = ["id", "start", "end", "name", "location", "description", "host", "owner", "category", "from_mail"]
+		read_only_fields = ["id", "owner"]
 
 
 class EventView(APIView):
@@ -53,11 +54,17 @@ class EventView(APIView):
 class EventDetailView(APIView):
 	def get(self, request, event_id) -> Response:
 		# Logic to get details of an event
-		pass
+		event = get_object_or_404(Event, id=event_id)
+		serializer = EventSerializer(event)
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def put(self, request, event_id) -> Response:
 		# Logic to update details of an event
-		pass
+		event = get_object_or_404(Event, id=event_id)
+		serializer = EventSerializer(event, data=request.data)
+		serializer.is_valid(raise_exception=True)
+		serializer.save()
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def delete(self, request, event_id) -> Response:
 		# Logic to delete an event
