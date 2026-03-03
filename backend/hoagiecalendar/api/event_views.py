@@ -35,7 +35,7 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = ['start', 'end', 'name', 'location', 'description', 
                   'host', 'owner', 'category', 'from_mail']
-        read_only_fields = ['owner']
+        read_only_fields = ['id', 'owner']
         
 
 class EventView(APIView):
