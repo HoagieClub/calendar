@@ -1,13 +1,13 @@
-from rest_framework import serializers
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from ..models.event import Event
-from rest_framework import serializers, status
-from django.shortcuts import get_object_or_404
 
 
 class EventSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(
+	name = serializers.CharField(
 		max_length=100,
 		min_length=3,
 		error_messages={
@@ -16,7 +16,7 @@ class EventSerializer(serializers.ModelSerializer):
 			"max_length": "Name must be at most 100 characters.",
 		},
 	)
-    location = serializers.CharField(
+	location = serializers.CharField(
 		max_length=100,
 		min_length=3,
 		error_messages={
@@ -25,7 +25,7 @@ class EventSerializer(serializers.ModelSerializer):
 			"max_length": "Location must be at most 100 characters.",
 		},
 	)
-    host = serializers.CharField(
+	host = serializers.CharField(
 		max_length=100,
 		min_length=3,
 		error_messages={
@@ -34,12 +34,12 @@ class EventSerializer(serializers.ModelSerializer):
 			"max_length": "Host must be at most 100 characters.",
 		},
 	)
-    class Meta:
-        model = Event
-        fields = ['start', 'end', 'name', 'location', 'description', 
-                  'host', 'owner', 'category', 'from_mail']
-        read_only_fields = ['id', 'owner']
-        
+
+	class Meta:
+		model = Event
+		fields = ["start", "end", "name", "location", "description", "host", "owner", "category", "from_mail"]
+		read_only_fields = ["id", "owner"]
+
 
 class EventView(APIView):
 	def get(self, request) -> Response:
@@ -52,22 +52,22 @@ class EventView(APIView):
 
 
 class EventDetailView(APIView):
-    def get(self, request, event_id) -> Response:
-        # Logic to get details of an event
-        event = get_object_or_404(Event, pk=event_id)
-        serializer = EventSerializer(event)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+	def get(self, request, event_id) -> Response:
+		# Logic to get details of an event
+		event = get_object_or_404(Event, pk=event_id)
+		serializer = EventSerializer(event)
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request, event_id) -> Response:
-        # Logic to update details of an event
-        event = get_object_or_404(Event, pk=event_id)
-        serializer = EventSerializer(event, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+	def put(self, request, event_id) -> Response:
+		# Logic to update details of an event
+		event = get_object_or_404(Event, pk=event_id)
+		serializer = EventSerializer(event, data=request.data)
+		serializer.is_valid(raise_exception=True)
+		serializer.save()
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def delete(self, request, event_id) -> Response:
-        # Logic to delete an event
-        event = get_object_or_404(Event, pk=event_id)
-        event.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+	def delete(self, request, event_id) -> Response:
+		# Logic to delete an event
+		event = get_object_or_404(Event, pk=event_id)
+		event.delete()
+		return Response(status=status.HTTP_204_NO_CONTENT)
