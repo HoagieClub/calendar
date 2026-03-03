@@ -37,7 +37,8 @@ class EventSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Event
-		fields = ["start", "end", "name", "location", "description", "host", "owner", "category", "from_mail"]
+		fields = ["id", "start", "end", "name", "location", 
+			"description", "host", "owner", "category", "from_mail"]
 		read_only_fields = ["id", "owner"]
 
 
@@ -54,13 +55,13 @@ class EventView(APIView):
 class EventDetailView(APIView):
 	def get(self, request, event_id) -> Response:
 		# Logic to get details of an event
-		event = get_object_or_404(Event, pk=event_id)
+		event = get_object_or_404(Event, id=event_id)
 		serializer = EventSerializer(event)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def put(self, request, event_id) -> Response:
 		# Logic to update details of an event
-		event = get_object_or_404(Event, pk=event_id)
+		event = get_object_or_404(Event, id=event_id)
 		serializer = EventSerializer(event, data=request.data)
 		serializer.is_valid(raise_exception=True)
 		serializer.save()
@@ -68,6 +69,4 @@ class EventDetailView(APIView):
 
 	def delete(self, request, event_id) -> Response:
 		# Logic to delete an event
-		event = get_object_or_404(Event, pk=event_id)
-		event.delete()
-		return Response(status=status.HTTP_204_NO_CONTENT)
+		pass
