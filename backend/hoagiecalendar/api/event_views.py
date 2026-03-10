@@ -6,7 +6,6 @@ from ..models.event import Event
 
 
 class EventSerializer(serializers.ModelSerializer):
-
 	name = serializers.CharField(
 		max_length=100,
 		min_length=3,
@@ -47,19 +46,15 @@ class EventView(APIView):
 	def get(self, request) -> Response:
 		# Logic to get events
 		pass
-	def get(self, request) -> Response:
-		# Logic to get events
-		pass
 
 	def post(self, request) -> Response:
 		serializer = EventSerializer(data=request.data)
-		if(serializer.is_valid()):
-			# saving the event with the user as the owner
-			serializer.save(owner=request.user)
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
-		else:
-			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-  
+		serializer.is_valid(raise_exception=True)
+		# saving the event with the user as the owner
+		serializer.save(owner=request.user)
+		return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 class EventDetailView(APIView):
 	def get(self, request, event_id) -> Response:
 		# Logic to get details of an event
@@ -69,9 +64,6 @@ class EventDetailView(APIView):
 		# Logic to update details of an event
 		pass
 
-	def delete(self, request, event_id) -> Response:
-		# Logic to delete an event
-		pass
 	def delete(self, request, event_id) -> Response:
 		# Logic to delete an event
 		pass
