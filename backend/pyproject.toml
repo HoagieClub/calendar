@@ -24,6 +24,7 @@ dependencies = [
     "djangorestframework>=3.16.1",
     "postgres>=4.0",
     "python-dotenv>=1.2.1",
+    "ruff>=0.15.5",
 ]
 
 # ===============================

@@ -23,9 +23,12 @@ class Event(models.Model):
 	owner = models.ForeignKey(User, on_delete=models.CASCADE)
 	category = models.ManyToManyField(Category, related_name="events", blank=True)
 	from_mail = models.BooleanField(default=False)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
 
 	def __str__(self) -> str:
 		return self.name
 
 	class Meta:
 		db_table = "Event"
+		ordering = ["start"]
