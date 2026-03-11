@@ -50,7 +50,6 @@ class EventSerializer(serializers.ModelSerializer):
 		]
 		read_only_fields = ["owner", "created_at", "updated_at"]
 
-
 class EventView(APIView):
 	def get(self, request) -> Response:
 		start_time = request.query_params.get("start_time")

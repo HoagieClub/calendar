@@ -72,6 +72,9 @@ requires-dist = [
     { name = "ruff", specifier = ">=0.15.5" },
 ]
 
+[package.metadata.requires-dev]
+dev = [{ name = "ruff", specifier = ">=0.15.4" }]
+
 [[package]]
 name = "postgres"
 version = "4.0"
