@@ -65,7 +65,7 @@ class EventView(APIView):
 
 		# get all events that overlap with the given time interval
 		# (event end is after the start of the range, and event start is before the end of the range)
-		queryset = Event.objects.filter(end__gt=start_time, start__lt=end_time)
+		queryset = Event.objects.filter(end__gte=start_time, start__lte=end_time)
 
 		# filter by matching category IDs (allow multiple categories)
 		category_ids = request.query_params.getlist("category_id")

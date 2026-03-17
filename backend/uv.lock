@@ -59,6 +59,10 @@ dependencies = [
     { name = "djangorestframework" },
     { name = "postgres" },
     { name = "python-dotenv" },
+]
+
+[package.dev-dependencies]
+dev = [
     { name = "ruff" },
 ]
 
@@ -69,7 +73,6 @@ requires-dist = [
     { name = "djangorestframework", specifier = ">=3.16.1" },
     { name = "postgres", specifier = ">=4.0" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
-    { name = "ruff", specifier = ">=0.15.5" },
 ]
 
 [package.metadata.requires-dev]
