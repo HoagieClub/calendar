@@ -12,7 +12,6 @@ class EventSerializer(serializers.ModelSerializer):
 		min_length=3,
 		error_messages={
 			"blank": "Name must be at least 3 characters.",
-			"required": "Name must be at least 3 characters.",
 			"min_length": "Name must be at least 3 characters.",
 			"max_length": "Name must be at most 100 characters.",
 		},
@@ -23,7 +22,6 @@ class EventSerializer(serializers.ModelSerializer):
 		min_length=3,
 		error_messages={
 			"blank": "Location must be at least 3 characters.",
-			"required": "Location must be at least 3 characters.",
 			"min_length": "Location must be at least 3 characters.",
 			"max_length": "Location must be at most 100 characters.",
 		},
@@ -34,7 +32,6 @@ class EventSerializer(serializers.ModelSerializer):
 		min_length=3,
 		error_messages={
 			"blank": "Host must be at least 3 characters.",
-			"required": "Host must be at least 3 characters.",
 			"min_length": "Host must be at least 3 characters.",
 			"max_length": "Host must be at most 100 characters.",
 		},
