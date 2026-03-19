@@ -22,5 +22,11 @@ class EventDetailView(APIView):
         pass
 
     def delete(self, request, event_id) -> Response:
-        # Logic to delete an event
-        pass
+        def delete(self, request, event_id) -> Response:
+        try:
+            event = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return 
+
+        event.delete()
+        return 
