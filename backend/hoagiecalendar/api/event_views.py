@@ -16,6 +16,7 @@ class EventSerializer(serializers.ModelSerializer):
 			"max_length": "Name must be at most 100 characters.",
 		},
 	)
+
 	location = serializers.CharField(
 		max_length=100,
 		min_length=3,
@@ -25,6 +26,7 @@ class EventSerializer(serializers.ModelSerializer):
 			"max_length": "Location must be at most 100 characters.",
 		},
 	)
+
 	host = serializers.CharField(
 		max_length=100,
 		min_length=3,
@@ -47,8 +49,11 @@ class EventView(APIView):
 		pass
 
 	def post(self, request) -> Response:
-		# Logic to create an event
-		pass
+		serializer = EventSerializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+		# saving the event with the user as the owner
+		serializer.save(owner=request.user)
+		return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class EventDetailView(APIView):
