@@ -38,14 +38,48 @@ class EventSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Event
-		fields = ["start", "end", "name", "location", "description", "host", "owner", "category", "from_mail"]
-		read_only_fields = ["owner"]
+		fields = [
+			"start",
+			"end",
+			"name",
+			"location",
+			"description",
+			"host",
+			"owner",
+			"category",
+			"from_mail",
+			"ordering",
+		]
+		read_only_fields = ["owner", "created_at", "updated_at"]
 
 
 class EventView(APIView):
 	def get(self, request) -> Response:
-		# Logic to get events
-		pass
+		start_time = request.query_params.get("start_time")
+		end_time = request.query_params.get("end_time")
+
+		# return an error if start_time or end_time are not in the request
+		if not start_time or not end_time:
+			return Response(
+				{"detail": "Both start_time and end_time query parameters are required."},
+				status=status.HTTP_400_BAD_REQUEST,
+			)
+
+		# get all events that overlap with the given time interval
+		# (event end is after the start of the range, and event start is before the end of the range)
+		queryset = Event.objects.filter(end__gte=start_time, start__lte=end_time)
+
+		# filter by matching category IDs (allow multiple categories)
+		category_ids = request.query_params.getlist("category_id")
+		if category_ids:
+			queryset = queryset.filter(category__id__in=category_ids)
+
+		# make sure events returned are unique (in case of multiple category matches)
+		queryset = queryset.distinct()
+
+		serializer = EventSerializer(queryset, many=True)
+
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def post(self, request) -> Response:
 		serializer = EventSerializer(data=request.data)
