@@ -1,0 +1,96 @@
+/* ─── MonthGrid.css ─────────────────────────────────────────────────── */
+
+.month-grid {
+  width: 100%;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* ── Header row: SUN MON TUE … SAT ──────────────────────────────────── */
+.month-grid__header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.month-grid__day-name {
+  padding: 10px 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #6b7280; /* muted grey, matches Figma header labels */
+  text-transform: uppercase;
+}
+
+/* ── Grid body ───────────────────────────────────────────────────────── */
+.month-grid__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.month-grid__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+}
+
+/* ── Individual cell ─────────────────────────────────────────────────── */
+.month-grid__cell {
+  min-height: 110px;
+  padding: 8px 10px;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  box-sizing: border-box;
+  vertical-align: top;
+  background: #ffffff;
+  position: relative;
+}
+
+/* Remove right border on last column */
+.month-grid__cell:nth-child(7n) {
+  border-right: none;
+}
+
+/* Remove bottom border on last row's cells */
+.month-grid__week:last-child .month-grid__cell {
+  border-bottom: none;
+}
+
+/* Prev / next month cells — slightly dimmed background */
+.month-grid__cell--overflow {
+  background: #f9fafb;
+}
+
+.month-grid__cell--overflow .month-grid__date-number {
+  color: #c0c0c0;
+}
+
+/* ── Date number ─────────────────────────────────────────────────────── */
+.month-grid__date-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+/* ── Today highlight ─────────────────────────────────────────────────── */
+/*
+  Figma shows today (25) as a filled teal/cyan circle on the date number.
+  Color extracted from design: approximately #0dbfbf (teal-cyan).
+*/
+.month-grid__cell--today .month-grid__date-number {
+  background-color: #0dbfbf;
+  color: #ffffff;
+  font-weight: 700;
+}
