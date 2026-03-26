@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from ..models.event import Event
 from .event_views import EventSerializer
 
+
 class UserEventsView(APIView):
 	# Logic to get events user created
 	def get(self, request) -> Response:
