@@ -8,10 +8,11 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Colors from hoagieCalendar theme
 const TEAL = '#1EA7AE';
-const GRAY_100 = '#F7F7F7';
-const GRAY_300 = '#EEEEEE';
-const GRAY_500 = '#D2D2D2';
-const GRAY_800 = '#343434';
+const HEADER_GRAY = '#EBEBEB';
+const ROW_GRAY = '#F7F7F7';
+const BORDER = '#D2D2D2';
+const GRAY_500 = '#808080';
+const GRAY_800 = '#1A1A1A';
 const WHITE = '#FFFFFF';
 const RED = '#D14343';
 
@@ -57,7 +58,7 @@ export default function WeekView() {
 				fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
 				fontSize: 14,
 				color: GRAY_800,
-				border: `1px solid ${GRAY_300}`,
+				border: `1px solid ${BORDER}`,
 				borderRadius: 16,
 			}}
 		>
@@ -65,8 +66,8 @@ export default function WeekView() {
 			<div
 				style={{
 					display: 'flex',
-					borderBottom: `1px solid ${GRAY_300}`,
-					background: GRAY_100,
+					borderBottom: `1px solid ${BORDER}`,
+					background: HEADER_GRAY,
 					flexShrink: 0,
 					zIndex: 10,
 				}}
@@ -76,14 +77,13 @@ export default function WeekView() {
 					style={{
 						width: TIME_COL_WIDTH,
 						flexShrink: 0,
-						borderRight: `1px solid ${GRAY_300}`,
+						borderRight: `1px solid ${BORDER}`,
 					}}
 				/>
 
 				{weekDates.map((date, i) => {
 					const isToday = i === todayIndex;
 					const dayNum = date.getDate();
-					const monthShort = date.toLocaleString('en-US', { month: 'short' });
 					return (
 						<div
 							key={i}
@@ -91,7 +91,7 @@ export default function WeekView() {
 								flex: 1,
 								textAlign: 'center',
 								padding: '10px 0 8px',
-								borderLeft: `1px solid ${GRAY_300}`,
+								borderLeft: `1px solid ${BORDER}`,
 							}}
 						>
 							{/* Day name */}
@@ -125,20 +125,6 @@ export default function WeekView() {
 							>
 								{dayNum}
 							</div>
-
-							{/* Month label */}
-							{(i === 0 || date.getDate() === 1) && (
-								<div
-									style={{
-										fontSize: 10,
-										color: GRAY_500,
-										marginTop: 2,
-										letterSpacing: '0.03em',
-									}}
-								>
-									{monthShort}
-								</div>
-							)}
 						</div>
 					);
 				})}
@@ -167,8 +153,8 @@ export default function WeekView() {
 							width: TIME_COL_WIDTH,
 							flexShrink: 0,
 							position: 'relative',
-							background: GRAY_100,
-							borderRight: `1px solid ${GRAY_300}`,
+							background: HEADER_GRAY,
+							borderRight: `1px solid ${BORDER}`,
 						}}
 					>
 						{Array.from({ length: 24 }, (_, hour) => (
@@ -200,7 +186,7 @@ export default function WeekView() {
 								key={colIdx}
 								style={{
 									flex: 1,
-									borderLeft: `1px solid ${GRAY_300}`,
+									borderLeft: `1px solid ${BORDER}`,
 									position: 'relative',
 								}}
 							>
@@ -214,9 +200,8 @@ export default function WeekView() {
 											left: 0,
 											right: 0,
 											height: HOUR_HEIGHT,
-											background: hour % 2 === 0 ? WHITE : GRAY_100,
-											borderTop:
-												hour === 0 ? 'none' : `1px solid ${GRAY_300}`,
+											background: hour % 2 === 0 ? WHITE : ROW_GRAY,
+											borderTop: hour === 0 ? 'none' : `1px solid ${BORDER}`,
 										}}
 									>
 										{/* Half-hour line */}
@@ -226,7 +211,7 @@ export default function WeekView() {
 												top: HOUR_HEIGHT / 2,
 												left: 0,
 												right: 0,
-												borderTop: `1px solid ${GRAY_300}`,
+												borderTop: `1px solid ${BORDER}`,
 												opacity: 0.4,
 											}}
 										/>
