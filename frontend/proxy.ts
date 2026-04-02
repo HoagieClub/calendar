@@ -30,7 +30,8 @@ export async function proxy(request: NextRequest) {
 	if (
 		request.nextUrl.pathname.startsWith('/feature1') ||
 		request.nextUrl.pathname.startsWith('/feature2') ||
-		request.nextUrl.pathname.startsWith('/feature3')
+		request.nextUrl.pathname.startsWith('/feature3') ||
+		request.nextUrl.pathname.startsWith('/DayView')
 	) {
 		const { origin } = new URL(request.url);
 		const session = await auth0.getSession();

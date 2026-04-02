@@ -52,6 +52,7 @@ async function Content({ children }: ContentProps): Promise<JSX.Element> {
 		{ title: 'Feature 1', href: '/feature1' },
 		{ title: 'Feature 2', href: '/feature2' },
 		{ title: 'Feature 3', href: '/feature3' },
+		{ title: 'DayView', href: '/DayView' },
 	];
 
 	return (
