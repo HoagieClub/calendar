@@ -10,11 +10,11 @@ from hoagiecalendar.models import Event
 
 
 class SaveEventRequestSerializer(serializers.Serializer):
-	post_id = serializers.BigIntegerField()
+	event_id = serializers.BigIntegerField()
 
 
 class SaveEventRequestData(TypedDict):
-	post_id: int
+	event_id: int
 
 
 class UserSavedEventsView(APIView):
@@ -30,10 +30,10 @@ class UserSavedEventsView(APIView):
 		if not serializer.is_valid():
 			return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-		validated_data = cast(SaveEventRequestData, serializer.data)
+		validated_data = cast(SaveEventRequestData, serializer.validated_data)
 
 		try:
-			event = Event.objects.get(id=validated_data)
+			event = Event.objects.get(pk=validated_data["event_id"])
 			event.saved_by.add(request.user)
 
 			return Response({"message": "event saved"}, status=status.HTTP_201_CREATED)
@@ -47,10 +47,10 @@ class UserSavedEventsView(APIView):
 		if not serializer.is_valid():
 			return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-		validated_data = cast(SaveEventRequestData, serializer.data)
+		validated_data = cast(SaveEventRequestData, serializer.validated_data)
 
 		try:
-			event = Event.objects.get(id=validated_data)
+			event = Event.objects.get(pk=validated_data["event_id"])
 			event.saved_by.add(request.user)
 
 			return Response({"message": "event unsaved"}, status=status.HTTP_200_OK)
