@@ -10,5 +10,5 @@ class UserEventsView(APIView):
 	# Logic to get events user created
 	def get(self, request) -> Response:
 		events = Event.objects.filter(owner=request.user)
-		serializer = EventSerializer(events, many=True)
+		serializer = EventSerializer(events, many=True, context={"request": request})
 		return Response(serializer.data, status=status.HTTP_200_OK)

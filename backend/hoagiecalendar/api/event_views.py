@@ -37,6 +37,13 @@ class EventSerializer(serializers.ModelSerializer):
 		},
 	)
 
+	is_saved = serializers.SerializerMethodField()
+
+	def get_is_saved(self, obj: Event) -> bool:
+		user = self.context["request"].user
+
+		return obj.saved_by.contains(user)
+
 	class Meta:
 		model = Event
 		fields = [
@@ -51,8 +58,9 @@ class EventSerializer(serializers.ModelSerializer):
 			"category",
 			"from_mail",
 			"ordering",
+			"is_saved_by_user",
 		]
-		read_only_fields = ["id", "owner", "created_at", "updated_at"]
+		read_only_fields = ["id", "owner", "created_at", "updated_at", "is_saved_by_user"]
 
 
 class EventView(APIView):

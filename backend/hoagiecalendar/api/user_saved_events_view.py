@@ -21,7 +21,7 @@ class UserSavedEventsView(APIView):
 	def get(self, request: Request) -> Response:
 		user = request.user
 		saved_events = user.saved_events.all()
-		serializer = EventSerializer(data=saved_events, many=True)
+		serializer = EventSerializer(saved_events, many=True, context={"request": request})
 
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
