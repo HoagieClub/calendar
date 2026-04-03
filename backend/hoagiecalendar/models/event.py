@@ -1,6 +1,7 @@
+from typing import TYPE_CHECKING
+
 from django.db import models
 
-from typing import TYPE_CHECKING
 from .user import User
 
 
@@ -15,11 +16,11 @@ class Category(models.Model):
 
 
 class EventManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().annotate(attending_count=models.Count("attending"))
+	def get_queryset(self):
+		return super().get_queryset().annotate(attending_count=models.Count("attendees"))
 
-    def get_raw_queryset(self):
-        return super().get_queryset()
+	def get_raw_queryset(self):
+		return super().get_queryset()
 
 
 class Event(models.Model):
@@ -34,8 +35,8 @@ class Event(models.Model):
 	from_mail = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
-	attending = models.ManyToManyField(User, related_name="attending_events", blank=True)
-	
+	attendees = models.ManyToManyField(User, related_name="events_attending", blank=True)
+
 	objects = EventManager()
 
 	def __str__(self) -> str:
@@ -47,5 +48,6 @@ class Event(models.Model):
 
 
 if TYPE_CHECKING:
-	class AnnotatedEvent(Event): # Python type magic to make `attending_count` exist for type checker.
+
+	class AnnotatedEvent(Event):  # Python type magic to make `attending_count` exist for type checker.
 		attending_count: int

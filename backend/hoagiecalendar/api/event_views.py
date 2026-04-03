@@ -53,7 +53,7 @@ class EventSerializer(serializers.ModelSerializer):
 			"category",
 			"from_mail",
 			"ordering",
-			"attending_count"
+			"attending_count",
 		]
 		read_only_fields = ["id", "owner", "created_at", "updated_at", "attending_count"]
 
