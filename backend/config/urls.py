@@ -26,6 +26,6 @@ urlpatterns = [
 	path("admin/", admin.site.urls),
 	path("event/", EventView.as_view(), name="event"),
 	path("event/<int:event_id>/", EventDetailView.as_view(), name="event-detail"),
-	path("user/events/", UserEventsView.as_view(), name="user-events"),
+	path("user/events/created", UserEventsView.as_view(), name="user-events"),
 	path("user/events/attending", UserEventAttendingView.as_view(), name="user-events-attending"),
 ]
