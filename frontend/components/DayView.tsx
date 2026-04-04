@@ -2,7 +2,16 @@
 
 import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 
-import { CalendarIcon, CrossIcon, Heading, IconButton, Pane, Paragraph, Text, majorScale } from 'evergreen-ui';
+import {
+	CalendarIcon,
+	CrossIcon,
+	Heading,
+	IconButton,
+	Pane,
+	Paragraph,
+	Text,
+	majorScale,
+} from 'evergreen-ui';
 
 import Event, { formatEventTime, type CalendarEvent } from '@/components/Event';
 
@@ -231,7 +240,10 @@ export function DayView() {
 			return;
 		}
 
-		const targetScroll = Math.max(0, currentTimePosition - container.clientHeight / 2 + INITIAL_SCROLL_PADDING);
+		const targetScroll = Math.max(
+			0,
+			currentTimePosition - container.clientHeight / 2 + INITIAL_SCROLL_PADDING
+		);
 		container.scrollTop = targetScroll;
 		hasAutoScrolledRef.current = true;
 	}, [currentTimePosition]);
@@ -270,7 +282,11 @@ export function DayView() {
 								right={0}
 								height={HOUR_HEIGHT}
 								borderBottom='1px solid rgba(203, 213, 225, 0.45)'
-								background={hour % 2 === 0 ? 'rgba(255,255,255,0.5)' : 'rgba(248,250,252,0.2)'}
+								background={
+									hour % 2 === 0
+										? 'rgba(255,255,255,0.5)'
+										: 'rgba(248,250,252,0.2)'
+								}
 							>
 								<Text
 									size={300}
@@ -295,7 +311,13 @@ export function DayView() {
 							</Pane>
 						))}
 
-						<Pane position='absolute' top={0} bottom={0} left={TIME_LABEL_WIDTH} right={majorScale(2)}>
+						<Pane
+							position='absolute'
+							top={0}
+							bottom={0}
+							left={TIME_LABEL_WIDTH}
+							right={majorScale(2)}
+						>
 							{SAMPLE_EVENTS.map((event, index) => {
 								const duration = event.endHour - event.startHour;
 								const top = event.startHour * HOUR_HEIGHT;
@@ -391,12 +413,22 @@ export function DayView() {
 							transformOrigin: 'center center',
 						}}
 					>
-						<Pane display='flex' justifyContent='space-between' alignItems='flex-start' gap={majorScale(2)}>
+						<Pane
+							display='flex'
+							justifyContent='space-between'
+							alignItems='flex-start'
+							gap={majorScale(2)}
+						>
 							<Pane flex={1}>
 								<Heading size={800} color='#111827'>
 									{selectedEvent.title}
 								</Heading>
-								<Pane display='flex' alignItems='center' gap={8} marginTop={majorScale(2)}>
+								<Pane
+									display='flex'
+									alignItems='center'
+									gap={8}
+									marginTop={majorScale(2)}
+								>
 									<Pane
 										width={12}
 										height={12}
@@ -418,14 +450,32 @@ export function DayView() {
 							/>
 						</Pane>
 
-						<Pane marginTop={majorScale(3)} border='1px solid rgba(226, 232, 240, 0.9)' borderRadius={14} padding={majorScale(2)}>
-							<Pane display='flex' alignItems='center' gap={10} marginBottom={majorScale(2)}>
+						<Pane
+							marginTop={majorScale(3)}
+							border='1px solid rgba(226, 232, 240, 0.9)'
+							borderRadius={14}
+							padding={majorScale(2)}
+						>
+							<Pane
+								display='flex'
+								alignItems='center'
+								gap={10}
+								marginBottom={majorScale(2)}
+							>
 								<CalendarIcon color='muted' />
 								<Text size={400} color='#1f2937' fontWeight={600}>
-									{formatEventTime(selectedEvent.startHour, selectedEvent.endHour)}
+									{formatEventTime(
+										selectedEvent.startHour,
+										selectedEvent.endHour
+									)}
 								</Text>
 							</Pane>
-							<Paragraph size={400} color='#4b5563' lineHeight='22px' marginBottom={majorScale(2)}>
+							<Paragraph
+								size={400}
+								color='#4b5563'
+								lineHeight='22px'
+								marginBottom={majorScale(2)}
+							>
 								{selectedEvent.description ?? getEventDescription(selectedEvent)}
 							</Paragraph>
 							<Text display='block' size={300} color='#4b5563' marginBottom={6}>

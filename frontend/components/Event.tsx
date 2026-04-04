@@ -138,7 +138,9 @@ export function Event({ event, top, left, width, height, onSelect }: EventProps)
 			onFocus={() => setIsHighlighted(true)}
 			onBlur={() => setIsHighlighted(false)}
 			style={{
-				transform: isHighlighted ? 'translateY(-3px) scale(1.01)' : 'translateY(0) scale(1)',
+				transform: isHighlighted
+					? 'translateY(-3px) scale(1.01)'
+					: 'translateY(0) scale(1)',
 				boxShadow: isHighlighted
 					? '0 14px 30px rgba(100, 116, 139, 0.2)'
 					: '0 6px 18px rgba(100, 116, 139, 0.12)',
@@ -167,15 +169,13 @@ export function Event({ event, top, left, width, height, onSelect }: EventProps)
 					marginTop={6}
 					color='#1f2937'
 					lineHeight='20px'
-					style={
-						{
-							display: '-webkit-box',
-							WebkitBoxOrient: 'vertical',
-							WebkitLineClamp: titleLineClamp,
-							overflow: 'hidden',
-							textOverflow: 'ellipsis',
-						}
-					}
+					style={{
+						display: '-webkit-box',
+						WebkitBoxOrient: 'vertical',
+						WebkitLineClamp: titleLineClamp,
+						overflow: 'hidden',
+						textOverflow: 'ellipsis',
+					}}
 				>
 					{event.title}
 				</Heading>
