@@ -91,7 +91,6 @@ type EventProps = {
 	left: string;
 	width: string;
 	height: number;
-	onSelect: (event: CalendarEvent) => void;
 };
 
 export function formatEventTime(startHour: number, endHour: number): string {
@@ -107,7 +106,7 @@ export function formatEventTime(startHour: number, endHour: number): string {
 	return `${toLabel(startHour)} - ${toLabel(endHour)}`;
 }
 
-export function Event({ event, top, left, width, height, onSelect }: EventProps) {
+export function Event({ event, top, left, width, height }: EventProps) {
 	const showExpandedDetails = height >= 120;
 	const showLocation = height >= 92;
 	const titleLineClamp = showExpandedDetails ? 2 : 1;
@@ -116,8 +115,6 @@ export function Event({ event, top, left, width, height, onSelect }: EventProps)
 
 	return (
 		<Pane
-			is='button'
-			type='button'
 			position='absolute'
 			top={top}
 			left={left}
@@ -129,10 +126,7 @@ export function Event({ event, top, left, width, height, onSelect }: EventProps)
 			boxShadow='0 6px 18px rgba(100, 116, 139, 0.12)'
 			border={`1px solid ${event.accent}22`}
 			overflow='hidden'
-			cursor='pointer'
 			textAlign='left'
-			appearance='none'
-			onClick={() => onSelect(event)}
 			onMouseEnter={() => setIsHighlighted(true)}
 			onMouseLeave={() => setIsHighlighted(false)}
 			onFocus={() => setIsHighlighted(true)}
