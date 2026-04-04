@@ -267,9 +267,7 @@ export function DayView() {
 							height={HOUR_HEIGHT}
 							borderBottom='1px solid rgba(203, 213, 225, 0.45)'
 							background={
-								hour % 2 === 0
-									? 'rgba(255,255,255,0.5)'
-									: 'rgba(248,250,252,0.2)'
+								hour % 2 === 0 ? 'rgba(255,255,255,0.5)' : 'rgba(248,250,252,0.2)'
 							}
 						>
 							<Text
