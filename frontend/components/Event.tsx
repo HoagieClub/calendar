@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { Heading, Pane, Text } from 'evergreen-ui';
 
 export const EVENT_CATEGORIES = [
@@ -80,6 +82,7 @@ export type CalendarEvent = {
 	organizer: string;
 	attendees: number;
 	category?: EventCategory;
+	description?: string;
 };
 
 type EventProps = {
@@ -88,9 +91,10 @@ type EventProps = {
 	left: string;
 	width: string;
 	height: number;
+	onSelect: (event: CalendarEvent) => void;
 };
 
-function formatEventTime(startHour: number, endHour: number): string {
+export function formatEventTime(startHour: number, endHour: number): string {
 	const toLabel = (value: number) => {
 		const hours = Math.floor(value);
 		const minutes = Math.round((value - hours) * 60);
@@ -103,14 +107,17 @@ function formatEventTime(startHour: number, endHour: number): string {
 	return `${toLabel(startHour)} - ${toLabel(endHour)}`;
 }
 
-export function Event({ event, top, left, width, height }: EventProps) {
+export function Event({ event, top, left, width, height, onSelect }: EventProps) {
 	const showExpandedDetails = height >= 120;
 	const showLocation = height >= 92;
 	const titleLineClamp = showExpandedDetails ? 2 : 1;
 	const categoryStyle = event.category ? CATEGORY_STYLES[event.category] : null;
+	const [isHighlighted, setIsHighlighted] = useState(false);
 
 	return (
 		<Pane
+			is='button'
+			type='button'
 			position='absolute'
 			top={top}
 			left={left}
@@ -122,6 +129,21 @@ export function Event({ event, top, left, width, height }: EventProps) {
 			boxShadow='0 6px 18px rgba(100, 116, 139, 0.12)'
 			border={`1px solid ${event.accent}22`}
 			overflow='hidden'
+			cursor='pointer'
+			textAlign='left'
+			appearance='none'
+			onClick={() => onSelect(event)}
+			onMouseEnter={() => setIsHighlighted(true)}
+			onMouseLeave={() => setIsHighlighted(false)}
+			onFocus={() => setIsHighlighted(true)}
+			onBlur={() => setIsHighlighted(false)}
+			style={{
+				transform: isHighlighted ? 'translateY(-3px) scale(1.01)' : 'translateY(0) scale(1)',
+				boxShadow: isHighlighted
+					? '0 14px 30px rgba(100, 116, 139, 0.2)'
+					: '0 6px 18px rgba(100, 116, 139, 0.12)',
+				transition: 'transform 140ms ease, box-shadow 140ms ease',
+			}}
 		>
 			<Pane
 				position='absolute'
