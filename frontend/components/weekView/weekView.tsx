@@ -2,19 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 
+import { useTheme } from 'evergreen-ui';
+
 const HOUR_HEIGHT = 60;
 const TIME_COL_WIDTH = 56;
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-// Colors from hoagieCalendar theme
-const TEAL = '#1EA7AE';
-const HEADER_GRAY = '#EBEBEB';
-const ROW_GRAY = '#F7F7F7';
-const BORDER = '#D2D2D2';
-const GRAY_500 = '#808080';
-const GRAY_800 = '#1A1A1A';
-const WHITE = '#FFFFFF';
-const RED = '#D14343';
 
 function getWeekDates(date: Date): Date[] {
 	const sunday = new Date(date);
@@ -35,6 +27,8 @@ function formatHour(hour: number): string {
 }
 
 export default function WeekView() {
+	const { colors } = useTheme();
+	const themeColors = colors as unknown as Record<string, string>;
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const now = new Date();
 	const weekDates = getWeekDates(now);
@@ -54,11 +48,11 @@ export default function WeekView() {
 				flexDirection: 'column',
 				height: '100%',
 				overflow: 'hidden',
-				background: WHITE,
+				background: colors.white,
 				fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
 				fontSize: 14,
-				color: GRAY_800,
-				border: `1px solid ${BORDER}`,
+				color: themeColors.gray800,
+				border: `1px solid ${themeColors.gray400}`,
 				borderRadius: 16,
 			}}
 		>
@@ -66,8 +60,8 @@ export default function WeekView() {
 			<div
 				style={{
 					display: 'flex',
-					borderBottom: `1px solid ${BORDER}`,
-					background: HEADER_GRAY,
+					borderBottom: `1px solid ${colors.gray400}`,
+					background: colors.gray200,
 					flexShrink: 0,
 					zIndex: 10,
 				}}
@@ -77,7 +71,7 @@ export default function WeekView() {
 					style={{
 						width: TIME_COL_WIDTH,
 						flexShrink: 0,
-						borderRight: `1px solid ${BORDER}`,
+						borderRight: `1px solid ${colors.gray400}`,
 					}}
 				/>
 
@@ -91,7 +85,7 @@ export default function WeekView() {
 								flex: 1,
 								textAlign: 'center',
 								padding: '10px 0 8px',
-								borderLeft: `1px solid ${BORDER}`,
+								borderLeft: `1px solid ${colors.gray400}`,
 							}}
 						>
 							{/* Day name */}
@@ -100,7 +94,9 @@ export default function WeekView() {
 									fontSize: 10,
 									fontWeight: 500,
 									letterSpacing: '0.04em',
-									color: isToday ? TEAL : GRAY_500,
+									color: isToday
+										? themeColors['hoagie-teal']
+										: themeColors.gray700,
 									textTransform: 'uppercase',
 									marginBottom: 4,
 								}}
@@ -117,8 +113,10 @@ export default function WeekView() {
 									width: 32,
 									height: 32,
 									borderRadius: '50%',
-									background: isToday ? TEAL : 'transparent',
-									color: isToday ? WHITE : GRAY_800,
+									background: isToday
+										? themeColors['hoagie-teal']
+										: 'transparent',
+									color: isToday ? themeColors.white : themeColors.gray900,
 									fontSize: 16,
 									fontWeight: isToday ? 600 : 400,
 								}}
@@ -153,8 +151,8 @@ export default function WeekView() {
 							width: TIME_COL_WIDTH,
 							flexShrink: 0,
 							position: 'relative',
-							background: HEADER_GRAY,
-							borderRight: `1px solid ${BORDER}`,
+							background: colors.gray200,
+							borderRight: `1px solid ${colors.gray400}`,
 						}}
 					>
 						{Array.from({ length: 24 }, (_, hour) => (
@@ -167,7 +165,7 @@ export default function WeekView() {
 									height: HOUR_HEIGHT,
 									display: 'flex',
 									alignItems: 'flex-start',
-									color: GRAY_500,
+									color: themeColors.gray700,
 									fontSize: 10,
 									fontWeight: 400,
 									whiteSpace: 'nowrap',
@@ -186,7 +184,7 @@ export default function WeekView() {
 								key={colIdx}
 								style={{
 									flex: 1,
-									borderLeft: `1px solid ${BORDER}`,
+									borderLeft: `1px solid ${colors.gray400}`,
 									position: 'relative',
 								}}
 							>
@@ -200,8 +198,10 @@ export default function WeekView() {
 											left: 0,
 											right: 0,
 											height: HOUR_HEIGHT,
-											background: hour % 2 === 0 ? WHITE : ROW_GRAY,
-											borderTop: hour === 0 ? 'none' : `1px solid ${BORDER}`,
+											background:
+												hour % 2 === 0 ? colors.white : colors.gray100,
+											borderTop:
+												hour === 0 ? 'none' : `1px solid ${colors.gray400}`,
 										}}
 									>
 										{/* Half-hour line */}
@@ -211,7 +211,7 @@ export default function WeekView() {
 												top: HOUR_HEIGHT / 2,
 												left: 0,
 												right: 0,
-												borderTop: `1px solid ${BORDER}`,
+												borderTop: `1px solid ${colors.gray400}`,
 												opacity: 0.4,
 											}}
 										/>
@@ -239,13 +239,13 @@ export default function WeekView() {
 									width: 8,
 									height: 8,
 									borderRadius: '50%',
-									background: RED,
+									background: colors.red500,
 								}}
 							/>
 							<div
 								style={{
 									height: 2,
-									background: RED,
+									background: colors.red500,
 									borderRadius: 1,
 								}}
 							/>
