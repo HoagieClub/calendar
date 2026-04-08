@@ -88,9 +88,7 @@ export default function MonthView({ month, year }: MonthViewProps) {
 							gridTemplateColumns: 'repeat(7, 1fr)',
 							flex: 1,
 							borderBottom:
-								wi < weeks.length - 1
-									? `1px solid ${themeColors.gray400}`
-									: 'none',
+								wi < weeks.length - 1 ? `1px solid ${themeColors.gray400}` : 'none',
 						}}
 					>
 						{week.map((date, di) => {
@@ -107,7 +105,8 @@ export default function MonthView({ month, year }: MonthViewProps) {
 										minHeight: 110,
 										padding: '8px 10px',
 										borderLeft: `1px solid ${themeColors.gray400}`,
-										background: date === null ? themeColors.gray100 : colors.white,
+										background:
+											date === null ? themeColors.gray100 : colors.white,
 										boxSizing: 'border-box',
 										position: 'relative',
 									}}
