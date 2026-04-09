@@ -25,7 +25,6 @@ interface MonthViewProps {
 
 export default function MonthView({ month, year }: MonthViewProps) {
 	const { colors } = useTheme();
-	const themeColors = colors as unknown as Record<string, string>;
 
 	const now = new Date();
 	const displayMonth = month !== undefined ? month : now.getMonth();
@@ -43,8 +42,8 @@ export default function MonthView({ month, year }: MonthViewProps) {
 				background: colors.white,
 				fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
 				fontSize: 14,
-				color: themeColors.gray800,
-				border: `1px solid ${themeColors.gray400}`,
+				color: colors.gray800,
+				border: `1px solid ${colors.gray400}`,
 				borderRadius: 16,
 			}}
 		>
@@ -53,7 +52,7 @@ export default function MonthView({ month, year }: MonthViewProps) {
 				style={{
 					display: 'grid',
 					gridTemplateColumns: 'repeat(7, 1fr)',
-					borderBottom: `1px solid ${themeColors.gray400}`,
+					borderBottom: `1px solid ${colors.gray400}`,
 					background: colors.gray200,
 					flexShrink: 0,
 					zIndex: 10,
@@ -68,9 +67,9 @@ export default function MonthView({ month, year }: MonthViewProps) {
 							fontSize: 10,
 							fontWeight: 500,
 							letterSpacing: '0.04em',
-							color: themeColors.gray700,
+							color: colors.gray700,
 							textTransform: 'uppercase',
-							borderLeft: `1px solid ${themeColors.gray400}`,
+							borderLeft: `1px solid ${colors.gray400}`,
 						}}
 					>
 						{day}
@@ -88,7 +87,7 @@ export default function MonthView({ month, year }: MonthViewProps) {
 							gridTemplateColumns: 'repeat(7, 1fr)',
 							flex: 1,
 							borderBottom:
-								wi < weeks.length - 1 ? `1px solid ${themeColors.gray400}` : 'none',
+								wi < weeks.length - 1 ? `1px solid ${colors.gray400}` : 'none',
 						}}
 					>
 						{week.map((date, di) => {
@@ -104,9 +103,8 @@ export default function MonthView({ month, year }: MonthViewProps) {
 									style={{
 										minHeight: 110,
 										padding: '8px 10px',
-										borderLeft: `1px solid ${themeColors.gray400}`,
-										background:
-											date === null ? themeColors.gray100 : colors.white,
+										borderLeft: `1px solid ${colors.gray400}`,
+										background: date === null ? colors.gray100 : colors.white,
 										boxSizing: 'border-box',
 										position: 'relative',
 									}}
@@ -121,11 +119,9 @@ export default function MonthView({ month, year }: MonthViewProps) {
 												height: 28,
 												borderRadius: '50%',
 												background: isToday
-													? themeColors['hoagie-teal']
+													? colors.selected
 													: 'transparent',
-												color: isToday
-													? themeColors.white
-													: themeColors.gray900,
+												color: isToday ? colors.white : colors.gray900,
 												fontSize: 13,
 												fontWeight: isToday ? 700 : 400,
 											}}
