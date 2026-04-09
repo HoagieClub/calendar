@@ -118,66 +118,12 @@ const teamMembers = [
 		},
 	},
 	{
-		name: 'Adam Wahid',
-		role: 'Software Engineer',
-		imgSrc: 'https://i.imgur.com/TFcPAG4.jpeg',
-		socials: {
-			linkedin: 'https://www.linkedin.com/in/adam-wahid-34898a319/',
-			github: 'https://github.com/pentrail',
-		},
-	},
-	{
-		name: 'Prishaa Kapasi',
-		role: 'Software Engineer',
-		imgSrc: 'https://i.imgur.com/mQ47W5o.jpeg',
-		socials: {
-			linkedin: 'https://www.linkedin.com/in/prishaa-kapasi-87b73825b/',
-			github: 'https://github.com/prishaakapasi',
-		},
-	},
-	{
-		name: 'Aayush Mitra',
-		role: 'Software Engineer',
-		imgSrc: 'https://i.imgur.com/JJSV3B5.jpeg',
-		socials: {
-			linkedin: 'https://www.linkedin.com/in/aayushmitra121/',
-			github: 'https://github.com/aayush-mitra',
-		},
-	},
-	{
-		name: 'Christal Chen',
-		role: 'Software Engineer',
-		imgSrc: 'https://i.imgur.com/ZshQ3Fj.jpeg',
-		socials: {
-			linkedin: 'https://www.linkedin.com/in/christalchen/',
-			github: 'https://github.com/12chenec',
-		},
-	},
-	{
 		name: 'Erica Lee',
 		role: 'Software Engineer',
 		imgSrc: 'https://i.imgur.com/1nXfGV4.png',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/ericayrlee/',
 			github: 'https://github.com/ericayrlee',
-		},
-	},
-	{
-		name: 'Anna Lau',
-		role: 'Software Engineer',
-		imgSrc: 'https://i.imgur.com/KQAU12z.jpeg',
-		socials: {
-			linkedin: 'https://www.linkedin.com/in/anna-lau-605964299/',
-			github: 'https://github.com/anna-1au',
-		},
-	},
-	{
-		name: 'Grace Wang',
-		role: 'Software Engineer',
-		imgSrc: 'https://i.imgur.com/0Rt86zU.jpeg',
-		socials: {
-			linkedin: 'https://www.linkedin.com/in/grace-wang-85b4122a8/',
-			github: 'https://github.com/gw4249',
 		},
 	},
 	{
