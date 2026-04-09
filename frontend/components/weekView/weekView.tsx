@@ -28,7 +28,6 @@ function formatHour(hour: number): string {
 
 export default function WeekView() {
 	const { colors } = useTheme();
-	const themeColors = colors as unknown as Record<string, string>;
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const now = new Date();
 	const weekDates = getWeekDates(now);
@@ -51,8 +50,8 @@ export default function WeekView() {
 				background: colors.white,
 				fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
 				fontSize: 14,
-				color: themeColors.gray800,
-				border: `1px solid ${themeColors.gray400}`,
+				color: colors.gray800,
+				border: `1px solid ${colors.gray400}`,
 				borderRadius: 16,
 			}}
 		>
@@ -94,9 +93,7 @@ export default function WeekView() {
 									fontSize: 10,
 									fontWeight: 500,
 									letterSpacing: '0.04em',
-									color: isToday
-										? themeColors['hoagie-teal']
-										: themeColors.gray700,
+									color: isToday ? colors.selected : colors.gray700,
 									textTransform: 'uppercase',
 									marginBottom: 4,
 								}}
@@ -113,10 +110,8 @@ export default function WeekView() {
 									width: 32,
 									height: 32,
 									borderRadius: '50%',
-									background: isToday
-										? themeColors['hoagie-teal']
-										: 'transparent',
-									color: isToday ? themeColors.white : themeColors.gray900,
+									background: isToday ? colors.selected : 'transparent',
+									color: isToday ? colors.white : colors.gray900,
 									fontSize: 16,
 									fontWeight: isToday ? 600 : 400,
 								}}
@@ -165,7 +160,7 @@ export default function WeekView() {
 									height: HOUR_HEIGHT,
 									display: 'flex',
 									alignItems: 'flex-start',
-									color: themeColors.gray700,
+									color: colors.gray700,
 									fontSize: 10,
 									fontWeight: 400,
 									whiteSpace: 'nowrap',
