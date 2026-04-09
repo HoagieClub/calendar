@@ -2,7 +2,10 @@
 
 import { useTheme } from 'evergreen-ui';
 
+import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
+
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MAX_VISIBLE_EVENTS = 3;
 
 function getMonthMatrix(year: number, month: number): (Date | null)[][] {
 	const firstDay = new Date(year, month, 1).getDay();
@@ -11,11 +14,27 @@ function getMonthMatrix(year: number, month: number): (Date | null)[][] {
 		...Array(firstDay).fill(null),
 		...Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1)),
 	];
-	// Pad to full weeks
 	while (cells.length % 7 !== 0) cells.push(null);
 	const weeks: (Date | null)[][] = [];
 	for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 	return weeks;
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+	return (
+		a.getFullYear() === b.getFullYear() &&
+		a.getMonth() === b.getMonth() &&
+		a.getDate() === b.getDate()
+	);
+}
+
+function formatEventTime(iso: string): string {
+	const d = new Date(iso);
+	const h = d.getHours();
+	const min = d.getMinutes();
+	const suffix = h >= 12 ? 'p' : 'a';
+	const hour = h % 12 === 0 ? 12 : h % 12;
+	return min === 0 ? `${hour}${suffix}` : `${hour}:${String(min).padStart(2, '0')}${suffix}`;
 }
 
 interface MonthViewProps {
@@ -31,6 +50,10 @@ export default function MonthView({ month, year }: MonthViewProps) {
 	const displayYear = year !== undefined ? year : now.getFullYear();
 
 	const weeks = getMonthMatrix(displayYear, displayMonth);
+
+	const startTime = new Date(displayYear, displayMonth, 1);
+	const endTime = new Date(displayYear, displayMonth + 1, 0, 23, 59, 59);
+	const { events } = useEvents(startTime, endTime);
 
 	return (
 		<div
@@ -97,37 +120,95 @@ export default function MonthView({ month, year }: MonthViewProps) {
 								date.getMonth() === now.getMonth() &&
 								date.getFullYear() === now.getFullYear();
 
+							const dayEvents = date
+								? events.filter((e) => isSameDay(new Date(e.start), date))
+								: [];
+							const visibleEvents = dayEvents.slice(0, MAX_VISIBLE_EVENTS);
+							const overflow = dayEvents.length - MAX_VISIBLE_EVENTS;
+
 							return (
 								<div
 									key={di}
 									style={{
 										minHeight: 110,
-										padding: '8px 10px',
+										padding: '6px',
 										borderLeft: `1px solid ${colors.gray400}`,
 										background: date === null ? colors.gray100 : colors.white,
 										boxSizing: 'border-box',
 										position: 'relative',
+										overflow: 'hidden',
 									}}
 								>
 									{date !== null && (
-										<div
-											style={{
-												display: 'inline-flex',
-												alignItems: 'center',
-												justifyContent: 'center',
-												width: 28,
-												height: 28,
-												borderRadius: '50%',
-												background: isToday
-													? colors.selected
-													: 'transparent',
-												color: isToday ? colors.white : colors.gray900,
-												fontSize: 13,
-												fontWeight: isToday ? 700 : 400,
-											}}
-										>
-											{date.getDate()}
-										</div>
+										<>
+											{/* Date number */}
+											<div
+												style={{
+													display: 'inline-flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													width: 28,
+													height: 28,
+													borderRadius: '50%',
+													background: isToday
+														? colors.selected
+														: 'transparent',
+													color: isToday ? colors.white : colors.gray900,
+													fontSize: 13,
+													fontWeight: isToday ? 700 : 400,
+													marginBottom: 3,
+												}}
+											>
+												{date.getDate()}
+											</div>
+
+											{/* Event pills */}
+											<div
+												style={{
+													display: 'flex',
+													flexDirection: 'column',
+													gap: 2,
+												}}
+											>
+												{visibleEvents.map((event) => {
+													const color = getCategoryColor(event.category);
+													return (
+														<div
+															key={event.id}
+															title={event.name}
+															style={{
+																background: color.bg,
+																color: color.text,
+																borderRadius: 4,
+																padding: '2px 5px',
+																fontSize: 11,
+																fontWeight: 500,
+																whiteSpace: 'nowrap',
+																overflow: 'hidden',
+																textOverflow: 'ellipsis',
+																cursor: 'pointer',
+															}}
+														>
+															{formatEventTime(event.start)}{' '}
+															{event.name}
+														</div>
+													);
+												})}
+
+												{overflow > 0 && (
+													<div
+														style={{
+															fontSize: 11,
+															color: colors.gray600,
+															paddingLeft: 2,
+															cursor: 'pointer',
+														}}
+													>
+														+{overflow} more
+													</div>
+												)}
+											</div>
+										</>
 									)}
 								</div>
 							);
