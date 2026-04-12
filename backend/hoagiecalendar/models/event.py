@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 from django.db import models
 
 from .user import User
@@ -13,14 +11,6 @@ class Category(models.Model):
 
 	class Meta:
 		db_table = "Category"
-
-
-class EventManager(models.Manager):
-	def get_queryset(self):
-		return super().get_queryset().annotate(attending_count=models.Count("attendees"))
-
-	def get_raw_queryset(self):
-		return super().get_queryset()
 
 
 class Event(models.Model):
@@ -37,7 +27,8 @@ class Event(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 	attendees = models.ManyToManyField(User, related_name="events_attending", blank=True)
 
-	objects = EventManager()
+	def attending_count(self) -> int:
+		return self.attendees.count()
 
 	def __str__(self) -> str:
 		return self.name
@@ -45,9 +36,3 @@ class Event(models.Model):
 	class Meta:
 		db_table = "Event"
 		ordering = ["start"]
-
-
-if TYPE_CHECKING:
-
-	class AnnotatedEvent(Event):  # Python type magic to make `attending_count` exist for type checker.
-		attending_count: int
