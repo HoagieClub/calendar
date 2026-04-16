@@ -510,13 +510,13 @@ type UseEventsResult = {
 };
 
 export function useEvents(startTime: Date, endTime: Date): UseEventsResult {
-  const events = useMemo(
-    () =>
-      PLACEHOLDER_EVENTS.filter(
-        (e) => new Date(e.start) <= endTime && new Date(e.end) >= startTime
-      ),
-    [startTime, endTime]
-  );
+	const events = useMemo(
+		() =>
+			PLACEHOLDER_EVENTS.filter(
+				(e) => new Date(e.start) <= endTime && new Date(e.end) >= startTime
+			),
+		[startTime, endTime]
+	);
 
-  return { events, isLoading: false, error: null };
+	return { events, isLoading: false, error: null };
 }
