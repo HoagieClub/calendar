@@ -10,7 +10,7 @@
  * and/or sell copies of the software. This software is provided "as-is", without warranty of any kind.
  */
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 import type { CalendarEvent } from '@/types';
 
@@ -510,26 +510,13 @@ type UseEventsResult = {
 };
 
 export function useEvents(startTime: Date, endTime: Date): UseEventsResult {
-	const [events, setEvents] = useState<CalendarEvent[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error] = useState<string | null>(null);
+  const events = useMemo(
+    () =>
+      PLACEHOLDER_EVENTS.filter(
+        (e) => new Date(e.start) <= endTime && new Date(e.end) >= startTime
+      ),
+    [startTime, endTime]
+  );
 
-	useEffect(() => {
-		// TODO: replace with real API call, e.g.:
-		// const res = await fetch(
-		//   `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/?start_time=${startTime.toISOString()}&end_time=${endTime.toISOString()}`,
-		//   { headers: { Authorization: `Bearer ${token}` } }
-		// );
-		// const data = await res.json();
-		// setEvents(data);
-
-		const filtered = PLACEHOLDER_EVENTS.filter(
-			(e) => new Date(e.start) <= endTime && new Date(e.end) >= startTime
-		);
-		// eslint-disable-next-line react-hooks/set-state-in-effect
-		setEvents(filtered);
-		setIsLoading(false);
-	}, [startTime.toISOString(), endTime.toISOString()]);
-
-	return { events, isLoading, error };
+  return { events, isLoading: false, error: null };
 }
