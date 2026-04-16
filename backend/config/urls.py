@@ -18,9 +18,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from hoagiecalendar.api.category_view import CategoryView
 from hoagiecalendar.api.event_views import EventDetailView, EventView
 from hoagiecalendar.api.user_events_view import UserEventsView
-from hoagiecalendar.api.category_view import CategoryView
 
 urlpatterns = [
 	path("admin/", admin.site.urls),
