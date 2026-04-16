@@ -7,7 +7,7 @@ from .category_serializer import CategorySerializer
 
 
 class CategoryView(APIView):
-    def get(self, request) -> Response:
-        categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+	def get(self, request) -> Response:
+		categories = Category.objects.all()
+		serializer = CategorySerializer(categories, many=True)
+		return Response(serializer.data, status=status.HTTP_200_OK)
