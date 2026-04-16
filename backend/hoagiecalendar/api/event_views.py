@@ -58,9 +58,9 @@ class EventSerializer(serializers.ModelSerializer):
 			"category",
 			"from_mail",
 			"ordering",
-			"is_saved_by_user",
+			"is_saved",
 		]
-		read_only_fields = ["id", "owner", "created_at", "updated_at", "is_saved_by_user"]
+		read_only_fields = ["id", "owner", "created_at", "updated_at", "is_saved"]
 
 
 class EventView(APIView):
