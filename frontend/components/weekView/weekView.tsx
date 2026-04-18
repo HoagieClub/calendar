@@ -66,10 +66,10 @@ interface PositionedEvent {
 	event: CalendarEvent;
 	top: number;
 	height: number;
-	colIndex: number;  // which column 0..MAX_COLUMNS-1
-	numCols: number;   // total visible columns in this group
-	isLast: boolean;   // is this the last visible column?
-	overflow: number;  // how many hidden events beyond this group
+	colIndex: number; // which column 0..MAX_COLUMNS-1
+	numCols: number; // total visible columns in this group
+	isLast: boolean; // is this the last visible column?
+	overflow: number; // how many hidden events beyond this group
 	overflowColors: string[];
 }
 
@@ -90,9 +90,7 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 		const visibleCols = columns.slice(0, MAX_COLUMNS);
 		const hiddenEvents = columns.slice(MAX_COLUMNS).flat();
 		const overflow = hiddenEvents.length;
-		const overflowColors = hiddenEvents
-			.map((e) => getCategoryColor(e.category).bg)
-			.slice(0, 3);
+		const overflowColors = hiddenEvents.map((e) => getCategoryColor(e.category).bg).slice(0, 3);
 		const numCols = Math.min(totalCols, MAX_COLUMNS);
 
 		for (let c = 0; c < visibleCols.length; c++) {
@@ -196,7 +194,13 @@ export default function WeekView() {
 					zIndex: 10,
 				}}
 			>
-				<div style={{ width: TIME_COL_WIDTH, flexShrink: 0, borderRight: `1px solid ${colors.gray400}` }} />
+				<div
+					style={{
+						width: TIME_COL_WIDTH,
+						flexShrink: 0,
+						borderRight: `1px solid ${colors.gray400}`,
+					}}
+				/>
 				{weekDates.map((date, i) => {
 					const isToday = i === todayIndex;
 					return (
@@ -209,10 +213,32 @@ export default function WeekView() {
 								borderLeft: `1px solid ${colors.gray400}`,
 							}}
 						>
-							<div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.04em', color: isToday ? colors.selected : colors.gray700, textTransform: 'uppercase', marginBottom: 4 }}>
+							<div
+								style={{
+									fontSize: 10,
+									fontWeight: 500,
+									letterSpacing: '0.04em',
+									color: isToday ? colors.selected : colors.gray700,
+									textTransform: 'uppercase',
+									marginBottom: 4,
+								}}
+							>
 								{DAYS[i]}
 							</div>
-							<div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', background: isToday ? colors.selected : 'transparent', color: isToday ? colors.white : colors.gray900, fontSize: 16, fontWeight: isToday ? 600 : 400 }}>
+							<div
+								style={{
+									display: 'inline-flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									width: 32,
+									height: 32,
+									borderRadius: '50%',
+									background: isToday ? colors.selected : 'transparent',
+									color: isToday ? colors.white : colors.gray900,
+									fontSize: 16,
+									fontWeight: isToday ? 600 : 400,
+								}}
+							>
 								{date.getDate()}
 							</div>
 						</div>
@@ -240,7 +266,14 @@ export default function WeekView() {
 						paddingRight: 8,
 					}}
 				>
-					<span style={{ fontSize: 10, color: colors.gray500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+					<span
+						style={{
+							fontSize: 10,
+							color: colors.gray500,
+							letterSpacing: '0.04em',
+							textTransform: 'uppercase',
+						}}
+					>
 						All-day
 					</span>
 				</div>
@@ -290,11 +323,21 @@ export default function WeekView() {
 			</div>
 
 			{/* ── Scrollable grid body ── */}
-			<div ref={scrollRef} style={{ flex: 1, overflowY: 'scroll', overflowX: 'hidden', position: 'relative' }}>
+			<div
+				ref={scrollRef}
+				style={{ flex: 1, overflowY: 'scroll', overflowX: 'hidden', position: 'relative' }}
+			>
 				<div style={{ display: 'flex', position: 'relative', height: 24 * HOUR_HEIGHT }}>
-
 					{/* ── Time labels column ── */}
-					<div style={{ width: TIME_COL_WIDTH, flexShrink: 0, position: 'relative', background: colors.gray200, borderRight: `1px solid ${colors.gray400}` }}>
+					<div
+						style={{
+							width: TIME_COL_WIDTH,
+							flexShrink: 0,
+							position: 'relative',
+							background: colors.gray200,
+							borderRight: `1px solid ${colors.gray400}`,
+						}}
+					>
 						{Array.from({ length: 24 }, (_, hour) => (
 							<div
 								key={hour}
@@ -328,7 +371,11 @@ export default function WeekView() {
 							return (
 								<div
 									key={colIdx}
-									style={{ flex: 1, borderLeft: `1px solid ${colors.gray400}`, position: 'relative' }}
+									style={{
+										flex: 1,
+										borderLeft: `1px solid ${colors.gray400}`,
+										position: 'relative',
+									}}
 								>
 									{/* Hour rows */}
 									{Array.from({ length: 24 }, (_, hour) => (
@@ -340,79 +387,137 @@ export default function WeekView() {
 												left: 0,
 												right: 0,
 												height: HOUR_HEIGHT,
-												background: hour % 2 === 0 ? colors.white : colors.gray100,
-												borderTop: hour === 0 ? 'none' : `1px solid ${colors.gray400}`,
+												background:
+													hour % 2 === 0 ? colors.white : colors.gray100,
+												borderTop:
+													hour === 0
+														? 'none'
+														: `1px solid ${colors.gray400}`,
 											}}
 										>
-											<div style={{ position: 'absolute', top: HOUR_HEIGHT / 2, left: 0, right: 0, borderTop: `1px solid ${colors.gray400}`, opacity: 0.4 }} />
+											<div
+												style={{
+													position: 'absolute',
+													top: HOUR_HEIGHT / 2,
+													left: 0,
+													right: 0,
+													borderTop: `1px solid ${colors.gray400}`,
+													opacity: 0.4,
+												}}
+											/>
 										</div>
 									))}
 
 									{/* ── Event tiles ── */}
-									{positioned.map(({ event, top, height, colIndex, numCols, isLast, overflow, overflowColors }) => {
-										const color = getCategoryColor(event.category);
-										const isNarrow = numCols > 1;
-										const leftPct = (colIndex / numCols) * 100;
-										const widthPct = (1 / numCols) * 100;
+									{positioned.map(
+										({
+											event,
+											top,
+											height,
+											colIndex,
+											numCols,
+											isLast,
+											overflow,
+											overflowColors,
+										}) => {
+											const color = getCategoryColor(event.category);
+											const isNarrow = numCols > 1;
+											const leftPct = (colIndex / numCols) * 100;
+											const widthPct = (1 / numCols) * 100;
 
-										return (
-											<div
-												key={event.id}
-												title={event.name}
-												style={{
-													position: 'absolute',
-													top: top + 1,
-													left: `calc(${leftPct}% + 2px)`,
-													width: `calc(${widthPct}% - 4px)`,
-													height: height,
-													background: color.bg,
-													borderLeft: `3px solid ${color.text}`,
-													borderRadius: 4,
-													padding: '3px 5px',
-													overflow: 'hidden',
-													cursor: 'pointer',
-													zIndex: 2,
-													boxSizing: 'border-box',
-												}}
-											>
-												<div style={{ fontSize: isNarrow ? 10 : 11, fontWeight: 600, color: color.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-													{event.name}
-												</div>
-												{height > 36 && !isNarrow && (
-													<div style={{ fontSize: 10, color: color.text, opacity: 0.8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-														{formatEventTime(event.start)} – {formatEventTime(event.end)}
-													</div>
-												)}
-
-												{/* Overflow pill on the last visible tile */}
-												{isLast && overflow > 0 && (
+											return (
+												<div
+													key={event.id}
+													title={event.name}
+													style={{
+														position: 'absolute',
+														top: top + 1,
+														left: `calc(${leftPct}% + 2px)`,
+														width: `calc(${widthPct}% - 4px)`,
+														height: height,
+														background: color.bg,
+														borderLeft: `3px solid ${color.text}`,
+														borderRadius: 4,
+														padding: '3px 5px',
+														overflow: 'hidden',
+														cursor: 'pointer',
+														zIndex: 2,
+														boxSizing: 'border-box',
+													}}
+												>
 													<div
 														style={{
-															position: 'absolute',
-															top: 4,
-															right: 4,
-															display: 'flex',
-															alignItems: 'center',
-															gap: 2,
-															background: colors.white,
-															border: `1px solid ${colors.gray300}`,
-															borderRadius: 10,
-															padding: '1px 5px',
-															cursor: 'pointer',
-															zIndex: 3,
+															fontSize: isNarrow ? 10 : 11,
+															fontWeight: 600,
+															color: color.text,
+															whiteSpace: 'nowrap',
+															overflow: 'hidden',
+															textOverflow: 'ellipsis',
 														}}
 													>
-														{overflowColors.map((c, ci) => (
-															<div key={ci} style={{ width: 6, height: 6, borderRadius: '50%', background: c }} />
-														))}
-														<span style={{ fontSize: 10, fontWeight: 600, color: colors.gray700, marginLeft: 1 }}>
-															+{overflow}
-														</span>
+														{event.name}
 													</div>
-												)}
-											</div>
-										);
-									})}
+													{height > 36 && !isNarrow && (
+														<div
+															style={{
+																fontSize: 10,
+																color: color.text,
+																opacity: 0.8,
+																whiteSpace: 'nowrap',
+																overflow: 'hidden',
+																textOverflow: 'ellipsis',
+															}}
+														>
+															{formatEventTime(event.start)} –{' '}
+															{formatEventTime(event.end)}
+														</div>
+													)}
+
+													{/* Overflow pill on the last visible tile */}
+													{isLast && overflow > 0 && (
+														<div
+															style={{
+																position: 'absolute',
+																top: 4,
+																right: 4,
+																display: 'flex',
+																alignItems: 'center',
+																gap: 2,
+																background: colors.white,
+																border: `1px solid ${colors.gray300}`,
+																borderRadius: 10,
+																padding: '1px 5px',
+																cursor: 'pointer',
+																zIndex: 3,
+															}}
+														>
+															{overflowColors.map((c, ci) => (
+																<div
+																	key={ci}
+																	style={{
+																		width: 6,
+																		height: 6,
+																		borderRadius: '50%',
+																		background: c,
+																	}}
+																/>
+															))}
+															<span
+																style={{
+																	fontSize: 10,
+																	fontWeight: 600,
+																	color: colors.gray700,
+																	marginLeft: 1,
+																}}
+															>
+																+{overflow}
+															</span>
+														</div>
+													)}
+												</div>
+											);
+										}
+									)}
 								</div>
 							);
 						})}
@@ -428,8 +533,20 @@ export default function WeekView() {
 								pointerEvents: 'none',
 							}}
 						>
-							<div style={{ position: 'absolute', left: -4, top: -4, width: 8, height: 8, borderRadius: '50%', background: colors.red500 }} />
-							<div style={{ height: 2, background: colors.red500, borderRadius: 1 }} />
+							<div
+								style={{
+									position: 'absolute',
+									left: -4,
+									top: -4,
+									width: 8,
+									height: 8,
+									borderRadius: '50%',
+									background: colors.red500,
+								}}
+							/>
+							<div
+								style={{ height: 2, background: colors.red500, borderRadius: 1 }}
+							/>
 						</div>
 					</div>
 				</div>
