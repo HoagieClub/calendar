@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Heading, majorScale, Pane, Text, useTheme } from 'evergreen-ui';
 
@@ -16,16 +16,25 @@ interface member {
 }
 
 // Icon for social media links
-const SocialIcon = ({ href, children }: { href: string; children: React.ReactNode }) => (
-	<a
-		href={href}
-		target='_blank'
-		rel='noopener noreferrer'
-		className='text-gray-400 hover:text-emerald-500 transition-colors duration-300'
-	>
-		{children}
-	</a>
-);
+const SocialIcon = ({ href, children }: { href: string; children: React.ReactNode }) => {
+	const theme = useTheme();
+	const [hovered, setHovered] = useState(false);
+	return (
+		<a
+			href={href}
+			target='_blank'
+			rel='noopener noreferrer'
+			style={{
+				color: hovered ? theme.colors.selected : '#9ca3af',
+				transition: 'color 300ms',
+			}}
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
+		>
+			{children}
+		</a>
+	);
+};
 
 // SVG components for icons
 const LinkedinIcon = () => (
@@ -58,17 +67,90 @@ const GitHubIcon = () => (
 	</svg>
 );
 
+const LeadCard = ({ lead }: { lead: member }) => {
+	const theme = useTheme();
+	const [hovered, setHovered] = useState(false);
+	return (
+		<div
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
+			className='bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 ease-in-out'
+		>
+			<div className='p-8 flex flex-col sm:flex-row items-center'>
+				{/* Intentionally using img so direct Imgur URLs work without Next image domain config. */}
+				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<img
+					src={lead.imgSrc}
+					alt={lead.name}
+					className='w-32 h-32 rounded-full flex-shrink-0 mb-6 sm:mb-0 sm:mr-8'
+					height={128}
+					width={128}
+					style={{
+						objectFit: 'cover',
+						border: `4px solid ${hovered ? theme.colors.blue500 : theme.colors.blue200}`,
+						transition: 'border-color 300ms',
+					}}
+				/>
+				<div className='text-center sm:text-left'>
+					<h3 className='text-2xl font-bold text-slate-900'>{lead.name}</h3>
+					<p className='text-md font-bold mb-2' style={{ color: theme.colors.blue500 }}>
+						{lead.role}
+					</p>
+					<div className='flex justify-center sm:justify-start space-x-4'>
+						<SocialIcon href={lead.socials.github}>
+							<GitHubIcon />
+						</SocialIcon>
+						<SocialIcon href={lead.socials.linkedin}>
+							<LinkedinIcon />
+						</SocialIcon>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+const MemberCard = ({ member }: { member: member }) => {
+	const theme = useTheme();
+	const [hovered, setHovered] = useState(false);
+	return (
+		<div
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
+			className='bg-white rounded-xl shadow-md p-6 text-center transform hover:-translate-y-2 transition-transform duration-300 ease-in-out'
+		>
+			{/* Intentionally using img so direct Imgur URLs work without Next image domain config. */}
+			{/* eslint-disable-next-line @next/next/no-img-element */}
+			<img
+				src={member.imgSrc}
+				alt={member.name}
+				className='w-24 h-24 rounded-full mx-auto mb-4'
+				height={128}
+				width={128}
+				style={{
+					objectFit: 'cover',
+					border: `4px solid ${hovered ? theme.colors.blue500 : theme.colors.blue100}`,
+					transition: 'border-color 300ms',
+				}}
+			/>
+			<h4 className='font-bold text-slate-800 text-lg'>{member.name}</h4>
+			<p className='text-sm font-semibold mb-2' style={{ color: theme.colors.blue500 }}>
+				{member.role}
+			</p>
+			<div className='flex mx-auto w-min mt-2 justify-center sm:justify-start space-x-4'>
+				<SocialIcon href={member.socials.github}>
+					<GitHubIcon />
+				</SocialIcon>
+				<SocialIcon href={member.socials.linkedin}>
+					<LinkedinIcon />
+				</SocialIcon>
+			</div>
+		</div>
+	);
+};
+
 // Team data organized for easier management
 const teamLeads: member[] = [
-	{
-		name: 'Jenny Fan',
-		role: 'Team Lead',
-		imgSrc: 'https://i.imgur.com/grwgWFZ.jpeg',
-		socials: {
-			linkedin: 'https://www.linkedin.com/in/jennyfan04/',
-			github: 'https://github.com/jfmath04',
-		},
-	},
 	{
 		name: 'Zhao Song Zhou',
 		role: 'Team Lead',
@@ -85,6 +167,18 @@ const teamLeads: member[] = [
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/alvinsze/',
 			github: 'https://github.com/asze17',
+		},
+	},
+];
+
+const pastLeads: member[] = [
+	{
+		name: 'Jenny Fan',
+		role: 'Team Lead (2025 - 2026)',
+		imgSrc: 'https://i.imgur.com/grwgWFZ.jpeg',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/jennyfan04/',
+			github: 'https://github.com/jfmath04',
 		},
 	},
 ];
@@ -198,52 +292,9 @@ export function App() {
 					<h2 className='text-3xl font-bold text-slate-900 mb-12 text-center'>
 						Team Leadership
 					</h2>
-					<div className='grid grid-cols-1 lg:grid-cols-1 gap-10 max-w-lg mx-auto'>
+					<div className='grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-5xl mx-auto'>
 						{teamLeads.map((lead) => (
-							<div
-								key={lead.name}
-								className='bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 ease-in-out'
-							>
-								<div className='p-8 flex flex-col sm:flex-row items-center'>
-									<Pane
-										flexShrink={0}
-										marginBottom={majorScale(3)}
-										marginRight={majorScale(4)}
-										width={128}
-										height={128}
-										borderRadius='50%'
-										border={`4px solid ${theme.colors.blue200}`}
-										boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-										overflow='hidden'
-									>
-										{/* Intentionally using img so direct Imgur URLs work without Next image domain config. */}
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={lead.imgSrc}
-											alt={lead.name}
-											height={128}
-											width={128}
-											style={{ objectFit: 'cover' }}
-										/>
-									</Pane>
-									<div className='text-center sm:text-left'>
-										<h3 className='text-2xl font-bold text-slate-900'>
-											{lead.name}
-										</h3>
-										<p className='text-md font-semibold text-emerald-600 mb-2'>
-											{lead.role}
-										</p>
-										<div className='flex justify-center sm:justify-start space-x-4'>
-											<SocialIcon href={lead.socials.github}>
-												<GitHubIcon />
-											</SocialIcon>
-											<SocialIcon href={lead.socials.linkedin}>
-												<LinkedinIcon />
-											</SocialIcon>
-										</div>
-									</div>
-								</div>
-							</div>
+							<LeadCard key={lead.name} lead={lead} />
 						))}
 					</div>
 				</section>
@@ -255,31 +306,19 @@ export function App() {
 					</h2>
 					<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8'>
 						{teamMembers.map((member) => (
-							<div
-								key={member.name}
-								className='bg-white rounded-xl shadow-md p-6 text-center transform hover:-translate-y-2 transition-transform duration-300 ease-in-out group'
-							>
-								{/* Intentionally using img so direct Imgur URLs work without Next image domain config. */}
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img
-									src={member.imgSrc}
-									alt={member.name}
-									className='w-24 h-24 rounded-full mx-auto mb-4 border-4 border-slate-200 group-hover:border-emerald-300 transition-colors duration-300'
-									height={128}
-									width={128}
-									style={{ objectFit: 'cover' }}
-								/>
-								<h4 className='font-bold text-slate-800 text-lg'>{member.name}</h4>
-								<p className='text-emerald-600 text-sm'>{member.role}</p>
-								<div className='flex mx-auto w-min mt-2 justify-center sm:justify-start space-x-4'>
-									<SocialIcon href={member.socials.github}>
-										<GitHubIcon />
-									</SocialIcon>
-									<SocialIcon href={member.socials.linkedin}>
-										<LinkedinIcon />
-									</SocialIcon>
-								</div>
-							</div>
+							<MemberCard key={member.name} member={member} />
+						))}
+					</div>
+				</section>
+
+				{/* Past Leads Section */}
+				<section className='mt-16'>
+					<h2 className='text-3xl font-bold text-slate-900 mb-12 text-center'>
+						Past Leads
+					</h2>
+					<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8'>
+						{pastLeads.map((lead) => (
+							<MemberCard key={lead.name} member={lead} />
 						))}
 					</div>
 				</section>
