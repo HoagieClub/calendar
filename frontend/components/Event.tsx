@@ -73,13 +73,11 @@ const CATEGORY_STYLES: Record<
 
 export type CalendarEvent = {
 	id: number;
-	title: string;
+	name: string;
 	startHour: number;
 	endHour: number;
-	color: string;
-	accent: string;
 	location: string;
-	organizer: string;
+	host: string;
 	attendees: number;
 	category?: EventCategory;
 	description?: string;
@@ -109,8 +107,10 @@ export function formatEventTime(startHour: number, endHour: number): string {
 export function Event({ event, top, left, width, height }: EventProps) {
 	const showExpandedDetails = height >= 120;
 	const showLocation = height >= 92;
-	const titleLineClamp = showExpandedDetails ? 2 : 1;
-	const categoryStyle = event.category ? CATEGORY_STYLES[event.category] : null;
+	const titleLineClamp = height >= 140 ? 2 : 1;
+	const categoryStyle = event.category
+		? CATEGORY_STYLES[event.category]
+		: CATEGORY_STYLES['Other'];
 	const [isHighlighted, setIsHighlighted] = useState(false);
 
 	return (
@@ -120,11 +120,11 @@ export function Event({ event, top, left, width, height }: EventProps) {
 			left={left}
 			width={width}
 			height={height}
-			background={event.color}
+			background={categoryStyle.background}
 			borderRadius={10}
 			padding={12}
 			boxShadow='0 6px 18px rgba(100, 116, 139, 0.12)'
-			border={`1px solid ${event.accent}22`}
+			border={`1px solid ${categoryStyle.border}22`}
 			overflow='hidden'
 			textAlign='left'
 			onMouseEnter={() => setIsHighlighted(true)}
@@ -147,7 +147,7 @@ export function Event({ event, top, left, width, height }: EventProps) {
 				left={0}
 				bottom={0}
 				width={3}
-				background={event.accent}
+				background={categoryStyle.border}
 			/>
 			<Pane display='flex' flexDirection='column' height='100%' paddingLeft={2}>
 				<Pane display='flex' justifyContent='space-between' alignItems='flex-start' gap={8}>
@@ -171,7 +171,7 @@ export function Event({ event, top, left, width, height }: EventProps) {
 						textOverflow: 'ellipsis',
 					}}
 				>
-					{event.title}
+					{event.name}
 				</Heading>
 				{showLocation ? (
 					<Text
@@ -188,29 +188,18 @@ export function Event({ event, top, left, width, height }: EventProps) {
 				) : null}
 				{showExpandedDetails ? (
 					<Pane display='flex' alignItems='center' gap={6} marginTop={6} minHeight={16}>
-						{categoryStyle ? (
-							<Pane
-								background={categoryStyle.background}
-								border={`1px solid ${categoryStyle.border}22`}
-								borderRadius={999}
-								paddingX={8}
-								paddingY={2}
-								flexShrink={0}
-							>
-								<Text fontSize='10px' color={categoryStyle.color} fontWeight={700}>
-									{categoryStyle.label}
-								</Text>
-							</Pane>
-						) : (
-							<Pane
-								width={8}
-								height={8}
-								borderRadius='50%'
-								background={event.accent}
-								flexShrink={0}
-								marginLeft={2}
-							/>
-						)}
+						<Pane
+							background={categoryStyle.background}
+							border={`1px solid ${categoryStyle.border}22`}
+							borderRadius={999}
+							paddingX={8}
+							paddingY={2}
+							flexShrink={0}
+						>
+							<Text fontSize='10px' color={categoryStyle.color} fontWeight={700}>
+								{categoryStyle.label}
+							</Text>
+						</Pane>
 						<Text
 							fontSize='10px'
 							color='#8a94a6'
@@ -219,7 +208,7 @@ export function Event({ event, top, left, width, height }: EventProps) {
 							overflow='hidden'
 							textOverflow='ellipsis'
 						>
-							{`via ${event.organizer}`}
+							{`via ${event.host}`}
 						</Text>
 					</Pane>
 				) : null}
