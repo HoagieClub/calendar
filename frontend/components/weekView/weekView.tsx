@@ -66,10 +66,10 @@ interface PositionedEvent {
 	event: CalendarEvent;
 	top: number;
 	height: number;
-	colIndex: number; // which column 0..MAX_COLUMNS-1
-	numCols: number; // total visible columns in this group
-	isLast: boolean; // is this the last visible column?
-	overflow: number; // how many hidden events beyond this group
+	colIndex: number;
+	numCols: number;
+	isLast: boolean;
+	overflow: number;
 	overflowColors: string[];
 }
 
@@ -86,12 +86,13 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 	function flushGroup() {
 		if (group.length === 0) return;
 
-		const totalCols = columns.length;
 		const visibleCols = columns.slice(0, MAX_COLUMNS);
 		const hiddenEvents = columns.slice(MAX_COLUMNS).flat();
 		const overflow = hiddenEvents.length;
-		const overflowColors = hiddenEvents.map((e) => getCategoryColor(e.category).bg).slice(0, 3);
-		const numCols = Math.min(totalCols, MAX_COLUMNS);
+		const overflowColors = hiddenEvents
+			.map((e) => getCategoryColor(e.category).border)
+			.slice(0, 3);
+		const numCols = Math.min(columns.length, MAX_COLUMNS);
 
 		for (let c = 0; c < visibleCols.length; c++) {
 			const isLast = c === visibleCols.length - 1;
@@ -287,6 +288,7 @@ export default function WeekView() {
 							style={{
 								flex: 1,
 								borderLeft: `1px solid ${colors.gray400}`,
+								overflow: 'hidden',
 								padding: '3px 3px',
 								display: 'flex',
 								flexDirection: 'column',
@@ -300,13 +302,12 @@ export default function WeekView() {
 										key={event.id}
 										title={event.name}
 										style={{
-											background: color.bg,
-											borderLeft: `3px solid ${color.text}`,
+											background: color.border,
 											borderRadius: 3,
-											padding: '1px 4px',
+											padding: '2px 6px',
 											fontSize: 11,
 											fontWeight: 600,
-											color: color.text,
+											color: '#ffffff',
 											whiteSpace: 'nowrap',
 											overflow: 'hidden',
 											textOverflow: 'ellipsis',
@@ -377,7 +378,7 @@ export default function WeekView() {
 										position: 'relative',
 									}}
 								>
-									{/* Hour rows */}
+									{/* Hour lines */}
 									{Array.from({ length: 24 }, (_, hour) => (
 										<div
 											key={hour}
@@ -387,24 +388,14 @@ export default function WeekView() {
 												left: 0,
 												right: 0,
 												height: HOUR_HEIGHT,
-												background:
-													hour % 2 === 0 ? colors.white : colors.gray100,
 												borderTop:
-													hour === 0
-														? 'none'
-														: `1px solid ${colors.gray400}`,
+													hour === 0 ? 'none' : `1px solid #D1D5DB`,
+												boxSizing: 'border-box',
+												zIndex: 0,
+												pointerEvents: 'none', // important
 											}}
 										>
-											<div
-												style={{
-													position: 'absolute',
-													top: HOUR_HEIGHT / 2,
-													left: 0,
-													right: 0,
-													borderTop: `1px solid ${colors.gray400}`,
-													opacity: 0.4,
-												}}
-											/>
+											{/* Half-hour dashed line */}
 										</div>
 									))}
 
@@ -421,9 +412,9 @@ export default function WeekView() {
 											overflowColors,
 										}) => {
 											const color = getCategoryColor(event.category);
-											const isNarrow = numCols > 1;
 											const leftPct = (colIndex / numCols) * 100;
 											const widthPct = (1 / numCols) * 100;
+											const showTime = height > 42;
 
 											return (
 												<div
@@ -435,37 +426,40 @@ export default function WeekView() {
 														left: `calc(${leftPct}% + 2px)`,
 														width: `calc(${widthPct}% - 4px)`,
 														height: height,
-														background: color.bg,
-														borderLeft: `3px solid ${color.text}`,
+														background: `${color.bg}99`,
+														borderLeft: `3px solid ${color.border}`,
 														borderRadius: 4,
-														padding: '3px 5px',
+														padding: '3px 6px',
 														overflow: 'hidden',
 														cursor: 'pointer',
-														zIndex: 2,
+														zIndex: 0,
 														boxSizing: 'border-box',
 													}}
 												>
+													{/* Black bold title */}
 													<div
 														style={{
-															fontSize: isNarrow ? 10 : 11,
-															fontWeight: 600,
-															color: color.text,
+															fontSize: 11,
+															fontWeight: 700,
+															color: '#111827',
 															whiteSpace: 'nowrap',
 															overflow: 'hidden',
 															textOverflow: 'ellipsis',
+															lineHeight: 1.3,
 														}}
 													>
 														{event.name}
 													</div>
-													{height > 36 && !isNarrow && (
+													{/* Gray time underneath */}
+													{showTime && (
 														<div
 															style={{
 																fontSize: 10,
-																color: color.text,
-																opacity: 0.8,
+																color: '#6B7280',
 																whiteSpace: 'nowrap',
 																overflow: 'hidden',
 																textOverflow: 'ellipsis',
+																marginTop: 1,
 															}}
 														>
 															{formatEventTime(event.start)} –{' '}
@@ -473,7 +467,7 @@ export default function WeekView() {
 														</div>
 													)}
 
-													{/* Overflow pill on the last visible tile */}
+													{/* Overflow pill */}
 													{isLast && overflow > 0 && (
 														<div
 															style={{
