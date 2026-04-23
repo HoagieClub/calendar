@@ -213,7 +213,7 @@ const teamMembers = [
 	},
 	{
 		name: 'Erica Lee',
-		role: 'Software Engineer',
+		role: 'Developer',
 		imgSrc: 'https://i.imgur.com/1nXfGV4.png',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/ericayrlee/',
@@ -222,7 +222,7 @@ const teamMembers = [
 	},
 	{
 		name: 'Angela Cai',
-		role: 'Software Engineer',
+		role: 'Developer',
 		imgSrc: 'https://i.imgur.com/NASRtwq.jpeg',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/angcai/',
@@ -231,7 +231,7 @@ const teamMembers = [
 	},
 	{
 		name: 'Karen Gao',
-		role: 'Software Engineer',
+		role: 'Developer',
 		imgSrc: 'https://i.imgur.com/dBnfnGt.jpeg',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/karen-a-gao/',
@@ -240,7 +240,7 @@ const teamMembers = [
 	},
 	{
 		name: 'Chloe Chen',
-		role: 'Software Engineer',
+		role: 'Developer',
 		imgSrc: 'https://i.imgur.com/HoM0S1V.jpeg',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/chloe-chen-7388243b2/',
@@ -249,7 +249,7 @@ const teamMembers = [
 	},
 	{
 		name: 'Niv Levy',
-		role: 'Software Engineer',
+		role: 'Developer',
 		imgSrc: 'https://i.imgur.com/XbLGo6d.jpeg',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/niv-levy-012685258/',
