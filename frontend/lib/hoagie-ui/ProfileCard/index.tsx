@@ -40,8 +40,11 @@ export function ProfileCard({ user }: { user: User }) {
 			<Text color='muted' size={300} marginTop={2}>
 				{email}
 			</Text>
+			<a href='/my-events'>
+    			<Button marginTop={16} width='100%'>My Events</Button>
+			</a>
 			<a href='/auth/logout'>
-				<Button marginTop={16}>Log Out</Button>
+    			<Button marginTop={8} width='100%'>Log Out</Button>
 			</a>
 		</Card>
 	);
