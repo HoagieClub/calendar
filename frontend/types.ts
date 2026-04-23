@@ -22,3 +22,17 @@ export type HoagieUser = {
 	name?: string;
 	email?: string;
 };
+
+export type CalendarEvent = {
+	id: string;
+	start: string; // ISO datetime string
+	end: string; // ISO datetime string
+	name: string;
+	location: string;
+	description: string;
+	host: string;
+	owner: string;
+	category: string;
+	from_mail: boolean;
+	ordering: number;
+};
