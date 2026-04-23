@@ -1,4 +1,4 @@
-import MyEvents from '@/components/myEvents/myEvents2';
+import MyEvents from '@/components/myEvents/MyEvents';
 
 export default function Page() {
   return <MyEvents />;
