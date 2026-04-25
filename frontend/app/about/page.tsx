@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Heading, majorScale, Pane, Text, useTheme } from 'evergreen-ui';
-import Image from 'next/image';
 
 // --- Helper Components & Data ---
 interface member {
@@ -12,20 +11,30 @@ interface member {
 	imgSrc: string;
 	socials: {
 		linkedin: string;
+		github: string;
 	};
 }
 
 // Icon for social media links
-const SocialIcon = ({ href, children }: { href: string; children: React.ReactNode }) => (
-	<a
-		href={href}
-		target='_blank'
-		rel='noopener noreferrer'
-		className='text-gray-400 hover:text-emerald-500 transition-colors duration-300'
-	>
-		{children}
-	</a>
-);
+const SocialIcon = ({ href, children }: { href: string; children: React.ReactNode }) => {
+	const theme = useTheme();
+	const [hovered, setHovered] = useState(false);
+	return (
+		<a
+			href={href}
+			target='_blank'
+			rel='noopener noreferrer'
+			style={{
+				color: hovered ? theme.colors.selected : '#9ca3af',
+				transition: 'color 300ms',
+			}}
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
+		>
+			{children}
+		</a>
+	);
+};
 
 // SVG components for icons
 const LinkedinIcon = () => (
@@ -46,34 +55,221 @@ const LinkedinIcon = () => (
 	</svg>
 );
 
+const GitHubIcon = () => (
+	<svg
+		xmlns='http://www.w3.org/2000/svg'
+		width='24'
+		height='24'
+		viewBox='0 0 16 16'
+		fill='currentColor'
+	>
+		<path d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8' />
+	</svg>
+);
+
+const LeadCard = ({ lead }: { lead: member }) => {
+	const theme = useTheme();
+	const [hovered, setHovered] = useState(false);
+	return (
+		<div
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
+			className='bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 ease-in-out'
+		>
+			<div className='p-8 flex flex-col sm:flex-row items-center'>
+				{/* Intentionally using img so direct Imgur URLs work without Next image domain config. */}
+				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<img
+					src={lead.imgSrc}
+					alt={lead.name}
+					className='w-32 h-32 rounded-full flex-shrink-0 mb-6 sm:mb-0 sm:mr-8'
+					height={128}
+					width={128}
+					style={{
+						objectFit: 'cover',
+						border: `4px solid ${hovered ? theme.colors.blue500 : theme.colors.blue200}`,
+						transition: 'border-color 300ms',
+					}}
+				/>
+				<div className='text-center sm:text-left'>
+					<h3 className='text-2xl font-bold text-slate-900'>{lead.name}</h3>
+					<p className='text-md font-bold mb-2' style={{ color: theme.colors.blue500 }}>
+						{lead.role}
+					</p>
+					<div className='flex justify-center sm:justify-start space-x-4'>
+						<SocialIcon href={lead.socials.github}>
+							<GitHubIcon />
+						</SocialIcon>
+						<SocialIcon href={lead.socials.linkedin}>
+							<LinkedinIcon />
+						</SocialIcon>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+const MemberCard = ({ member }: { member: member }) => {
+	const theme = useTheme();
+	const [hovered, setHovered] = useState(false);
+	return (
+		<div
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
+			className='bg-white rounded-xl shadow-md p-6 text-center transform hover:-translate-y-2 transition-transform duration-300 ease-in-out'
+		>
+			{/* Intentionally using img so direct Imgur URLs work without Next image domain config. */}
+			{/* eslint-disable-next-line @next/next/no-img-element */}
+			<img
+				src={member.imgSrc}
+				alt={member.name}
+				className='w-24 h-24 rounded-full mx-auto mb-4'
+				height={128}
+				width={128}
+				style={{
+					objectFit: 'cover',
+					border: `4px solid ${hovered ? theme.colors.blue500 : theme.colors.blue100}`,
+					transition: 'border-color 300ms',
+				}}
+			/>
+			<h4 className='font-bold text-slate-800 text-lg'>{member.name}</h4>
+			<p className='text-sm font-semibold mb-2' style={{ color: theme.colors.blue500 }}>
+				{member.role}
+			</p>
+			<div className='flex mx-auto w-min mt-2 justify-center sm:justify-start space-x-4'>
+				<SocialIcon href={member.socials.github}>
+					<GitHubIcon />
+				</SocialIcon>
+				<SocialIcon href={member.socials.linkedin}>
+					<LinkedinIcon />
+				</SocialIcon>
+			</div>
+		</div>
+	);
+};
+
 // Team data organized for easier management
 const teamLeads: member[] = [
 	{
-		name: 'Jenny Fan',
+		name: 'Zhao Song Zhou',
 		role: 'Team Lead',
-		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQFOQEWyofLFhw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1710648138236?e=1770249600&v=beta&t=YhbYphTxR6MEjk17qmvvw0dqbcdpbIwNrDs0oDU-BVM',
+		imgSrc: 'https://i.imgur.com/JeUh9dc.jpeg',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/zhao-song-zhou/',
+			github: 'https://github.com/ZhaoSongZh7',
+		},
+	},
+	{
+		name: 'Alvin Sze',
+		role: 'Team Lead',
+		imgSrc: 'https://i.imgur.com/mZy9kzp.jpeg',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/alvinsze/',
+			github: 'https://github.com/asze17',
+		},
+	},
+];
+
+const pastLeads: member[] = [
+	{
+		name: 'Jenny Fan',
+		role: 'Team Lead (2025 - 2026)',
+		imgSrc: 'https://i.imgur.com/grwgWFZ.jpeg',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/jennyfan04/',
+			github: 'https://github.com/jfmath04',
 		},
 	},
 ];
 
 const teamMembers = [
-	// Add your name, role, and image here!
 	{
 		name: 'Chloe Lau',
 		role: 'Product Manager',
-		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQFlLceS8QZODA/profile-displayphoto-crop_800_800/B4EZrciQfjKUAI-/0/1764636561365?e=1770854400&v=beta&t=qa6Xfoyb44M9dw9VHW_ofy9ChNiirP2hS6CMRYRWfto',
+		imgSrc: 'https://i.imgur.com/BVrnu64.jpeg',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/chloe-hc-lau/',
+			github: 'https://github.com/lauechlo',
+		},
+	},
+	{
+		name: 'Allison Lee',
+		role: 'Product Manager',
+		imgSrc: 'https://i.imgur.com/3SPqM7z.jpeg',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/allisonelee/',
+			github: 'https://github.com/allisonelee',
+		},
+	},
+	{
+		name: 'Helen Hui',
+		role: 'Product Manager',
+		imgSrc: 'https://i.imgur.com/kc4WIyv.jpeg',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/helen-hui-7125b929b/',
+			github: 'https://github.com/ilovehhhyn',
+		},
+	},
+	{
+		name: 'Erica Lee',
+		role: 'Developer',
+		imgSrc: 'https://i.imgur.com/1nXfGV4.png',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/ericayrlee/',
+			github: 'https://github.com/ericayrlee',
 		},
 	},
 	{
 		name: 'Angela Cai',
-		role: 'Software Engineer',
-		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQHpPTd04eUfhQ/profile-displayphoto-crop_800_800/B4EZrXdJAUHEAI-/0/1764551332672?e=1772668800&v=beta&t=LsG7vZaIRyXzf_3-7lrJiu2z_Hokd46Kvv5-3d2_Wpc',
+		role: 'Developer',
+		imgSrc: 'https://i.imgur.com/NASRtwq.jpeg',
 		socials: {
 			linkedin: 'https://www.linkedin.com/in/angcai/',
+			github: 'https://github.com/Ang-cai',
+		},
+	},
+	{
+		name: 'Karen Gao',
+		role: 'Developer',
+		imgSrc: 'https://i.imgur.com/dBnfnGt.jpeg',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/karen-a-gao/',
+			github: 'https://github.com/karengao6',
+		},
+	},
+	{
+		name: 'Chloe Chen',
+		role: 'Developer',
+		imgSrc: 'https://i.imgur.com/HoM0S1V.jpeg',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/chloe-chen-7388243b2/',
+			github: 'https://github.com/celloii',
+		},
+	},
+	{
+		name: 'Niv Levy',
+		role: 'Developer',
+		imgSrc: 'https://i.imgur.com/XbLGo6d.jpeg',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/niv-levy-012685258/',
+			github: 'https://github.com/NivLevy-gh',
+		},
+	},
+	{
+		name: 'Chloe Chen',
+		role: 'Software Engineer',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D4E03AQGtOBqymzIJ6Q/profile-displayphoto-scale_400_400/B4EZyIt1WtJsAg-/0/1771820246551?e=1773273600&v=beta&t=oZxsneIF-hkukaX0rNoV7tt6NcpmgjYWALc5l8MRzp8',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/chloe-chen-7388243b2',
+		},
+	},
+	{
+		name: 'Karen Gao',
+		role: 'Software Engineer',
+		imgSrc: 'https://media.licdn.com/dms/image/v2/D5603AQH24u_lw8Ix2A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1727058129445?e=1773273600&v=beta&t=YPDY4mzM53X5QZaJI-8WmyAk32orQdwCMz7bBohkjgY',
+		socials: {
+			linkedin: 'https://www.linkedin.com/in/karen-a-gao/',
 		},
 	},
 ];
@@ -112,47 +308,9 @@ export function App() {
 					<h2 className='text-3xl font-bold text-slate-900 mb-12 text-center'>
 						Team Leadership
 					</h2>
-					<div className='grid grid-cols-1 lg:grid-cols-1 gap-10 max-w-lg mx-auto'>
+					<div className='grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-5xl mx-auto'>
 						{teamLeads.map((lead) => (
-							<div
-								key={lead.name}
-								className='bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 ease-in-out'
-							>
-								<div className='p-8 flex flex-col sm:flex-row items-center'>
-									<Pane
-										flexShrink={0}
-										marginBottom={majorScale(3)}
-										marginRight={majorScale(4)}
-										width={128}
-										height={128}
-										borderRadius='50%'
-										border={`4px solid ${theme.colors.blue200}`}
-										boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-										overflow='hidden'
-									>
-										<Image
-											src={lead.imgSrc}
-											alt={lead.name}
-											height={128}
-											width={128}
-											objectFit='cover'
-										/>
-									</Pane>
-									<div className='text-center sm:text-left'>
-										<h3 className='text-2xl font-bold text-slate-900'>
-											{lead.name}
-										</h3>
-										<p className='text-md font-semibold text-emerald-600 mb-2'>
-											{lead.role}
-										</p>
-										<div className='flex justify-center sm:justify-start space-x-4'>
-											<SocialIcon href={lead.socials.linkedin}>
-												<LinkedinIcon />
-											</SocialIcon>
-										</div>
-									</div>
-								</div>
-							</div>
+							<LeadCard key={lead.name} lead={lead} />
 						))}
 					</div>
 				</section>
@@ -164,26 +322,19 @@ export function App() {
 					</h2>
 					<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8'>
 						{teamMembers.map((member) => (
-							<div
-								key={member.name}
-								className='bg-white rounded-xl shadow-md p-6 text-center transform hover:-translate-y-2 transition-transform duration-300 ease-in-out group'
-							>
-								<Image
-									src={member.imgSrc}
-									alt={member.name}
-									className='w-24 h-24 rounded-full mx-auto mb-4 border-4 border-slate-200 group-hover:border-emerald-300 transition-colors duration-300'
-									height={128}
-									width={128}
-									objectFit='cover'
-								/>
-								<h4 className='font-bold text-slate-800 text-lg'>{member.name}</h4>
-								<p className='text-emerald-600 text-sm'>{member.role}</p>
-								<div className='flex mx-auto w-min mt-2 justify-center sm:justify-start space-x-4'>
-									<SocialIcon href={member.socials.linkedin}>
-										<LinkedinIcon />
-									</SocialIcon>
-								</div>
-							</div>
+							<MemberCard key={member.name} member={member} />
+						))}
+					</div>
+				</section>
+
+				{/* Past Leads Section */}
+				<section className='mt-16'>
+					<h2 className='text-3xl font-bold text-slate-900 mb-12 text-center'>
+						Past Leads
+					</h2>
+					<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8'>
+						{pastLeads.map((lead) => (
+							<MemberCard key={lead.name} member={lead} />
 						))}
 					</div>
 				</section>
