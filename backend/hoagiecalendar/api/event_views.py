@@ -63,7 +63,7 @@ class EventView(APIView):
 		# return an error if start_time or end_time are not in the request
 		if not start_time or not end_time:
 			return Response(
-				{"detail": "Both start_time and end_time query parameters are required."},
+				{"error": "Both start_time and end_time query parameters are required."},
 				status=status.HTTP_400_BAD_REQUEST,
 			)
 
@@ -108,4 +108,6 @@ class EventDetailView(APIView):
 
 	def delete(self, request, event_id) -> Response:
 		# Logic to delete an event
-		pass
+		event = get_object_or_404(Event, id=event_id)
+		event.delete()
+		return Response(status=status.HTTP_204_NO_CONTENT)
