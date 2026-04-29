@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Heading, Pane, Text } from 'evergreen-ui';
+import { Heading, Pane, Text, useTheme } from 'evergreen-ui';
 
 export const EVENT_CATEGORIES = [
 	'Social Events',
@@ -105,13 +105,26 @@ export function formatEventTime(startHour: number, endHour: number): string {
 }
 
 export function Event({ event, top, left, width, height }: EventProps) {
+	const { colors } = useTheme();
 	const showExpandedDetails = height >= 120;
-	const showLocation = height >= 92;
-	const titleLineClamp = height >= 140 ? 2 : 1;
+	const showLocation = height >= 80;
+	const titleLineClamp = height >= 120 ? 2 : 1;
 	const categoryStyle = event.category
 		? CATEGORY_STYLES[event.category]
 		: CATEGORY_STYLES['Other'];
 	const [isHighlighted, setIsHighlighted] = useState(false);
+	const cardRef = useRef<HTMLDivElement>(null);
+	const [cardWidth, setCardWidth] = useState(999);
+
+	useEffect(() => {
+		const el = cardRef.current;
+		if (!el) return;
+		const observer = new ResizeObserver(([entry]) => {
+			setCardWidth(entry.contentRect.width);
+		});
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, []);
 
 	return (
 		<Pane
@@ -122,7 +135,9 @@ export function Event({ event, top, left, width, height }: EventProps) {
 			height={height}
 			background={categoryStyle.background}
 			borderRadius={10}
-			padding={12}
+			paddingTop={10}
+			paddingBottom={10}
+			paddingX={12}
 			boxShadow='0 6px 18px rgba(100, 116, 139, 0.12)'
 			border={`1px solid ${categoryStyle.border}22`}
 			overflow='hidden'
@@ -141,78 +156,103 @@ export function Event({ event, top, left, width, height }: EventProps) {
 				transition: 'transform 140ms ease, box-shadow 140ms ease',
 			}}
 		>
-			<Pane
-				position='absolute'
-				top={0}
-				left={0}
-				bottom={0}
-				width={3}
-				background={categoryStyle.border}
-			/>
-			<Pane display='flex' flexDirection='column' height='100%' paddingLeft={2}>
-				<Pane display='flex' justifyContent='space-between' alignItems='flex-start' gap={8}>
-					<Text size={200} fontWeight={700} fontSize={14} color='#374151'>
-						{formatEventTime(event.startHour, event.endHour)}
-					</Text>
-					<Text size={200} color='#6b7280' fontSize={14} fontWeight={600}>
-						{`👥 ${event.attendees}`}
-					</Text>
-				</Pane>
-				<Heading
-					size={400}
-					marginTop={6}
-					color='#1f2937'
-					lineHeight='20px'
-					style={{
-						display: '-webkit-box',
-						WebkitBoxOrient: 'vertical',
-						WebkitLineClamp: titleLineClamp,
-						overflow: 'hidden',
-						textOverflow: 'ellipsis',
-					}}
-				>
-					{event.name}
-				</Heading>
-				{showLocation ? (
-					<Text
-						fontSize='11px'
-						color='#6b7280'
-						marginTop={6}
-						lineHeight='13px'
-						whiteSpace='nowrap'
-						overflow='hidden'
-						textOverflow='ellipsis'
+			<div ref={cardRef} style={{ width: '100%', height: '100%' }}>
+				<Pane
+					position='absolute'
+					top={0}
+					left={0}
+					bottom={0}
+					width={3}
+					background={categoryStyle.border}
+				/>
+				<Pane display='flex' flexDirection='column' height='100%' paddingLeft={2}>
+					<Heading
+						size={400}
+						color={colors.gray800}
+						fontWeight={700}
+						style={{
+							lineHeight: '18px',
+							display: '-webkit-box',
+							WebkitBoxOrient: 'vertical',
+							WebkitLineClamp: titleLineClamp,
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+						}}
 					>
-						{`📍 ${event.location}`}
-					</Text>
-				) : null}
-				{showExpandedDetails ? (
-					<Pane display='flex' alignItems='center' gap={6} marginTop={6} minHeight={16}>
-						<Pane
-							background={categoryStyle.background}
-							border={`1px solid ${categoryStyle.border}22`}
-							borderRadius={999}
-							paddingX={8}
-							paddingY={2}
-							flexShrink={0}
-						>
-							<Text fontSize='10px' color={categoryStyle.color} fontWeight={700}>
-								{categoryStyle.label}
-							</Text>
-						</Pane>
+						{event.name}
+					</Heading>
+					<Pane display='flex' alignItems='center' gap={15} marginTop={2}>
 						<Text
-							fontSize='10px'
-							color='#8a94a6'
+							size={200}
+							fontWeight={500}
+							fontSize={12}
+							color={colors.gray800}
+							overflow='hidden'
+							textOverflow='ellipsis'
+							whiteSpace='nowrap'
+						>
+							{formatEventTime(event.startHour, event.endHour)}
+						</Text>
+						{cardWidth >= 130 ? (
+							<Text
+								size={200}
+								fontSize={12}
+								fontWeight={500}
+								color={colors.muted}
+								flexShrink={0}
+							>
+								{`👥 ${event.attendees}`}
+							</Text>
+						) : null}
+					</Pane>
+					{showLocation ? (
+						<Text
+							fontSize='11px'
+							color={colors.muted}
+							marginTop={6}
 							lineHeight='13px'
 							whiteSpace='nowrap'
 							overflow='hidden'
 							textOverflow='ellipsis'
 						>
-							{`via ${event.host}`}
+							{`📍 ${event.location}`}
 						</Text>
-					</Pane>
-				) : null}
-			</Pane>
+					) : null}
+					{showExpandedDetails ? (
+						<Pane
+							display='flex'
+							alignItems='center'
+							gap={6}
+							marginTop={6}
+							minHeight={16}
+						>
+							<Pane
+								display='flex'
+								alignItems='center'
+								background={categoryStyle.background}
+								border={`1px solid ${categoryStyle.border}22`}
+								borderRadius={999}
+								paddingX={8}
+								flexShrink={0}
+							>
+								<Text fontSize='10px' color={categoryStyle.color} fontWeight={700}>
+									{categoryStyle.label}
+								</Text>
+							</Pane>
+							<Text
+								fontSize='10px'
+								color={colors.gray700}
+								lineHeight='13px'
+								whiteSpace='nowrap'
+								overflow='hidden'
+								textOverflow='ellipsis'
+							>
+								{`via ${event.host}`}
+							</Text>
+						</Pane>
+					) : null}
+				</Pane>
+			</div>
 		</Pane>
 	);
 }

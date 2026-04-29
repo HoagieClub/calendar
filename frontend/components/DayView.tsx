@@ -174,7 +174,11 @@ function formatHour(hour: number): string {
 export function DayView() {
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 	const hasAutoScrolledRef = useRef(false);
-	const [now, setNow] = useState(() => new Date());
+	const [now, setNow] = useState(() => {
+		const d = new Date();
+		d.setSeconds(0, 0);
+		return d;
+	});
 	const totalHeight = HOUR_HEIGHT * 24;
 	const currentTimePosition = useMemo(
 		() => (now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600) * HOUR_HEIGHT,
