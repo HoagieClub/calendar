@@ -4,9 +4,13 @@ import { useEffect, useRef } from 'react';
 
 import { useTheme } from 'evergreen-ui';
 
+import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
+import type { CalendarEvent } from '@/types';
+
 const HOUR_HEIGHT = 60;
 const TIME_COL_WIDTH = 56;
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MAX_COLUMNS = 3;
 
 function getWeekDates(date: Date): Date[] {
 	const sunday = new Date(date);
@@ -26,6 +30,127 @@ function formatHour(hour: number): string {
 	return `${hour - 12} PM`;
 }
 
+function formatEventTime(iso: string): string {
+	const d = new Date(iso);
+	const h = d.getHours();
+	const min = d.getMinutes();
+	const suffix = h >= 12 ? 'PM' : 'AM';
+	const hour = h % 12 === 0 ? 12 : h % 12;
+	return min === 0 ? `${hour} ${suffix}` : `${hour}:${String(min).padStart(2, '0')} ${suffix}`;
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+	return (
+		a.getFullYear() === b.getFullYear() &&
+		a.getMonth() === b.getMonth() &&
+		a.getDate() === b.getDate()
+	);
+}
+
+function isAllDay(event: CalendarEvent): boolean {
+	const start = new Date(event.start);
+	const end = new Date(event.end);
+	return (
+		start.getHours() === 0 &&
+		start.getMinutes() === 0 &&
+		end.getHours() === 23 &&
+		end.getMinutes() === 59
+	);
+}
+
+function minutesFromMidnight(date: Date): number {
+	return date.getHours() * 60 + date.getMinutes();
+}
+
+interface PositionedEvent {
+	event: CalendarEvent;
+	top: number;
+	height: number;
+	colIndex: number;
+	numCols: number;
+	isLast: boolean;
+	overflow: number;
+	overflowColors: string[];
+}
+
+function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
+	const sorted = [...events].sort(
+		(a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+	);
+
+	const result: PositionedEvent[] = [];
+	let groupEnd = -Infinity;
+	let group: CalendarEvent[] = [];
+	let columns: CalendarEvent[][] = [];
+
+	function flushGroup() {
+		if (group.length === 0) return;
+
+		const visibleCols = columns.slice(0, MAX_COLUMNS);
+		const hiddenEvents = columns.slice(MAX_COLUMNS).flat();
+		const overflow = hiddenEvents.length;
+		const overflowColors = hiddenEvents
+			.map((e) => getCategoryColor(e.category).border)
+			.slice(0, 3);
+		const numCols = Math.min(columns.length, MAX_COLUMNS);
+
+		for (let c = 0; c < visibleCols.length; c++) {
+			const isLast = c === visibleCols.length - 1;
+			for (const ev of visibleCols[c]) {
+				const start = new Date(ev.start);
+				const end = new Date(ev.end);
+				const startMin = minutesFromMidnight(start);
+				const durationMin = Math.max(30, (end.getTime() - start.getTime()) / 60000);
+				result.push({
+					event: ev,
+					top: startMin * (HOUR_HEIGHT / 60),
+					height: durationMin * (HOUR_HEIGHT / 60) - 2,
+					colIndex: c,
+					numCols,
+					isLast,
+					overflow: isLast ? overflow : 0,
+					overflowColors: isLast ? overflowColors : [],
+				});
+			}
+		}
+
+		group = [];
+		columns = [];
+		groupEnd = -Infinity;
+	}
+
+	for (const ev of sorted) {
+		const start = new Date(ev.start);
+		const end = new Date(ev.end);
+		const startMin = minutesFromMidnight(start);
+		const endMin = minutesFromMidnight(end);
+
+		if (startMin >= groupEnd) {
+			flushGroup();
+		}
+
+		group.push(ev);
+		groupEnd = Math.max(groupEnd, endMin);
+
+		let placed = false;
+		for (const col of columns) {
+			const last = col[col.length - 1];
+			const lastEnd = minutesFromMidnight(new Date(last.end));
+			if (startMin >= lastEnd) {
+				col.push(ev);
+				placed = true;
+				break;
+			}
+		}
+		if (!placed) {
+			columns.push([ev]);
+		}
+	}
+
+	flushGroup();
+	return result;
+}
+
 export default function WeekView() {
 	const { colors } = useTheme();
 	const scrollRef = useRef<HTMLDivElement>(null);
@@ -33,6 +158,11 @@ export default function WeekView() {
 	const weekDates = getWeekDates(now);
 	const todayIndex = now.getDay();
 	const currentMinuteOffset = (now.getHours() * 60 + now.getMinutes()) * (HOUR_HEIGHT / 60);
+
+	const startTime = weekDates[0];
+	const endTime = new Date(weekDates[6]);
+	endTime.setHours(23, 59, 59);
+	const { events } = useEvents(startTime, endTime);
 
 	useEffect(() => {
 		if (scrollRef.current) {
@@ -65,7 +195,6 @@ export default function WeekView() {
 					zIndex: 10,
 				}}
 			>
-				{/* Corner spacer */}
 				<div
 					style={{
 						width: TIME_COL_WIDTH,
@@ -73,10 +202,8 @@ export default function WeekView() {
 						borderRight: `1px solid ${colors.gray400}`,
 					}}
 				/>
-
 				{weekDates.map((date, i) => {
 					const isToday = i === todayIndex;
-					const dayNum = date.getDate();
 					return (
 						<div
 							key={i}
@@ -87,7 +214,6 @@ export default function WeekView() {
 								borderLeft: `1px solid ${colors.gray400}`,
 							}}
 						>
-							{/* Day name */}
 							<div
 								style={{
 									fontSize: 10,
@@ -100,8 +226,6 @@ export default function WeekView() {
 							>
 								{DAYS[i]}
 							</div>
-
-							{/* Date circle */}
 							<div
 								style={{
 									display: 'inline-flex',
@@ -116,8 +240,84 @@ export default function WeekView() {
 									fontWeight: isToday ? 600 : 400,
 								}}
 							>
-								{dayNum}
+								{date.getDate()}
 							</div>
+						</div>
+					);
+				})}
+			</div>
+
+			{/* ── ALL-DAY row ── */}
+			<div
+				style={{
+					display: 'flex',
+					flexShrink: 0,
+					borderBottom: `2px solid ${colors.gray400}`,
+					minHeight: 32,
+				}}
+			>
+				<div
+					style={{
+						width: TIME_COL_WIDTH,
+						flexShrink: 0,
+						borderRight: `1px solid ${colors.gray400}`,
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'flex-end',
+						paddingRight: 8,
+					}}
+				>
+					<span
+						style={{
+							fontSize: 10,
+							color: colors.gray500,
+							letterSpacing: '0.04em',
+							textTransform: 'uppercase',
+						}}
+					>
+						All-day
+					</span>
+				</div>
+				{weekDates.map((date, i) => {
+					const allDayEvents = events.filter(
+						(e) => isSameDay(new Date(e.start), date) && isAllDay(e)
+					);
+					return (
+						<div
+							key={i}
+							style={{
+								flex: 1,
+								borderLeft: `1px solid ${colors.gray400}`,
+								overflow: 'hidden',
+								padding: '3px 3px',
+								display: 'flex',
+								flexDirection: 'column',
+								gap: 2,
+							}}
+						>
+							{allDayEvents.map((event) => {
+								const color = getCategoryColor(event.category);
+								return (
+									<div
+										key={event.id}
+										title={event.name}
+										style={{
+											background: color.border,
+											borderRadius: 3,
+											padding: '2px 6px',
+											fontSize: 11,
+											fontWeight: 600,
+											color: '#ffffff',
+											whiteSpace: 'nowrap',
+											overflow: 'hidden',
+											textOverflow: 'ellipsis',
+											cursor: 'pointer',
+										}}
+									>
+										{event.name}
+									</div>
+								);
+							})}
 						</div>
 					);
 				})}
@@ -126,20 +326,9 @@ export default function WeekView() {
 			{/* ── Scrollable grid body ── */}
 			<div
 				ref={scrollRef}
-				style={{
-					flex: 1,
-					overflowY: 'scroll',
-					overflowX: 'hidden',
-					position: 'relative',
-				}}
+				style={{ flex: 1, overflowY: 'scroll', overflowX: 'hidden', position: 'relative' }}
 			>
-				<div
-					style={{
-						display: 'flex',
-						position: 'relative',
-						height: 24 * HOUR_HEIGHT,
-					}}
-				>
+				<div style={{ display: 'flex', position: 'relative', height: 24 * HOUR_HEIGHT }}>
 					{/* ── Time labels column ── */}
 					<div
 						style={{
@@ -174,46 +363,158 @@ export default function WeekView() {
 
 					{/* ── Day columns ── */}
 					<div style={{ flex: 1, display: 'flex', position: 'relative' }}>
-						{weekDates.map((_, colIdx) => (
-							<div
-								key={colIdx}
-								style={{
-									flex: 1,
-									borderLeft: `1px solid ${colors.gray400}`,
-									position: 'relative',
-								}}
-							>
-								{/* Alternating hour rows */}
-								{Array.from({ length: 24 }, (_, hour) => (
-									<div
-										key={hour}
-										style={{
-											position: 'absolute',
-											top: hour * HOUR_HEIGHT,
-											left: 0,
-											right: 0,
-											height: HOUR_HEIGHT,
-											background:
-												hour % 2 === 0 ? colors.white : colors.gray100,
-											borderTop:
-												hour === 0 ? 'none' : `1px solid ${colors.gray400}`,
-										}}
-									>
-										{/* Half-hour line */}
+						{weekDates.map((date, colIdx) => {
+							const timedEvents = events.filter(
+								(e) => isSameDay(new Date(e.start), date) && !isAllDay(e)
+							);
+							const positioned = layoutEvents(timedEvents);
+
+							return (
+								<div
+									key={colIdx}
+									style={{
+										flex: 1,
+										borderLeft: `1px solid ${colors.gray400}`,
+										position: 'relative',
+									}}
+								>
+									{/* Hour lines */}
+									{Array.from({ length: 24 }, (_, hour) => (
 										<div
+											key={hour}
 											style={{
 												position: 'absolute',
-												top: HOUR_HEIGHT / 2,
+												top: hour * HOUR_HEIGHT,
 												left: 0,
 												right: 0,
-												borderTop: `1px solid ${colors.gray400}`,
-												opacity: 0.4,
+												height: HOUR_HEIGHT,
+												borderTop:
+													hour === 0 ? 'none' : `1px solid #D1D5DB`,
+												boxSizing: 'border-box',
+												zIndex: 0,
+												pointerEvents: 'none', // important
 											}}
-										/>
-									</div>
-								))}
-							</div>
-						))}
+										>
+											{/* Half-hour dashed line */}
+										</div>
+									))}
+
+									{/* ── Event tiles ── */}
+									{positioned.map(
+										({
+											event,
+											top,
+											height,
+											colIndex,
+											numCols,
+											isLast,
+											overflow,
+											overflowColors,
+										}) => {
+											const color = getCategoryColor(event.category);
+											const leftPct = (colIndex / numCols) * 100;
+											const widthPct = (1 / numCols) * 100;
+											const showTime = height > 42;
+
+											return (
+												<div
+													key={event.id}
+													title={event.name}
+													style={{
+														position: 'absolute',
+														top: top + 1,
+														left: `calc(${leftPct}% + 2px)`,
+														width: `calc(${widthPct}% - 4px)`,
+														height: height,
+														background: `${color.bg}99`,
+														borderLeft: `3px solid ${color.border}`,
+														borderRadius: 4,
+														padding: '3px 6px',
+														overflow: 'hidden',
+														cursor: 'pointer',
+														zIndex: 0,
+														boxSizing: 'border-box',
+													}}
+												>
+													{/* Black bold title */}
+													<div
+														style={{
+															fontSize: 11,
+															fontWeight: 700,
+															color: '#111827',
+															whiteSpace: 'nowrap',
+															overflow: 'hidden',
+															textOverflow: 'ellipsis',
+															lineHeight: 1.3,
+														}}
+													>
+														{event.name}
+													</div>
+													{/* Gray time underneath */}
+													{showTime && (
+														<div
+															style={{
+																fontSize: 10,
+																color: '#6B7280',
+																whiteSpace: 'nowrap',
+																overflow: 'hidden',
+																textOverflow: 'ellipsis',
+																marginTop: 1,
+															}}
+														>
+															{formatEventTime(event.start)} –{' '}
+															{formatEventTime(event.end)}
+														</div>
+													)}
+
+													{/* Overflow pill */}
+													{isLast && overflow > 0 && (
+														<div
+															style={{
+																position: 'absolute',
+																top: 4,
+																right: 4,
+																display: 'flex',
+																alignItems: 'center',
+																gap: 2,
+																background: colors.white,
+																border: `1px solid ${colors.gray300}`,
+																borderRadius: 10,
+																padding: '1px 5px',
+																cursor: 'pointer',
+																zIndex: 3,
+															}}
+														>
+															{overflowColors.map((c, ci) => (
+																<div
+																	key={ci}
+																	style={{
+																		width: 6,
+																		height: 6,
+																		borderRadius: '50%',
+																		background: c,
+																	}}
+																/>
+															))}
+															<span
+																style={{
+																	fontSize: 10,
+																	fontWeight: 600,
+																	color: colors.gray700,
+																	marginLeft: 1,
+																}}
+															>
+																+{overflow}
+															</span>
+														</div>
+													)}
+												</div>
+											);
+										}
+									)}
+								</div>
+							);
+						})}
 
 						{/* ── Current time indicator ── */}
 						<div
@@ -238,11 +539,7 @@ export default function WeekView() {
 								}}
 							/>
 							<div
-								style={{
-									height: 2,
-									background: colors.red500,
-									borderRadius: 1,
-								}}
+								style={{ height: 2, background: colors.red500, borderRadius: 1 }}
 							/>
 						</div>
 					</div>
