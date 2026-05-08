@@ -37,6 +37,11 @@ class EventSerializer(serializers.ModelSerializer):
 		},
 	)
 
+	attending_count = serializers.SerializerMethodField(read_only=True)
+
+	def get_attending_count(self, obj: Event) -> int:
+		return obj.attending_count()
+
 	class Meta:
 		model = Event
 		fields = [
@@ -50,9 +55,9 @@ class EventSerializer(serializers.ModelSerializer):
 			"owner",
 			"category",
 			"from_mail",
-			"ordering",
+			"attending_count",
 		]
-		read_only_fields = ["id", "owner", "created_at", "updated_at"]
+		read_only_fields = ["id", "owner", "created_at", "updated_at", "attending_count"]
 
 
 class EventView(APIView):
