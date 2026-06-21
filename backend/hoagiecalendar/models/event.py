@@ -25,6 +25,7 @@ class Event(models.Model):
 	from_mail = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
+	saved_by = models.ManyToManyField(User, related_name="saved_events", blank=True)
 
 	def __str__(self) -> str:
 		return self.name
