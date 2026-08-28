@@ -23,7 +23,7 @@ from hoagiecalendar.api.user_events_view import UserEventsView
 
 urlpatterns = [
 	path("admin/", admin.site.urls),
-	path("event/", EventView.as_view(), name="event"),
-	path("event/<int:event_id>/", EventDetailView.as_view(), name="event-detail"),
-	path("user/events/", UserEventsView.as_view(), name="user-events"),
+	path("api/event/", EventView.as_view(), name="event"),
+	path("api/event/<int:event_id>/", EventDetailView.as_view(), name="event-detail"),
+	path("api/user/events/", UserEventsView.as_view(), name="user-events"),
 ]
