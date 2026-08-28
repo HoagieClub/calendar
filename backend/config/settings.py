@@ -21,6 +21,9 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -85,7 +88,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Select the appropriate database URL based on DEBUG setting
 db_url = os.getenv("TEST_DATABASE_URL") if not PROD else os.getenv("DATABASE_URL")
 if not db_url:
-    raise ValueError("Database URL is not set. Please set TEST_DATABASE_URL or DATABASE_URL in your environment variables.")
+    raise ValueError(f"Database URL is not set. Please set {'TEST_DATABASE_URL' if not PROD else 'DATABASE_URL'} in your environment variables.")
 
 os.environ["DATABASE_URL"] = db_url
 DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"), ssl_require=False)}
