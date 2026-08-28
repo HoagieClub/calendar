@@ -12,12 +12,51 @@
 
 'use client';
 
-import { Pane, majorScale, minorScale, Heading, ArrowLeftIcon, Button } from 'evergreen-ui';
+import { useUser } from '@auth0/nextjs-auth0';
+import {
+	Pane,
+	majorScale,
+	minorScale,
+	Heading,
+	Spinner,
+	ArrowRightIcon,
+	ArrowLeftIcon,
+	Button,
+	useTheme,
+} from 'evergreen-ui';
 import Link from 'next/link';
 
 import AuthButton from '@/lib/hoagie-ui/AuthButton';
 
 export function Home() {
+	const theme = useTheme();
+	const { user, error, isLoading } = useUser();
+
+	let Profile;
+	if (isLoading) {
+		Profile = <Spinner />;
+	} else if (error || !user) {
+		Profile = <AuthButton />;
+	} else {
+		Profile = (
+			<Pane>
+				<Link href='/feature1'>
+					<Button
+						height={56}
+						width={majorScale(35)}
+						backgroundColor={theme.colors.blue100}
+						marginBottom={20}
+						iconBefore={ArrowRightIcon}
+					>
+						Call to Action
+					</Button>
+				</Link>
+				<br />
+				<AuthButton variant='logout' />
+			</Pane>
+		);
+	}
+
 	return (
 		<Pane
 			display='flex'
@@ -52,7 +91,7 @@ export function Home() {
 						alignItems='center'
 						marginTop='30px'
 					>
-						<AuthButton />
+						{Profile}
 						<Link href='https://hoagie.io'>
 							<Button
 								height={56}
