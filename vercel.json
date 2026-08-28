@@ -4,21 +4,9 @@
     "frontend": {
       "root": "frontend/",
       "framework": "nextjs"
-    },
-    "backend": {
-      "root": "backend/",
-      "entrypoint": "config.wsgi:application"
     }
   },
   "rewrites": [
-    {
-      "source": "/admin/(.*)",
-      "destination": { "service": "backend" }
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": { "service": "backend" }
-    },
     {
       "source": "/(.*)",
       "destination": { "service": "frontend" }
