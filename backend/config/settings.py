@@ -83,7 +83,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # Select the appropriate database URL based on DEBUG setting
-os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL") if not PROD else os.getenv("DATABASE_URL")
+db_url = os.getenv("TEST_DATABASE_URL") if not PROD else os.getenv("DATABASE_URL")
+if not db_url:
+    raise ValueError("Database URL is not set. Please set TEST_DATABASE_URL or DATABASE_URL in your environment variables.")
+
+os.environ["DATABASE_URL"] = db_url
 DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"), ssl_require=False)}
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
