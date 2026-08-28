@@ -26,6 +26,12 @@ export async function proxy(request: NextRequest) {
 		return authRes;
 	}
 
+	// The landing page is public. Keep this explicit so future protected-route
+	// logic cannot redirect unauthenticated visitors away from the index page.
+	if (request.nextUrl.pathname === '/') {
+		return authRes;
+	}
+
 	// Check if the user is trying to access one of the protected routes
 	if (
 		request.nextUrl.pathname.startsWith('/feature1') ||
