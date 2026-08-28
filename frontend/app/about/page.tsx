@@ -183,7 +183,8 @@ const pastLeads: member[] = [
 	},
 ];
 
-const teamMembers = [
+// FIXME: Reverse before merge
+const _teamMembers = [
 	{
 		name: 'Chloe Lau',
 		role: 'Product Manager',
@@ -321,9 +322,10 @@ export function App() {
 						Our Amazing Team
 					</h2>
 					<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8'>
-						{teamMembers.map((member) => (
+						{ // FIXME: Reverse before merge.
+						/* {teamMembers.map((member) => (
 							<MemberCard key={member.name} member={member} />
-						))}
+						))} */}
 					</div>
 				</section>
 
