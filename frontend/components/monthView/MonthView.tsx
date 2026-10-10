@@ -178,7 +178,7 @@ export default function MonthView({ month, year }: MonthViewProps) {
 															title={event.name}
 															style={{
 																background: color.bg,
-																color: color.text,
+																color: color.border,
 																borderRadius: 4,
 																padding: '2px 5px',
 																fontSize: 11,

@@ -11,7 +11,7 @@ interface member {
 	imgSrc: string;
 	socials: {
 		linkedin: string;
-		github: string;
+		github?: string;
 	};
 }
 
@@ -97,9 +97,11 @@ const LeadCard = ({ lead }: { lead: member }) => {
 						{lead.role}
 					</p>
 					<div className='flex justify-center sm:justify-start space-x-4'>
-						<SocialIcon href={lead.socials.github}>
-							<GitHubIcon />
-						</SocialIcon>
+						{lead.socials.github && (
+							<SocialIcon href={lead.socials.github}>
+								<GitHubIcon />
+							</SocialIcon>
+						)}
 						<SocialIcon href={lead.socials.linkedin}>
 							<LinkedinIcon />
 						</SocialIcon>
@@ -138,9 +140,11 @@ const MemberCard = ({ member }: { member: member }) => {
 				{member.role}
 			</p>
 			<div className='flex mx-auto w-min mt-2 justify-center sm:justify-start space-x-4'>
-				<SocialIcon href={member.socials.github}>
-					<GitHubIcon />
-				</SocialIcon>
+				{member.socials.github && (
+					<SocialIcon href={member.socials.github}>
+						<GitHubIcon />
+					</SocialIcon>
+				)}
 				<SocialIcon href={member.socials.linkedin}>
 					<LinkedinIcon />
 				</SocialIcon>
@@ -183,7 +187,7 @@ const pastLeads: member[] = [
 	},
 ];
 
-const teamMembers = [
+const teamMembers: member[] = [
 	{
 		name: 'Chloe Lau',
 		role: 'Product Manager',
