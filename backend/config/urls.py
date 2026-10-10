@@ -18,6 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from hoagiecalendar.api.category_view import CategoryView
 from hoagiecalendar.api.event_views import EventDetailView, EventView
 from hoagiecalendar.api.user_events_view import UserEventsView
 
@@ -26,4 +27,5 @@ urlpatterns = [
 	path("event/", EventView.as_view(), name="event"),
 	path("event/<int:event_id>/", EventDetailView.as_view(), name="event-detail"),
 	path("user/events/", UserEventsView.as_view(), name="user-events"),
+	path("category/", CategoryView.as_view(), name="category"),
 ]
