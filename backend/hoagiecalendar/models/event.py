@@ -25,6 +25,10 @@ class Event(models.Model):
 	from_mail = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
+	attendees = models.ManyToManyField(User, related_name="events_attending", blank=True)
+
+	def attending_count(self) -> int:
+		return self.attendees.count()
 
 	def __str__(self) -> str:
 		return self.name
