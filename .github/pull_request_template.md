@@ -5,20 +5,20 @@
 
 ## Summary
 
-<Briefly explain the problem and the resulting behavior.>
+- Briefly explain the problem and the resulting behavior.
 
 ## Changes
 
-- <Concrete change>
-- <Route, component, or endpoint updated>
-- <Existing behavior preserved or obsolete code removed>
+- Concrete change
+- Route, component, or endpoint updated
+- Existing behavior preserved or obsolete code removed
 
 ## Testing
 
 ### Manual
 
-- <Describe the user flow tested>
-- <List the views, states, browsers, or API responses checked>
+- Describe the user flow tested
+- List the views, states, browsers, or API responses checked
 
 ### Automated
 
@@ -33,8 +33,8 @@
 
 ## Screenshots
 
-<Add before/after screenshots for each affected view, or write N/A.>
+- Add before/after screenshots for each affected view, or write N/A.
 
 ## Follow-ups
 
-- <Related work intentionally left for another issue, or N/A>
+- Related work intentionally left for another issue, or N/A
