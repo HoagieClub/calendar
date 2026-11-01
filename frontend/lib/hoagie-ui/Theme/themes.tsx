@@ -244,7 +244,7 @@ export const hoagieCalendar = mergeTheme(hoagieUI, {
 		blue500: '#33BBBF',
 		blue400: '#5CCED3',
 		blue300: '#85DFE7',
-		blue200: '#ADCFEB',
+		blue200: '#a7dfe4',
 		blue100: '#D6EFF2',
 		blue50: '#E9FAFB',
 		blue25: '#F4FDFD',

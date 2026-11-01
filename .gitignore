@@ -143,6 +143,7 @@ backend/.venv/
 # ===============================
 # Coverage directory used by tools like Jest (Frontend)
 /frontend/coverage/
+/frontend/*.tsbuildinfo
 
 # Unit test / coverage reports (Backend)
 /backend/htmlcov/
