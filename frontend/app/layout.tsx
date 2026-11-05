@@ -51,6 +51,7 @@ async function Content({ children }: ContentProps): Promise<JSX.Element> {
 		{ title: 'Calendar', href: '/' },
 		{ title: 'My Events', href: '/my-events' },
 		{ title: 'Saved Events', href: '/saved' },
+		{ title: 'About', href: '/about' },
 	];
 	return (
 		<Theme palette='calendar'>
