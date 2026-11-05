@@ -21,7 +21,7 @@ import {
 	Text,
 	Position,
 	Popover,
-	Avatar,
+	Button,
 	TabNavigation,
 	Tab,
 	useTheme,
@@ -77,7 +77,6 @@ export function Nav({
 	const theme = useTheme();
 	const router = useRouter();
 	const pathname = usePathname();
-	const username = user?.name;
 
 	return (
 		<Pane elevation={1}>
@@ -90,7 +89,7 @@ export function Nav({
 				display='flex'
 				justifyContent='center'
 				width='100%'
-				height={majorScale(9)}
+				minHeight={majorScale(9)}
 				background='white'
 			>
 				<Pane
@@ -98,7 +97,8 @@ export function Nav({
 					alignItems='center'
 					justifyContent='space-between'
 					width='100%'
-					height='100%'
+					minHeight={majorScale(9)}
+					flexWrap='wrap'
 					maxWidth={1200}
 					paddingX={majorScale(5)}
 					fontSize={25}
@@ -158,18 +158,12 @@ export function Nav({
 								content={<ProfileCard user={user} />}
 								position={Position.BOTTOM}
 							>
-								<Avatar
-									name={username}
-									style={{
-										cursor: 'pointer',
-										border: `2px solid ${theme.colors.tealTint}`,
-									}}
-									backgroundColor={theme.colors.blue100}
-									size={40}
-									marginLeft={majorScale(4)}
-								/>
+								<Button appearance='minimal' marginLeft={8}>
+									Profile
+								</Button>
 							</Popover>
 						)}
+						{!user && <Link href='/auth/login'>Profile</Link>}
 					</Pane>
 				</Pane>
 			</Pane>

@@ -28,6 +28,8 @@ export async function proxy(request: NextRequest) {
 
 	// Check if the user is trying to access one of the protected routes
 	if (
+		request.nextUrl.pathname === '/my-events' ||
+		request.nextUrl.pathname === '/saved' ||
 		request.nextUrl.pathname.startsWith('/feature1') ||
 		request.nextUrl.pathname.startsWith('/feature2') ||
 		request.nextUrl.pathname.startsWith('/feature3')

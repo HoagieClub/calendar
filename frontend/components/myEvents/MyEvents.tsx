@@ -3,11 +3,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 import { useTheme } from 'evergreen-ui';
+import Link from 'next/link';
+
+import type { CalendarEvent } from '@/types';
 
 // ── Types ─────────────────────────────────────────────────────
 
-type Tab = 'All' | 'Saved' | 'Created';
-type SortOption = 'Date (soonest)' | 'Date (latest)' | 'Recently added';
+type SortOption = 'Date (soonest)' | 'Date (latest)';
 
 type Category = 'SPORTS' | 'ACADEMIC' | 'SOCIAL' | 'FOOD' | 'ARTS' | 'CAREER' | 'HOUSING' | 'OTHER';
 
@@ -43,101 +45,13 @@ interface Event {
 	description: string;
 	interested: number;
 	category: Category;
-	tab: Tab[];
 	isStarred?: boolean;
 	isOwned?: boolean;
 }
 
-// ── Mock Data ─────────────────────────────────────────────────
-
-const EVENTS: Event[] = [
-	{
-		id: '1',
-		title: 'Mock Interview Night',
-		dateISO: '2026-04-06',
-		displayDate: 'MON, APR 6',
-		timeRange: '6 PM – 8 PM',
-		location: 'Robertson Hall',
-		description:
-			'Practice behavioral and technical interviews with alumni volunteers from top tech and finance firms. Sign up for ...',
-		interested: 29,
-		category: 'CAREER',
-		tab: ['All', 'Saved'],
-		isStarred: true,
-	},
-	{
-		id: '2',
-		title: 'AI at Princeton: LLM Fine-Tuning Workshop',
-		dateISO: '2026-04-07',
-		displayDate: 'TUE, APR 7',
-		timeRange: '6 PM – 8 PM',
-		location: 'COS Building Room 302',
-		description:
-			'Hands-on workshop on fine-tuning large language models using LoRA and QLoRA. Bring your laptop with ...',
-		interested: 118,
-		category: 'ACADEMIC',
-		tab: ['All', 'Saved'],
-		isStarred: true,
-	},
-	{
-		id: '3',
-		title: 'Preview Day',
-		dateISO: '2026-04-08',
-		displayDate: 'WED, APR 8',
-		timeRange: '',
-		location: 'University-wide',
-		description:
-			'Princeton Preview Day for admitted students. Campus tours, info sessions, and class visits across all...',
-		interested: 0,
-		category: 'SOCIAL',
-		tab: ['All', 'Saved'],
-		isStarred: true,
-	},
-	{
-		id: '4',
-		title: 'Campus YMCA Yoga',
-		dateISO: '2026-04-10',
-		displayDate: 'FRI, APR 10',
-		timeRange: '4:30 PM – 5:30 PM',
-		location: 'Dillon Gymnasium',
-		description: 'All-level yoga class. No experience needed — just bring a mat!',
-		interested: 45,
-		category: 'SPORTS',
-		tab: ['All', 'Created'],
-		isOwned: true,
-	},
-	{
-		id: '5',
-		title: 'Spring Fling Food Festival',
-		dateISO: '2026-04-12',
-		displayDate: 'SUN, APR 12',
-		timeRange: '12 PM – 4 PM',
-		location: 'Prospect Garden',
-		description:
-			'Student-run food fair with dishes from 20+ cuisines. Live music and lawn games included.',
-		interested: 203,
-		category: 'FOOD',
-		tab: ['All', 'Created'],
-		isOwned: true,
-	},
-	{
-		id: '6',
-		title: 'A Cappella Showcase',
-		dateISO: '2026-04-15',
-		displayDate: 'WED, APR 15',
-		timeRange: '7 PM – 9 PM',
-		location: 'Richardson Auditorium',
-		description: 'Six Princeton a cappella groups perform in this semester-end showcase.',
-		interested: 87,
-		category: 'ARTS',
-		tab: ['All', 'Created'],
-		isOwned: true,
-	},
-];
-
 // ── Sort Options ──────────────────────────────────────────────
 
-const SORT_OPTIONS: SortOption[] = ['Date (soonest)', 'Date (latest)', 'Recently added'];
+const SORT_OPTIONS: SortOption[] = ['Date (soonest)', 'Date (latest)'];
 
 // ── Dropdown Hook ─────────────────────────────────────────────
 
@@ -153,13 +67,53 @@ function useClickOutside(ref: React.RefObject<HTMLElement>, cb: () => void) {
 
 // ── Component ─────────────────────────────────────────────────
 
-export default function MyEvents() {
+export default function MyEvents({ saved = false }: { saved?: boolean }) {
+	const [events, setEvents] = useState<Event[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState('');
+	const [attempt, setAttempt] = useState(0);
+	useEffect(() => {
+		const controller = new AbortController();
+		fetch(`/api/user/${saved ? 'saved' : 'events'}`, { signal: controller.signal })
+			.then(async (response) => {
+				if (!response.ok) throw new Error('Unable to load events. Please try again.');
+				const data: CalendarEvent[] = await response.json();
+				setEvents(
+					data.map((event) => ({
+						id: String(event.id),
+						title: event.name,
+						dateISO: event.start,
+						displayDate: new Date(event.start).toLocaleDateString('en-US', {
+							weekday: 'short',
+							month: 'short',
+							day: 'numeric',
+						}),
+						timeRange: `${new Date(event.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – ${new Date(event.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`,
+						location: event.location,
+						description: event.description,
+						interested: 0,
+						category:
+							ALL_CATEGORIES.find(
+								(category) => category === String(event.category).toUpperCase()
+							) ?? 'OTHER',
+						isStarred: saved,
+					}))
+				);
+			})
+			.catch(() => {
+				if (!controller.signal.aborted)
+					setError('Unable to load events. Please try again.');
+			})
+			.finally(() => {
+				if (!controller.signal.aborted) setLoading(false);
+			});
+		return () => controller.abort();
+	}, [saved, attempt]);
 	const { colors } = useTheme();
 	const themeColors = colors as any;
 
 	const TEAL = themeColors['hoagie-teal'] ?? '#00897B';
 
-	const [activeTab, setActiveTab] = useState<Tab>('All');
 	const [search, setSearch] = useState('');
 	const [sort, setSort] = useState<SortOption>('Date (soonest)');
 	const [sortOpen, setSortOpen] = useState(false);
@@ -172,27 +126,22 @@ export default function MyEvents() {
 	useClickOutside(sortRef, () => setSortOpen(false));
 	useClickOutside(categoryRef, () => setCategoryOpen(false));
 
-	const tabCounts = {
-		All: EVENTS.length,
-		Saved: EVENTS.filter((e) => e.tab.includes('Saved')).length,
-		Created: EVENTS.filter((e) => e.tab.includes('Created')).length,
-	};
-
 	const query = search.trim().toLowerCase();
 
-	const filtered = EVENTS.filter((e) => {
-		if (!e.tab.includes(activeTab)) return false;
-		if (query && !e.title.toLowerCase().includes(query)) return false;
-		if (selectedCategories.length > 0 && !selectedCategories.includes(e.category)) return false;
-		return true;
-	}).sort((a, b) => {
-		if (sort === 'Date (soonest)')
-			return new Date(a.dateISO).getTime() - new Date(b.dateISO).getTime();
-		if (sort === 'Date (latest)')
-			return new Date(b.dateISO).getTime() - new Date(a.dateISO).getTime();
-		if (sort === 'Recently added') return Number(b.id) - Number(a.id);
-		return 0;
-	});
+	const filtered = events
+		.filter((e) => {
+			if (query && !e.title.toLowerCase().includes(query)) return false;
+			if (selectedCategories.length > 0 && !selectedCategories.includes(e.category))
+				return false;
+			return true;
+		})
+		.sort((a, b) => {
+			if (sort === 'Date (soonest)')
+				return new Date(a.dateISO).getTime() - new Date(b.dateISO).getTime();
+			if (sort === 'Date (latest)')
+				return new Date(b.dateISO).getTime() - new Date(a.dateISO).getTime();
+			return 0;
+		});
 
 	function toggleCategory(cat: Category) {
 		setSelectedCategories((prev) =>
@@ -214,40 +163,8 @@ export default function MyEvents() {
 				<h1
 					style={{ fontSize: 22, fontWeight: 700, color: themeColors.gray900, margin: 0 }}
 				>
-					My Events
+					{saved ? 'Saved Events' : 'My Events'}
 				</h1>
-			</div>
-
-			{/* Tabs */}
-			<div
-				style={{
-					display: 'flex',
-					gap: 24,
-					marginTop: 16,
-					borderBottom: `1px solid ${themeColors.gray200}`,
-				}}
-			>
-				{(['All', 'Saved', 'Created'] as Tab[]).map((tab) => (
-					<button
-						key={tab}
-						onClick={() => setActiveTab(tab)}
-						style={{
-							border: 'none',
-							background: 'none',
-							cursor: 'pointer',
-							fontSize: 14,
-							fontWeight: activeTab === tab ? 600 : 400,
-							color: activeTab === tab ? TEAL : themeColors.gray600,
-							borderBottom:
-								activeTab === tab ? `2px solid ${TEAL}` : '2px solid transparent',
-							paddingBottom: 10,
-							marginBottom: -1,
-							transition: 'color 0.15s, border-color 0.15s',
-						}}
-					>
-						{tab} ({tabCounts[tab]})
-					</button>
-				))}
 			</div>
 
 			{/* Search + Filters */}
@@ -273,7 +190,8 @@ export default function MyEvents() {
 						<line x1='21' y1='21' x2='16.65' y2='16.65' />
 					</svg>
 					<input
-						placeholder='Search my events...'
+						aria-label='Search events'
+						placeholder={saved ? 'Search saved events...' : 'Search my events...'}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						style={{
@@ -504,7 +422,22 @@ export default function MyEvents() {
 			)}
 
 			{/* Grid */}
-			{filtered.length === 0 ? (
+			{loading ? (
+				<p role='status'>Loading events…</p>
+			) : error ? (
+				<div role='alert'>
+					<p>{error}</p>
+					<button
+						onClick={() => {
+							setError('');
+							setLoading(true);
+							setAttempt((value) => value + 1);
+						}}
+					>
+						Try again
+					</button>
+				</div>
+			) : filtered.length === 0 ? (
 				<div
 					style={{
 						marginTop: 60,
@@ -513,7 +446,16 @@ export default function MyEvents() {
 						fontSize: 14,
 					}}
 				>
-					No events match your filters.
+					{events.length > 0
+						? 'No events match your filters.'
+						: saved
+							? 'You haven’t saved any events yet. Save events from the calendar to find them here.'
+							: 'You haven’t created any events yet. Events you create will appear here.'}
+					{events.length === 0 && (
+						<p>
+							<Link href='/'>Browse Calendar</Link>
+						</p>
+					)}
 				</div>
 			) : (
 				<div
