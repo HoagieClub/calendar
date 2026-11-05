@@ -101,16 +101,6 @@ function SettingsIcon() {
 	);
 }
 
-// function MenuIcon() {
-// 	return (
-// 		<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
-// 			<line x1='3' y1='6' x2='21' y2='6' />
-// 			<line x1='3' y1='12' x2='21' y2='12' />
-// 			<line x1='3' y1='18' x2='21' y2='18' />
-// 		</svg>
-// 	);
-// }
-
 function ChevronLeft() {
 	return (
 		<svg
@@ -199,23 +189,6 @@ export default function CalendarPage() {
 					gap: 8,
 				}}
 			>
-				{/* Menu + Logo */}
-				{/* <button style={iconButtonStyle} title='Menu'>
-					<MenuIcon />
-				</button>
-
-				<div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginRight: 24 }}>
-					<span style={{ fontSize: 20, fontWeight: 700, color: colors.gray900, letterSpacing: '-0.5px' }}>
-						hoagie
-					</span>
-					<span style={{ fontSize: 20, fontWeight: 700, color: TEAL, letterSpacing: '-0.5px' }}>
-						calendar
-					</span>
-					<span style={{ fontSize: 10, color: colors.gray500, marginLeft: 4, fontWeight: 500, letterSpacing: '0.02em' }}>
-						BETA
-					</span>
-				</div> */}
-
 				{/* Navigation: back, Today, forward, date label */}
 				<button style={iconButtonStyle} onClick={goBack} title='Previous'>
 					<ChevronLeft />
