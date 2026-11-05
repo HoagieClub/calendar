@@ -90,7 +90,7 @@ export function Nav({
 				display='flex'
 				justifyContent='center'
 				width='100%'
-				height={majorScale(9)}
+				minHeight={majorScale(9)}
 				background='white'
 			>
 				<Pane
@@ -98,7 +98,8 @@ export function Nav({
 					alignItems='center'
 					justifyContent='space-between'
 					width='100%'
-					height='100%'
+					minHeight={majorScale(9)}
+					flexWrap='wrap'
 					maxWidth={1200}
 					paddingX={majorScale(5)}
 					fontSize={25}
@@ -170,6 +171,7 @@ export function Nav({
 								/>
 							</Popover>
 						)}
+						{!user && <Link href='/auth/login'>Profile</Link>}
 					</Pane>
 				</Pane>
 			</Pane>
