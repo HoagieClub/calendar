@@ -27,44 +27,7 @@ const THU = SUN + 4;
 const FRI = SUN + 5;
 const SAT = SUN + 6;
 
-const HOUR_MS = 60 * 60 * 1000;
-
 const PLACEHOLDER_EVENTS: CalendarEvent[] = [
-	// ── TEMPORARY: test events for the "Starting soon" / "In progress" status. ──
-	// These are placed relative to the current time. Delete them before merging.
-	{
-		id: 'temp-starting-soon',
-		name: 'TEMP: Starts in 1 Hour',
-		start: new Date(Date.now() + HOUR_MS).toISOString(),
-		end: new Date(Date.now() + 2 * HOUR_MS).toISOString(),
-		location: 'Frist Campus Center',
-		description: 'Temporary test event. Should show "Starting soon".',
-		host: 'Test Host',
-		owner: '',
-		owner_netid: 'testuser',
-		owner_email: 'testuser@princeton.edu',
-		category: 'food',
-		from_mail: false,
-		ordering: 0,
-	},
-	{
-		id: 'temp-in-progress',
-		name: 'TEMP: Happening Now',
-		start: new Date(Date.now() - HOUR_MS / 2).toISOString(),
-		end: new Date(Date.now() + HOUR_MS).toISOString(),
-		location: 'Friend Center',
-		description: 'Temporary test event. Should show "In progress".',
-		host: 'Test Host',
-		owner: '',
-		owner_netid: 'testuser',
-		owner_email: 'testuser@princeton.edu',
-		category: 'academic',
-		is_saved: true,
-		from_mail: false,
-		ordering: 0,
-	},
-	// ── END TEMPORARY ──
-
 	// ── All-day events ──
 	{
 		id: 'a1',
