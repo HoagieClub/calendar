@@ -550,7 +550,13 @@ export default function WeekView() {
 				</div>
 			</div>
 
-			<EventDetail event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+			<EventDetail
+				event={selectedEvent}
+				onClose={() => setSelectedEvent(null)}
+				// TEMPORARY: pretend 'testuser' is logged in so Edit/Delete show on the TEMP events.
+				// Replace with the real logged-in user's netid once the app can provide it.
+				currentUserNetid='testuser'
+			/>
 		</div>
 	);
 }

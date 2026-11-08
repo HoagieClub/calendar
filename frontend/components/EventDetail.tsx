@@ -19,6 +19,7 @@ import {
 	CalendarIcon,
 	CrossIcon,
 	Dialog,
+	EditIcon,
 	FlagIcon,
 	Heading,
 	IconButton,
@@ -31,6 +32,7 @@ import {
 	StarIcon,
 	Text,
 	TimeIcon,
+	TrashIcon,
 	UserIcon,
 	useTheme,
 } from 'evergreen-ui';
@@ -192,14 +194,18 @@ function DetailRow({ icon, children }: { icon: ReactNode; children: ReactNode })
 type EventDetailProps = {
 	event: CalendarEvent | null;
 	onClose: () => void;
+	// The logged-in user's netid. Used to show Edit/Delete only to the event's creator.
+	currentUserNetid?: string;
 };
 
-export function EventDetail({ event, onClose }: EventDetailProps) {
+export function EventDetail({ event, onClose, currentUserNetid }: EventDetailProps) {
 	const { colors } = useTheme();
 
 	if (!event) {
 		return null;
 	}
+
+	const isOwner = Boolean(event.owner_netid) && event.owner_netid === currentUserNetid;
 
 	const start = new Date(event.start);
 	const end = new Date(event.end);
@@ -256,11 +262,37 @@ export function EventDetail({ event, onClose }: EventDetailProps) {
 								{event.name}
 							</Heading>
 						</Pane>
+						{isOwner && (
+							<>
+								{/* TODO: wired up by the edit/delete ticket */}
+								<IconButton
+									appearance='minimal'
+									size='small'
+									icon={<EditIcon color={colors.gray600} />}
+									aria-label='Edit event'
+									title='Edit event'
+									className={styles.actionButton}
+									marginLeft={8}
+									marginTop={4}
+								/>
+								{/* TODO: wired up by the edit/delete ticket */}
+								<IconButton
+									appearance='minimal'
+									size='small'
+									icon={<TrashIcon color={colors.gray600} />}
+									aria-label='Delete event'
+									title='Delete event'
+									className={styles.actionButton}
+									marginLeft={2}
+									marginTop={4}
+								/>
+							</>
+						)}
 						<IconButton
 							appearance='minimal'
 							icon={<CrossIcon color={colors.gray600} />}
 							onClick={() => close()}
-							marginLeft={8}
+							marginLeft={isOwner ? 2 : 8}
 						/>
 					</Pane>
 
