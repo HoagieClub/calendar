@@ -32,7 +32,10 @@ export type CalendarEvent = {
 	description: string;
 	host: string;
 	owner: string;
+	owner_netid?: string; // Not sent by the backend yet (added in CALR-24)
+	owner_email?: string; // Not sent by the backend yet (added in CALR-24)
 	category: string;
+	is_saved?: boolean; // Whether the logged-in user saved this event (not sent by the backend yet)
 	from_mail: boolean;
 	ordering: number;
 };

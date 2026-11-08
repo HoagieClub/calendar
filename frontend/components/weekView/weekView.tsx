@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useTheme } from 'evergreen-ui';
 
+import EventDetail from '@/components/EventDetail';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -163,12 +164,28 @@ export default function WeekView() {
 	const endTime = new Date(weekDates[6]);
 	endTime.setHours(23, 59, 59);
 	const { events } = useEvents(startTime, endTime);
+	const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+	const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+	const hasAutoScrolledRef = useRef(false);
 
+	// Scroll to the current time once, when the calendar first appears.
 	useEffect(() => {
-		if (scrollRef.current) {
+		if (scrollRef.current && !hasAutoScrolledRef.current) {
 			scrollRef.current.scrollTop = Math.max(0, currentMinuteOffset - 200);
+			hasAutoScrolledRef.current = true;
 		}
 	}, [currentMinuteOffset]);
+
+	// Opens the popup next to the event card that was clicked.
+	function openEventDetail(event: CalendarEvent, card: HTMLElement) {
+		setSelectedEvent(event);
+		setAnchorRect(card.getBoundingClientRect());
+	}
+
+	function closeEventDetail() {
+		setSelectedEvent(null);
+		setAnchorRect(null);
+	}
 
 	return (
 		<div
@@ -301,6 +318,7 @@ export default function WeekView() {
 									<div
 										key={event.id}
 										title={event.name}
+										onClick={(e) => openEventDetail(event, e.currentTarget)}
 										style={{
 											background: color.border,
 											borderRadius: 3,
@@ -420,6 +438,9 @@ export default function WeekView() {
 												<div
 													key={event.id}
 													title={event.name}
+													onClick={(e) =>
+														openEventDetail(event, e.currentTarget)
+													}
 													style={{
 														position: 'absolute',
 														top: top + 1,
@@ -545,6 +566,8 @@ export default function WeekView() {
 					</div>
 				</div>
 			</div>
+
+			<EventDetail event={selectedEvent} anchorRect={anchorRect} onClose={closeEventDetail} />
 		</div>
 	);
 }
