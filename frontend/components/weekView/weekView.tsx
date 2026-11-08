@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useTheme } from 'evergreen-ui';
 
+import EventDetail from '@/components/EventDetail';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -163,6 +164,7 @@ export default function WeekView() {
 	const endTime = new Date(weekDates[6]);
 	endTime.setHours(23, 59, 59);
 	const { events } = useEvents(startTime, endTime);
+	const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
 	useEffect(() => {
 		if (scrollRef.current) {
@@ -301,6 +303,7 @@ export default function WeekView() {
 									<div
 										key={event.id}
 										title={event.name}
+										onClick={() => setSelectedEvent(event)}
 										style={{
 											background: color.border,
 											borderRadius: 3,
@@ -420,6 +423,7 @@ export default function WeekView() {
 												<div
 													key={event.id}
 													title={event.name}
+													onClick={() => setSelectedEvent(event)}
 													style={{
 														position: 'absolute',
 														top: top + 1,
@@ -545,6 +549,8 @@ export default function WeekView() {
 					</div>
 				</div>
 			</div>
+
+			<EventDetail event={selectedEvent} onClose={() => setSelectedEvent(null)} />
 		</div>
 	);
 }
