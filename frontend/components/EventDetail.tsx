@@ -12,9 +12,11 @@
 
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import {
+	Button,
+	CalendarIcon,
 	CrossIcon,
 	Dialog,
 	FlagIcon,
@@ -25,6 +27,8 @@ import {
 	Pane,
 	Paragraph,
 	PersonIcon,
+	StarEmptyIcon,
+	StarIcon,
 	Text,
 	TimeIcon,
 	UserIcon,
@@ -92,6 +96,86 @@ function getMapsUrl(location: string): string {
 function getReportMailto(event: CalendarEvent): string {
 	const subject = `Report event #${event.id}: ${event.name}`;
 	return `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent(subject)}`;
+}
+
+// Turns an ISO date string into Google Calendar's UTC format.
+// "2026-11-07T21:00:00.000Z" -> "20261107T210000Z"
+function toGoogleCalendarDate(iso: string): string {
+	return new Date(iso)
+		.toISOString()
+		.replace(/[-:]/g, '')
+		.replace(/\.\d{3}/, '');
+}
+
+function getGoogleCalendarUrl(event: CalendarEvent): string {
+	const start = encodeURIComponent(toGoogleCalendarDate(event.start));
+	const end = encodeURIComponent(toGoogleCalendarDate(event.end));
+	return (
+		'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+		`&text=${encodeURIComponent(event.name)}` +
+		`&dates=${start}/${end}` +
+		`&details=${encodeURIComponent(event.description)}` +
+		`&location=${encodeURIComponent(event.location)}`
+	);
+}
+
+// TODO: call POST/DELETE /event/<id>/save/ once saved-events endpoints merge
+function syncSavedEvent(_eventId: string, _isSaved: boolean): void {
+	// For now, saving only changes what the popup shows. Nothing is sent to the backend.
+}
+
+// The Save and Add to Calendar buttons.
+function EventActions({ event }: { event: CalendarEvent }) {
+	const { colors } = useTheme();
+	const [isSaved, setIsSaved] = useState(event.is_saved ?? false);
+
+	function handleSaveClick() {
+		const nextIsSaved = !isSaved;
+		setIsSaved(nextIsSaved);
+		syncSavedEvent(event.id, nextIsSaved);
+	}
+
+	const buttonStyle = {
+		height: 36,
+		paddingX: 14,
+		borderRadius: 10,
+		border: `1px solid ${colors.gray300}`,
+		color: colors.gray800,
+		fontSize: 13,
+		fontWeight: 500,
+		className: styles.actionButton,
+	};
+
+	return (
+		<Pane display='flex' gap={8}>
+			<Button
+				{...buttonStyle}
+				background={isSaved ? colors.gray200 : 'white'}
+				iconBefore={
+					isSaved ? (
+						<StarIcon color={colors.gray800} />
+					) : (
+						<StarEmptyIcon color={colors.gray600} />
+					)
+				}
+				aria-pressed={isSaved}
+				onClick={handleSaveClick}
+			>
+				{isSaved ? 'Saved' : 'Save'}
+			</Button>
+			<Button
+				{...buttonStyle}
+				is='a'
+				href={getGoogleCalendarUrl(event)}
+				target='_blank'
+				rel='noopener noreferrer'
+				background='white'
+				iconBefore={<CalendarIcon color='#3B82F6' />}
+			>
+				Add to Calendar
+			</Button>
+		</Pane>
+	);
 }
 
 // One line in the popup: a small icon followed by text.
@@ -205,6 +289,10 @@ export function EventDetail({ event, onClose }: EventDetailProps) {
 								{event.location}
 							</Link>
 						</DetailRow>
+					</Pane>
+
+					<Pane borderTop={`1px solid ${colors.gray300}`} marginTop={16} paddingTop={16}>
+						<EventActions key={event.id} event={event} />
 					</Pane>
 
 					<Pane borderTop={`1px solid ${colors.gray300}`} marginTop={16} paddingTop={16}>

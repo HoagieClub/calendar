@@ -59,6 +59,7 @@ const PLACEHOLDER_EVENTS: CalendarEvent[] = [
 		owner_netid: 'testuser',
 		owner_email: 'testuser@princeton.edu',
 		category: 'academic',
+		is_saved: true,
 		from_mail: false,
 		ordering: 0,
 	},

@@ -4,3 +4,8 @@
 .overlay::before {
 	background-color: transparent !important;
 }
+
+/* Hide Evergreen's teal focus ring after a mouse click, but keep it for keyboard users. */
+.actionButton:focus:not(:focus-visible) {
+	box-shadow: none !important;
+}
