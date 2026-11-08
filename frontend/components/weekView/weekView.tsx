@@ -165,12 +165,27 @@ export default function WeekView() {
 	endTime.setHours(23, 59, 59);
 	const { events } = useEvents(startTime, endTime);
 	const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+	const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+	const hasAutoScrolledRef = useRef(false);
 
+	// Scroll to the current time once, when the calendar first appears.
 	useEffect(() => {
-		if (scrollRef.current) {
+		if (scrollRef.current && !hasAutoScrolledRef.current) {
 			scrollRef.current.scrollTop = Math.max(0, currentMinuteOffset - 200);
+			hasAutoScrolledRef.current = true;
 		}
 	}, [currentMinuteOffset]);
+
+	// Opens the popup next to the event card that was clicked.
+	function openEventDetail(event: CalendarEvent, card: HTMLElement) {
+		setSelectedEvent(event);
+		setAnchorRect(card.getBoundingClientRect());
+	}
+
+	function closeEventDetail() {
+		setSelectedEvent(null);
+		setAnchorRect(null);
+	}
 
 	return (
 		<div
@@ -303,7 +318,7 @@ export default function WeekView() {
 									<div
 										key={event.id}
 										title={event.name}
-										onClick={() => setSelectedEvent(event)}
+										onClick={(e) => openEventDetail(event, e.currentTarget)}
 										style={{
 											background: color.border,
 											borderRadius: 3,
@@ -423,7 +438,9 @@ export default function WeekView() {
 												<div
 													key={event.id}
 													title={event.name}
-													onClick={() => setSelectedEvent(event)}
+													onClick={(e) =>
+														openEventDetail(event, e.currentTarget)
+													}
 													style={{
 														position: 'absolute',
 														top: top + 1,
@@ -552,7 +569,8 @@ export default function WeekView() {
 
 			<EventDetail
 				event={selectedEvent}
-				onClose={() => setSelectedEvent(null)}
+				anchorRect={anchorRect}
+				onClose={closeEventDetail}
 				// TEMPORARY: pretend 'testuser' is logged in so Edit/Delete show on the TEMP events.
 				// Replace with the real logged-in user's netid once the app can provide it.
 				currentUserNetid='testuser'

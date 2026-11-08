@@ -12,7 +12,7 @@
 
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import {
 	Button,
@@ -191,19 +191,83 @@ function DetailRow({ icon, children }: { icon: ReactNode; children: ReactNode })
 	);
 }
 
+const POPUP_WIDTH = 420;
+const ANCHOR_GAP = 8; // space between the event card and the popup
+const SCREEN_MARGIN = 16; // never get closer than this to the edge of the window
+
+// The on-screen box of the clicked event card. A DOMRect from getBoundingClientRect() fits this.
+export type AnchorRect = { top: number; left: number; right: number };
+
+// Decides where to put the popup so it sits beside the clicked card and stays on screen.
+export function getPopupPosition(
+	anchor: AnchorRect,
+	popupHeight: number,
+	viewportWidth: number,
+	viewportHeight: number
+): { top: number; left: number } {
+	const fitsOnRight = anchor.right + ANCHOR_GAP + POPUP_WIDTH <= viewportWidth - SCREEN_MARGIN;
+	const left = fitsOnRight
+		? anchor.right + ANCHOR_GAP
+		: Math.max(SCREEN_MARGIN, anchor.left - ANCHOR_GAP - POPUP_WIDTH);
+
+	const lowestAllowedTop = viewportHeight - SCREEN_MARGIN - popupHeight;
+	const top = Math.max(SCREEN_MARGIN, Math.min(anchor.top, lowestAllowedTop));
+
+	return { top, left };
+}
+
 type EventDetailProps = {
 	event: CalendarEvent | null;
 	onClose: () => void;
+	// Where the clicked card is on screen. Without it, the popup is centered.
+	anchorRect?: AnchorRect | null;
 	// The logged-in user's netid. Used to show Edit/Delete only to the event's creator.
 	currentUserNetid?: string;
 };
 
-export function EventDetail({ event, onClose, currentUserNetid }: EventDetailProps) {
+export function EventDetail({ event, onClose, anchorRect, currentUserNetid }: EventDetailProps) {
 	const { colors } = useTheme();
+	const [popupHeight, setPopupHeight] = useState(0);
+	const dialogRef = useRef<HTMLElement | null>(null);
+
+	// Runs when the popup's content appears on the page, so we can measure the popup's height.
+	const measurePopup = useCallback((node: HTMLDivElement | null) => {
+		const dialog = node?.closest<HTMLElement>('[role="dialog"]') ?? null;
+		dialogRef.current = dialog;
+		if (dialog) {
+			setPopupHeight(dialog.offsetHeight);
+		}
+	}, []);
+
+	// The popup is pinned to where the card was, so close it if anything scrolls or the window resizes.
+	useEffect(() => {
+		if (!event || !anchorRect) {
+			return;
+		}
+		function handleScroll(scrollEvent: Event) {
+			// Scrolling inside the popup itself (e.g. a long description) is fine.
+			const target = scrollEvent.target;
+			if (target instanceof Node && dialogRef.current?.contains(target)) {
+				return;
+			}
+			onClose();
+		}
+		// `true` = listen during the "capture" phase, so we hear scrolls from any element on the page.
+		window.addEventListener('scroll', handleScroll, true);
+		window.addEventListener('resize', onClose);
+		return () => {
+			window.removeEventListener('scroll', handleScroll, true);
+			window.removeEventListener('resize', onClose);
+		};
+	}, [event, anchorRect, onClose]);
 
 	if (!event) {
 		return null;
 	}
+
+	const position = anchorRect
+		? getPopupPosition(anchorRect, popupHeight, window.innerWidth, window.innerHeight)
+		: null;
 
 	const isOwner = Boolean(event.owner_netid) && event.owner_netid === currentUserNetid;
 
@@ -218,19 +282,27 @@ export function EventDetail({ event, onClose, currentUserNetid }: EventDetailPro
 			onCloseComplete={onClose}
 			hasHeader={false}
 			hasFooter={false}
-			width={420}
+			width={POPUP_WIDTH}
 			overlayProps={{ className: styles.overlay }}
 			containerProps={{
 				borderRadius: 16,
 				boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08)',
 				tabIndex: -1,
 				outline: 'none',
+				...(position && {
+					position: 'fixed',
+					top: position.top,
+					left: position.left,
+					marginX: 0,
+					marginY: 0,
+					maxHeight: `calc(100vh - ${SCREEN_MARGIN * 2}px)`,
+				}),
 			}}
 			contentContainerProps={{ paddingX: 24, paddingY: 24 }}
 		>
 			{({ close }) => (
 				<>
-					<Pane display='flex' alignItems='flex-start'>
+					<Pane ref={measurePopup} display='flex' alignItems='flex-start'>
 						<Pane flex={1}>
 							<Pane
 								display='inline-block'
@@ -291,6 +363,7 @@ export function EventDetail({ event, onClose, currentUserNetid }: EventDetailPro
 						<IconButton
 							appearance='minimal'
 							icon={<CrossIcon color={colors.gray600} />}
+							aria-label='Close'
 							onClick={() => close()}
 							marginLeft={isOwner ? 2 : 8}
 						/>
