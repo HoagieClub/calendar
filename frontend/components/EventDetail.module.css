@@ -1,0 +1,6 @@
+/* Evergreen's Dialog dims the page with a ::before layer on its overlay.
+   The event popup keeps the calendar visible, so hide that layer.
+   The overlay itself stays, so clicking outside the popup still closes it. */
+.overlay::before {
+	background-color: transparent !important;
+}
