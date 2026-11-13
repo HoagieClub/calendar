@@ -151,7 +151,13 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 	return result;
 }
 
-export default function WeekView({ date, onSelect }: { date: Date; onSelect?: (event: CalendarEvent) => void }) {
+export default function WeekView({
+	date,
+	onSelect,
+}: {
+	date: Date;
+	onSelect?: (event: CalendarEvent) => void;
+}) {
 	const { colors } = useTheme();
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const now = new Date();

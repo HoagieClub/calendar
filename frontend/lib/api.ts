@@ -1,4 +1,4 @@
-import { auth0 } from "./auth0";
+import { auth0 } from './auth0';
 
 const HOAGIE_API_URL = process.env.HOAGIE_API_URL;
 

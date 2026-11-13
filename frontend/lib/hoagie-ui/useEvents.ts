@@ -4,8 +4,9 @@
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  */
 
-import type { CalendarEvent } from '@/types';
 import { useEffect, useState } from 'react';
+
+import type { CalendarEvent } from '@/types';
 
 const y = new Date().getFullYear();
 const m = new Date().getMonth();

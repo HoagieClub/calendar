@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 import { apiFetch } from '@/lib/api';
+
+import type { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
 	const { search } = req.nextUrl;

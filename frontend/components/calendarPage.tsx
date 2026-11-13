@@ -7,7 +7,6 @@ import { useTheme } from 'evergreen-ui';
 import DayView from '@/components/DayView';
 import MonthView from '@/components/monthView/MonthView';
 import WeekView from '@/components/weekView/weekView';
-
 import type { CalendarEvent } from '@/types';
 
 type ViewType = 'Day' | 'Week' | 'Month';
@@ -137,9 +136,7 @@ function ChevronRight() {
 	);
 }
 
-
 export default function CalendarPage({ onSelect }: { onSelect?: (event: CalendarEvent) => void }) {
-
 	const { colors } = useTheme();
 	const themeColors = colors as unknown as Record<string, string>;
 	const TEAL = themeColors['hoagie-teal'] ?? '#1EA7AE';
@@ -284,7 +281,6 @@ export default function CalendarPage({ onSelect }: { onSelect?: (event: Calendar
 				{view === 'Week' && (
 					<div style={{ height: '100%' }}>
 						<WeekView date={currentDate} onSelect={onSelect} />
-						
 					</div>
 				)}
 				{view === 'Month' && (
