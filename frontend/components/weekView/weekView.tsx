@@ -307,6 +307,7 @@ export default function WeekView({
 									<div
 										key={event.id}
 										title={event.name}
+										onClick={() => onSelect?.(event)}
 										style={{
 											background: color.border,
 											borderRadius: 3,
@@ -426,6 +427,7 @@ export default function WeekView({
 												<div
 													key={event.id}
 													title={event.name}
+													onClick={() => onSelect?.(event)}
 													style={{
 														position: 'absolute',
 														top: top + 1,

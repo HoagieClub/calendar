@@ -834,7 +834,6 @@ export function useEvents(startTime: Date, endTime: Date): UseEventsResult {
 			start_time: new Date(start).toISOString(),
 			end_time: new Date(end).toISOString(),
 		});
-		setIsLoading(true);
 		fetch(`/api/event?${params}`)
 			.then((res) => {
 				if (!res.ok) throw new Error(`Request failed (${res.status})`);
