@@ -151,11 +151,11 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 	return result;
 }
 
-export default function WeekView() {
+export default function WeekView({ date, onSelect }: { date: Date; onSelect?: (event: CalendarEvent) => void }) {
 	const { colors } = useTheme();
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const now = new Date();
-	const weekDates = getWeekDates(now);
+	const weekDates = getWeekDates(date);
 	const todayIndex = now.getDay();
 	const currentMinuteOffset = (now.getHours() * 60 + now.getMinutes()) * (HOUR_HEIGHT / 60);
 

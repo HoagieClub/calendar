@@ -11,6 +11,7 @@
  */
 
 import '@/app/globals.css';
+
 import '@/lib/hoagie-ui/Theme/theme.css';
 
 import { type ReactNode, type JSX } from 'react';
@@ -48,10 +49,10 @@ async function Content({ children }: ContentProps): Promise<JSX.Element> {
 	const user = session?.user;
 
 	const tabs = [
-		{ title: 'About', href: '/about' },
-		{ title: 'Feature 1', href: '/feature1' },
-		{ title: 'Feature 2', href: '/feature2' },
-		{ title: 'Feature 3', href: '/feature3' },
+		{ title: 'Calendar', href: '/about' },
+		{ title: 'My Events', href: '/feature1' },
+		{ title: 'Saved Events', href: '/feature2' },
+		{ title: 'About', href: '/feature3' },
 	];
 
 	return (

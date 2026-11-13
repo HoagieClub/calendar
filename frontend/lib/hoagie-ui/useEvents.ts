@@ -5,6 +5,7 @@
  */
 
 import type { CalendarEvent } from '@/types';
+import { useEffect, useState } from 'react';
 
 const y = new Date().getFullYear();
 const m = new Date().getMonth();
@@ -813,9 +814,45 @@ type UseEventsResult = {
 	error: string | null;
 };
 
+const USE_FAKE_FALLBACK = process.env.NODE_ENV === 'development';
+
 export function useEvents(startTime: Date, endTime: Date): UseEventsResult {
-	const events = PLACEHOLDER_EVENTS.filter(
-		(e) => new Date(e.start) <= endTime && new Date(e.end) >= startTime
-	);
-	return { events, isLoading: false, error: null };
+	const [events, setEvents] = useState<CalendarEvent[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const start = startTime.getTime();
+	const end = endTime.getTime();
+
+	useEffect(() => {
+		let cancelled = false;
+		const fake = PLACEHOLDER_EVENTS.filter(
+			(e) => new Date(e.start).getTime() <= end && new Date(e.end).getTime() >= start
+		);
+		const params = new URLSearchParams({
+			start_time: new Date(start).toISOString(),
+			end_time: new Date(end).toISOString(),
+		});
+		setIsLoading(true);
+		fetch(`/api/event?${params}`)
+			.then((res) => {
+				if (!res.ok) throw new Error(`Request failed (${res.status})`);
+				return res.json();
+			})
+			.then((data: CalendarEvent[]) => {
+				if (cancelled) return;
+				setEvents(USE_FAKE_FALLBACK && data.length === 0 ? fake : data);
+			})
+			.catch((err) => {
+				if (cancelled) return;
+				if (USE_FAKE_FALLBACK) setEvents(fake);
+				else setError(err.message);
+			})
+			.finally(() => !cancelled && setIsLoading(false));
+		return () => {
+			cancelled = true;
+		};
+	}, [start, end]);
+
+	return { events, isLoading, error };
 }

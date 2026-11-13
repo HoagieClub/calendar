@@ -4,6 +4,8 @@ import { useTheme } from 'evergreen-ui';
 
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 
+import type { CalendarEvent } from '@/types';
+
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MAX_VISIBLE_EVENTS = 3;
 
@@ -38,8 +40,9 @@ function formatEventTime(iso: string): string {
 }
 
 interface MonthViewProps {
-	month?: number; // 0-indexed
+	month?: number;
 	year?: number;
+	onSelect?: (event: CalendarEvent) => void;
 }
 
 export default function MonthView({ month, year }: MonthViewProps) {
