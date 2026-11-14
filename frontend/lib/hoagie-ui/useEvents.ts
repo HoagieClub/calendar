@@ -815,7 +815,7 @@ type UseEventsResult = {
 	error: string | null;
 };
 
-const USE_FAKE_FALLBACK = process.env.NODE_ENV === 'development';
+const USE_FAKE_FALLBACK = process.env.NEXT_PUBLIC_USE_FAKE_EVENTS === 'true';
 
 export function useEvents(startTime: Date, endTime: Date): UseEventsResult {
 	const [events, setEvents] = useState<CalendarEvent[]>([]);

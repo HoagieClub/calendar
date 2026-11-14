@@ -162,7 +162,7 @@ export default function WeekView({
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const now = new Date();
 	const weekDates = getWeekDates(date);
-	const todayIndex = now.getDay();
+	const todayIndex = weekDates.findIndex((d) => d.toDateString() === now.toDateString());
 	const currentMinuteOffset = (now.getHours() * 60 + now.getMinutes()) * (HOUR_HEIGHT / 60);
 
 	const startTime = weekDates[0];

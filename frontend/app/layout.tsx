@@ -49,10 +49,10 @@ async function Content({ children }: ContentProps): Promise<JSX.Element> {
 	const user = session?.user;
 
 	const tabs = [
-		{ title: 'Calendar', href: '/about' },
-		{ title: 'My Events', href: '/feature1' },
-		{ title: 'Saved Events', href: '/feature2' },
-		{ title: 'About', href: '/feature3' },
+		{ title: 'Calendar', href: '/calendar' },
+		{ title: 'My Events', href: '/my-events' },
+		{ title: 'Saved Events', href: '/saved' },
+		{ title: 'Profile', href: '/profile' },
 	];
 
 	return (

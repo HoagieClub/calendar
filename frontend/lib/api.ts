@@ -4,7 +4,7 @@ const HOAGIE_API_URL = process.env.HOAGIE_API_URL;
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
 	if (!HOAGIE_API_URL) {
-		throw new Error('API_URL is not set');
+		throw new Error('HOAGIE_API_URL is not set');
 	}
 
 	const { token } = await auth0.getAccessToken();

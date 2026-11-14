@@ -44,7 +44,7 @@ interface MonthViewProps {
 	onSelect?: (event: CalendarEvent) => void;
 }
 
-export default function MonthView({ month, year }: MonthViewProps) {
+export default function MonthView({ month, year, onSelect }: MonthViewProps) {
 	const { colors } = useTheme();
 
 	const now = new Date();
@@ -178,6 +178,7 @@ export default function MonthView({ month, year }: MonthViewProps) {
 														<div
 															key={event.id}
 															title={event.name}
+															onClick={() => onSelect?.(event)}
 															style={{
 																background: color.bg,
 																color: color.border,

@@ -42,7 +42,12 @@ function navigate(view: ViewType, date: Date, direction: 1 | -1): Date {
 	const next = new Date(date);
 	if (view === 'Day') next.setDate(date.getDate() + direction);
 	else if (view === 'Week') next.setDate(date.getDate() + direction * 7);
-	else next.setMonth(date.getMonth() + direction);
+	else {
+		next.setDate(1);
+		next.setMonth(date.getMonth() + direction);
+		const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+		next.setDate(Math.min(date.getDate(), lastDay));
+	}
 	return next;
 }
 
@@ -275,7 +280,7 @@ export default function CalendarPage({ onSelect }: { onSelect?: (event: Calendar
 			<div style={{ flex: 1, overflow: 'hidden', padding: 16 }}>
 				{view === 'Day' && (
 					<div style={{ height: '100%' }}>
-						<DayView />
+						<DayView date={currentDate} onSelect={onSelect} />
 					</div>
 				)}
 				{view === 'Week' && (
