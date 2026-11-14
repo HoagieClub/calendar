@@ -28,9 +28,10 @@ export async function proxy(request: NextRequest) {
 
 	// Check if the user is trying to access one of the protected routes
 	if (
-		request.nextUrl.pathname.startsWith('/feature1') ||
-		request.nextUrl.pathname.startsWith('/feature2') ||
-		request.nextUrl.pathname.startsWith('/feature3')
+		request.nextUrl.pathname.startsWith('/calendar') ||
+		request.nextUrl.pathname.startsWith('/my-events') ||
+		request.nextUrl.pathname.startsWith('/saved') ||
+		request.nextUrl.pathname.startsWith('/profile')
 	) {
 		const { origin } = new URL(request.url);
 		const session = await auth0.getSession();
