@@ -4,6 +4,8 @@
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  */
 
+import { useCallback, useEffect, useState } from 'react';
+
 import type { CalendarEvent } from '@/types';
 
 const y = new Date().getFullYear();
@@ -809,13 +811,67 @@ export function getCategoryColor(category: string): { bg: string; border: string
 
 type UseEventsResult = {
 	events: CalendarEvent[];
+	/** True from the moment the range (or attempt) changes until its fetch settles. */
 	isLoading: boolean;
 	error: string | null;
+	/** Re-runs the fetch for the current range; no page reload. */
+	retry: () => void;
 };
 
+type Settled = { key: string; events: CalendarEvent[]; error: string | null };
+
+const USE_FAKE_FALLBACK = process.env.NEXT_PUBLIC_USE_FAKE_EVENTS === 'true';
+
 export function useEvents(startTime: Date, endTime: Date): UseEventsResult {
-	const events = PLACEHOLDER_EVENTS.filter(
-		(e) => new Date(e.start) <= endTime && new Date(e.end) >= startTime
-	);
-	return { events, isLoading: false, error: null };
+	const [settled, setSettled] = useState<Settled | null>(null);
+	const [attempt, setAttempt] = useState(0);
+
+	const start = startTime.getTime();
+	const end = endTime.getTime();
+	// One key per (range, attempt). Whatever settled for a different key is stale, so
+	// navigating to a new range or pressing Retry reads as loading without any
+	// setState call inside the effect.
+	const key = `${start}-${end}-${attempt}`;
+
+	useEffect(() => {
+		let cancelled = false;
+		const fake = PLACEHOLDER_EVENTS.filter(
+			(e) => new Date(e.start).getTime() <= end && new Date(e.end).getTime() >= start
+		);
+		const params = new URLSearchParams({
+			start_time: new Date(start).toISOString(),
+			end_time: new Date(end).toISOString(),
+		});
+		fetch(`/api/event?${params}`)
+			.then((res) => {
+				if (!res.ok) throw new Error(`Request failed (${res.status})`);
+				return res.json();
+			})
+			.then((data: unknown) => {
+				if (!Array.isArray(data)) throw new Error('Unexpected response');
+				if (cancelled) return;
+				const events =
+					USE_FAKE_FALLBACK && data.length === 0 ? fake : (data as CalendarEvent[]);
+				setSettled({ key, events, error: null });
+			})
+			.catch((err: unknown) => {
+				if (cancelled) return;
+				if (USE_FAKE_FALLBACK) {
+					setSettled({ key, events: fake, error: null });
+				} else {
+					const message = err instanceof Error ? err.message : 'Request failed';
+					setSettled({ key, events: [], error: message });
+				}
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [key, start, end]);
+
+	const retry = useCallback(() => setAttempt((n) => n + 1), []);
+
+	if (settled === null || settled.key !== key) {
+		return { events: [], isLoading: true, error: null, retry };
+	}
+	return { events: settled.events, isLoading: false, error: settled.error, retry };
 }
