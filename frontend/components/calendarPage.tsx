@@ -141,7 +141,14 @@ function ChevronRight() {
 	);
 }
 
-export default function CalendarPage({ onSelect }: { onSelect?: (event: CalendarEvent) => void }) {
+export default function CalendarPage({
+	onSelect,
+	onAddEvent,
+}: {
+	onSelect?: (event: CalendarEvent) => void;
+	/** Wires the "Add an event." link in the empty Day and Week states. */
+	onAddEvent?: () => void;
+}) {
 	const { colors } = useTheme();
 	const themeColors = colors as unknown as Record<string, string>;
 	const TEAL = themeColors['hoagie-teal'] ?? '#1EA7AE';
@@ -280,12 +287,12 @@ export default function CalendarPage({ onSelect }: { onSelect?: (event: Calendar
 			<div style={{ flex: 1, overflow: 'hidden', padding: 16 }}>
 				{view === 'Day' && (
 					<div style={{ height: '100%' }}>
-						<DayView date={currentDate} onSelect={onSelect} />
+						<DayView date={currentDate} onSelect={onSelect} onAddEvent={onAddEvent} />
 					</div>
 				)}
 				{view === 'Week' && (
 					<div style={{ height: '100%' }}>
-						<WeekView date={currentDate} onSelect={onSelect} />
+						<WeekView date={currentDate} onSelect={onSelect} onAddEvent={onAddEvent} />
 					</div>
 				)}
 				{view === 'Month' && (

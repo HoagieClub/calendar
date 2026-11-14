@@ -2,6 +2,7 @@
 
 import { useTheme } from 'evergreen-ui';
 
+import { ErrorState, Loading } from '@/components/states';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -55,7 +56,7 @@ export default function MonthView({ month, year, onSelect }: MonthViewProps) {
 
 	const startTime = new Date(displayYear, displayMonth, 1);
 	const endTime = new Date(displayYear, displayMonth + 1, 0, 23, 59, 59);
-	const { events } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
 
 	return (
 		<div
@@ -103,7 +104,9 @@ export default function MonthView({ month, year, onSelect }: MonthViewProps) {
 			</div>
 
 			{/* ── Calendar rows ── */}
-			<div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+			<div
+				style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}
+			>
 				{weeks.map((week, wi) => (
 					<div
 						key={wi}
@@ -218,6 +221,8 @@ export default function MonthView({ month, year, onSelect }: MonthViewProps) {
 						})}
 					</div>
 				))}
+				{isLoading && <Loading overlay variant='grid' columns={7} rows={weeks.length} />}
+				{error && <ErrorState overlay onRetry={retry} />}
 			</div>
 		</div>
 	);
