@@ -30,8 +30,7 @@ export async function proxy(request: NextRequest) {
 	if (
 		request.nextUrl.pathname.startsWith('/calendar') ||
 		request.nextUrl.pathname.startsWith('/my-events') ||
-		request.nextUrl.pathname.startsWith('/saved') ||
-		request.nextUrl.pathname.startsWith('/profile')
+		request.nextUrl.pathname.startsWith('/saved')
 	) {
 		const { origin } = new URL(request.url);
 		const session = await auth0.getSession();
