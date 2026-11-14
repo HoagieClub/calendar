@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 const TEAL = '#1fa8a8';
 const DEBOUNCE_MS = 300;
@@ -73,22 +73,25 @@ export default function SearchBar({ onSearch, placeholder = 'Search events...' }
 	// Global shortcuts. Handler is stored in a ref so the window listener
 	// is bound once but always sees current state.
 	const keyHandler = useRef<(e: KeyboardEvent) => void>(() => {});
-	keyHandler.current = (e) => {
-		if (e.key === 'Escape') {
-			if (panelOpen || Object.values(filters).some(Boolean)) handleCloseX();
-			return;
-		}
-		if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+	useEffect(() => {
+		keyHandler.current = (e) => {
+			if (e.key === 'Escape') {
+				if (panelOpen || Object.values(filters).some(Boolean)) handleCloseX();
+				return;
+			}
+			if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
 
-		// Don't hijack "/" while typing somewhere else.
-		const el = e.target as HTMLElement | null;
-		const tag = el?.tagName;
-		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable) return;
+			// Don't hijack "/" while typing somewhere else.
+			const el = e.target as HTMLElement | null;
+			const tag = el?.tagName;
+			if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable)
+				return;
 
-		e.preventDefault(); // otherwise "/" gets typed into the input
-		setPanelOpen(true);
-		inputRef.current?.focus();
-	};
+			e.preventDefault(); // otherwise "/" gets typed into the input
+			setPanelOpen(true);
+			inputRef.current?.focus();
+		};
+	});
 
 	useEffect(() => {
 		const listener = (e: KeyboardEvent) => keyHandler.current(e);
@@ -99,7 +102,14 @@ export default function SearchBar({ onSearch, placeholder = 'Search events...' }
 	const active = Object.values(filters).some(Boolean);
 
 	return (
-		<div style={{ width: '100%', maxWidth: 1440, fontFamily: "'Inter', sans-serif", fontSize: 14 }}>
+		<div
+			style={{
+				width: '100%',
+				maxWidth: 1440,
+				fontFamily: "'Inter', sans-serif",
+				fontSize: 14,
+			}}
+		>
 			<div
 				style={{
 					display: 'flex',
@@ -111,7 +121,9 @@ export default function SearchBar({ onSearch, placeholder = 'Search events...' }
 					background: '#fff',
 				}}
 			>
-				<span aria-hidden style={{ color: TEAL }}>🔍</span>
+				<span aria-hidden style={{ color: TEAL }}>
+					🔍
+				</span>
 				<input
 					ref={inputRef}
 					value={filters.query}
@@ -119,17 +131,33 @@ export default function SearchBar({ onSearch, placeholder = 'Search events...' }
 					onKeyDown={(e) => e.key === 'Enter' && emit(filters)}
 					placeholder={placeholder}
 					aria-label='Search events'
-					style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, background: 'transparent' }}
+					style={{
+						flex: 1,
+						border: 'none',
+						outline: 'none',
+						fontSize: 14,
+						background: 'transparent',
+					}}
 				/>
 
 				{panelOpen ? (
-					<button type='button' onClick={handleCloseX} aria-label='Close advanced search' style={iconButton}>
+					<button
+						type='button'
+						onClick={handleCloseX}
+						aria-label='Close advanced search'
+						style={iconButton}
+					>
 						×
 					</button>
 				) : (
 					<>
 						{active && (
-							<button type='button' onClick={handleClearAll} aria-label='Clear search' style={iconButton}>
+							<button
+								type='button'
+								onClick={handleClearAll}
+								aria-label='Clear search'
+								style={iconButton}
+							>
 								×
 							</button>
 						)}
@@ -205,10 +233,21 @@ export default function SearchBar({ onSearch, placeholder = 'Search events...' }
 						/>
 					</Field>
 
-					<div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
+					<div
+						style={{
+							gridColumn: '1 / -1',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'flex-end',
+							gap: 8,
+						}}
+					>
 						{rangeInvalid && (
-							<span role='alert' style={{ color: '#b91c1c', fontSize: 12, marginRight: 'auto' }}>
-								"From" must be on or before "To".
+							<span
+								role='alert'
+								style={{ color: '#b91c1c', fontSize: 12, marginRight: 'auto' }}
+							>
+								&quot;From&quot; must be on or before &quot;To&quot;.
 							</span>
 						)}
 						<button type='button' onClick={handleClearAll} style={secondaryButton}>
@@ -224,10 +263,18 @@ export default function SearchBar({ onSearch, placeholder = 'Search events...' }
 	);
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
 	return (
 		<label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-			<span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.05em', color: '#6b7280', textTransform: 'uppercase' }}>
+			<span
+				style={{
+					fontSize: 10,
+					fontWeight: 600,
+					letterSpacing: '0.05em',
+					color: '#6b7280',
+					textTransform: 'uppercase',
+				}}
+			>
 				{label}
 			</span>
 			{children}
@@ -235,16 +282,21 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 	);
 }
 
-const iconButton: React.CSSProperties = { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16 };
+const iconButton: CSSProperties = {
+	border: 'none',
+	background: 'transparent',
+	cursor: 'pointer',
+	fontSize: 16,
+};
 
-const inputStyle: React.CSSProperties = {
+const inputStyle: CSSProperties = {
 	border: '1px solid #d9dee3',
 	borderRadius: 6,
 	padding: '6px 8px',
 	fontSize: 13,
 };
 
-const primaryButton: React.CSSProperties = {
+const primaryButton: CSSProperties = {
 	background: TEAL,
 	color: '#fff',
 	border: 'none',
@@ -254,7 +306,7 @@ const primaryButton: React.CSSProperties = {
 	fontWeight: 600,
 };
 
-const secondaryButton: React.CSSProperties = {
+const secondaryButton: CSSProperties = {
 	background: '#fff',
 	color: '#374151',
 	border: '1px solid #d9dee3',

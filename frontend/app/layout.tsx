@@ -98,4 +98,3 @@ export function RootLayout({
 }
 
 export default RootLayout;
-

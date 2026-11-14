@@ -15,7 +15,10 @@ export default function SearchTestPage() {
 			<SearchBar onSearch={setFilters} />
 
 			{hasFilters ? (
-				<SearchResults filters={filters} onSelectEvent={(ev) => console.log('open popup for', ev)} />
+				<SearchResults
+					filters={filters}
+					onSelectEvent={(ev) => console.log('open popup for', ev)}
+				/>
 			) : (
 				<p>Calendar goes here.</p> // shown when everything is cleared
 			)}
