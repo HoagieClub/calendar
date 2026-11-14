@@ -41,7 +41,9 @@ export function ProfileCard({ user }: { user: User }) {
 				{email}
 			</Text>
 			<a href='/auth/logout'>
-				<Button marginTop={16}>Log Out</Button>
+				<Button marginTop={8} width='100%'>
+					Log Out
+				</Button>
 			</a>
 		</Card>
 	);

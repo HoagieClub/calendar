@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { useTheme } from 'evergreen-ui';
 
+import { Loading, Empty, ErrorState } from '@/components/AsyncState';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -151,24 +152,37 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 	return result;
 }
 
-export default function WeekView() {
+export default function WeekView({
+	date,
+	onSelect,
+}: {
+	date: Date;
+	onSelect?: (event: CalendarEvent) => void;
+}) {
 	const { colors } = useTheme();
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const now = new Date();
-	const weekDates = getWeekDates(now);
-	const todayIndex = now.getDay();
+	const weekDates = getWeekDates(date);
+	const todayIndex = weekDates.findIndex((d) => d.toDateString() === now.toDateString());
 	const currentMinuteOffset = (now.getHours() * 60 + now.getMinutes()) * (HOUR_HEIGHT / 60);
 
 	const startTime = weekDates[0];
 	const endTime = new Date(weekDates[6]);
 	endTime.setHours(23, 59, 59);
-	const { events } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
 
 	useEffect(() => {
 		if (scrollRef.current) {
 			scrollRef.current.scrollTop = Math.max(0, currentMinuteOffset - 200);
 		}
-	}, [currentMinuteOffset]);
+	}, [currentMinuteOffset, isLoading]);
+
+	if (isLoading) {
+		return <Loading columns={7} rows={3} label='Getting your calendar ready.' />;
+	}
+	if (error) {
+		return <ErrorState onRetry={retry} />;
+	}
 
 	return (
 		<div
@@ -185,6 +199,9 @@ export default function WeekView() {
 				borderRadius: 16,
 			}}
 		>
+			{events.length === 0 && (
+				<Empty message='Nothing on the calendar this week. Add an event.' />
+			)}
 			{/* ── Day header row ── */}
 			<div
 				style={{
@@ -301,6 +318,7 @@ export default function WeekView() {
 									<div
 										key={event.id}
 										title={event.name}
+										onClick={() => onSelect?.(event)}
 										style={{
 											background: color.border,
 											borderRadius: 3,
@@ -420,6 +438,7 @@ export default function WeekView() {
 												<div
 													key={event.id}
 													title={event.name}
+													onClick={() => onSelect?.(event)}
 													style={{
 														position: 'absolute',
 														top: top + 1,

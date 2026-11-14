@@ -1,0 +1,78 @@
+.state {
+	padding: 24px;
+	margin: 16px 0;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	background: #fff;
+	color: #4b5563;
+	font:
+		14px/1.5 Inter,
+		'Helvetica Neue',
+		sans-serif;
+	text-align: center;
+}
+.state p {
+	margin: 0;
+	font: inherit;
+}
+.action {
+	display: inline-block;
+	margin-top: 12px;
+	padding: 8px 16px;
+	border: 1px solid #168080;
+	border-radius: 6px;
+	background: #fff;
+	color: #166d6d;
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+}
+.action:focus-visible {
+	outline: 3px solid #1fa8a8;
+	outline-offset: 3px;
+}
+.grid {
+	display: grid;
+	gap: 16px;
+}
+.skeleton {
+	min-height: 96px;
+	padding: 16px;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	animation: pulse 1.5s ease-in-out infinite;
+}
+.skeleton div {
+	height: 12px;
+	margin-bottom: 12px;
+	border-radius: 4px;
+	background: #e5e7eb;
+}
+.skeleton div:nth-child(2) {
+	width: 75%;
+}
+.skeleton div:last-child {
+	width: 50%;
+	margin-bottom: 0;
+}
+.srOnly {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+@keyframes pulse {
+	50% {
+		opacity: 0.45;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.skeleton {
+		animation: none;
+	}
+}
