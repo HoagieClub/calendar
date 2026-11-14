@@ -61,7 +61,6 @@ class EventSerializer(serializers.ModelSerializer):
 			"owner_email",
 			"category",
 			"from_mail",
-			"ordering",
 		]
 		read_only_fields = ["id", "owner_netid", "owner_email", "created_at", "updated_at"]
 
