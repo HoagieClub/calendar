@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
+import { Loading, Empty, ErrorState } from '@/components/AsyncState';
 import type { SearchFilters } from '@/components/search/SearchBar';
+import { useEventList } from '@/lib/useEventList';
 
 // Adjust to match your real response from /event/.
 export type EventResult = {
@@ -20,45 +20,50 @@ type Props = {
 };
 
 export default function SearchResults({ filters, onSelectEvent }: Props) {
-	const [results, setResults] = useState<EventResult[] | null>(null);
-	const [error, setError] = useState(false);
-
-	// Stable dependency: the filters object changes identity on every emit.
-	const key = JSON.stringify(filters);
-
-	useEffect(() => {
-		const ctrl = new AbortController(); // ignore stale responses
-		setResults(null);
-		setError(false);
-
-		// Only send non-empty params. Param names are a guess: match your Python endpoint.
-		const params = new URLSearchParams();
-		if (filters.query) params.set('q', filters.query);
-		if (filters.name) params.set('name', filters.name);
-		if (filters.host) params.set('host', filters.host);
-		if (filters.from) params.set('from', filters.from);
-		if (filters.to) params.set('to', filters.to);
-
-		fetch(`/event/?${params}`, { signal: ctrl.signal })
-			.then((r) => {
-				if (!r.ok) throw new Error(String(r.status));
-				return r.json();
-			})
-			.then(setResults)
-			.catch((e) => {
-				if (e.name !== 'AbortError') setError(true);
-			});
-
-		return () => ctrl.abort();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [key]);
-
-	if (error) return <p role='alert'>Something went wrong. Please try again.</p>;
-	if (results === null) return <p>Searching…</p>;
-	if (results.length === 0) return <p>No events match your search.</p>;
+	const params = new URLSearchParams();
+	if (filters.query) {
+		params.set('query', filters.query);
+	}
+	if (filters.from) {
+		params.set('start_time', new Date(`${filters.from}T00:00:00`).toISOString());
+	}
+	if (filters.to) {
+		params.set('end_time', new Date(`${filters.to}T23:59:59.999`).toISOString());
+	}
+	const { events, isLoading, error, retry } = useEventList(`/api/event?${params}`);
+	const results = events
+		.filter(
+			(event) =>
+				event.name.toLowerCase().includes(filters.name.toLowerCase()) &&
+				event.host.toLowerCase().includes(filters.host.toLowerCase())
+		)
+		.map((event) => ({ ...event, title: event.name }));
+	if (isLoading) {
+		return <Loading label='Finding matching events.' />;
+	}
+	if (error) {
+		return (
+			<ErrorState
+				message='We couldn’t search for events. Please try again.'
+				onRetry={retry}
+			/>
+		);
+	}
+	if (results.length === 0) {
+		return <Empty message='No events match your search.' />;
+	}
 
 	return (
-		<ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+		<ul
+			style={{
+				listStyle: 'none',
+				margin: 0,
+				padding: 0,
+				display: 'flex',
+				flexDirection: 'column',
+				gap: 8,
+			}}
+		>
 			{results.map((ev) => (
 				<li key={ev.id}>
 					<button
@@ -81,7 +86,11 @@ export default function SearchResults({ filters, onSelectEvent }: Props) {
 							<strong>{ev.title}</strong>
 							<br />
 							<span style={{ fontSize: 13, color: '#6b7280' }}>
-								{new Date(ev.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })} · {ev.host}
+								{new Date(ev.start).toLocaleString([], {
+									dateStyle: 'medium',
+									timeStyle: 'short',
+								})}{' '}
+								· {ev.host}
 							</span>
 						</span>
 						{ev.category && (

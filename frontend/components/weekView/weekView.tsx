@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { useTheme } from 'evergreen-ui';
 
+import { Loading, Empty, ErrorState } from '@/components/AsyncState';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -168,13 +169,20 @@ export default function WeekView({
 	const startTime = weekDates[0];
 	const endTime = new Date(weekDates[6]);
 	endTime.setHours(23, 59, 59);
-	const { events } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
 
 	useEffect(() => {
 		if (scrollRef.current) {
 			scrollRef.current.scrollTop = Math.max(0, currentMinuteOffset - 200);
 		}
-	}, [currentMinuteOffset]);
+	}, [currentMinuteOffset, isLoading]);
+
+	if (isLoading) {
+		return <Loading columns={7} rows={3} label='Getting your calendar ready.' />;
+	}
+	if (error) {
+		return <ErrorState onRetry={retry} />;
+	}
 
 	return (
 		<div
@@ -191,6 +199,9 @@ export default function WeekView({
 				borderRadius: 16,
 			}}
 		>
+			{events.length === 0 && (
+				<Empty message='Nothing on the calendar this week. Add an event.' />
+			)}
 			{/* ── Day header row ── */}
 			<div
 				style={{

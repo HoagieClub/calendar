@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Pane, Text, majorScale } from 'evergreen-ui';
 
+import { Loading, Empty, ErrorState } from '@/components/AsyncState';
 import Event, { type CalendarEvent, type EventCategory } from '@/components/Event';
 import { useEvents } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent as ApiEvent } from '@/types';
@@ -46,7 +47,7 @@ export function DayView({ date, onSelect }: { date: Date; onSelect?: (event: Api
 	startTime.setHours(0, 0, 0, 0);
 	const endTime = new Date(date);
 	endTime.setHours(23, 59, 59, 0);
-	const { events } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
 	const cardEvents = events.map(toCardEvent);
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 	const hasAutoScrolledRef = useRef(false);
@@ -81,12 +82,22 @@ export function DayView({ date, onSelect }: { date: Date; onSelect?: (event: Api
 		);
 		container.scrollTop = targetScroll;
 		hasAutoScrolledRef.current = true;
-	}, [currentTimePosition]);
+	}, [currentTimePosition, isLoading]);
 
 	const hours = Array.from({ length: 24 }, (_, hour) => hour);
 
+	if (isLoading) {
+		return <Loading columns={1} rows={3} label='Getting your calendar ready.' />;
+	}
+	if (error) {
+		return <ErrorState onRetry={retry} />;
+	}
+
 	return (
 		<Pane paddingX={majorScale(2)} paddingY={majorScale(2)} width='100%'>
+			{events.length === 0 && (
+				<Empty message='Nothing on the calendar for this day. Add an event.' />
+			)}
 			<Pane
 				ref={scrollRef}
 				background='#f8fafc'

@@ -3,9 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 import { useTheme } from 'evergreen-ui';
-import Link from 'next/link';
 
-import type { CalendarEvent } from '@/types';
+import { Loading, Empty, ErrorState } from '@/components/AsyncState';
+import { useEventList } from '@/lib/useEventList';
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -68,47 +68,30 @@ function useClickOutside(ref: React.RefObject<HTMLElement>, cb: () => void) {
 // ── Component ─────────────────────────────────────────────────
 
 export default function MyEvents({ saved = false }: { saved?: boolean }) {
-	const [events, setEvents] = useState<Event[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState('');
-	const [attempt, setAttempt] = useState(0);
-	useEffect(() => {
-		const controller = new AbortController();
-		fetch(`/api/user/${saved ? 'saved' : 'events'}`, { signal: controller.signal })
-			.then(async (response) => {
-				if (!response.ok) throw new Error('Unable to load events. Please try again.');
-				const data: CalendarEvent[] = await response.json();
-				setEvents(
-					data.map((event) => ({
-						id: String(event.id),
-						title: event.name,
-						dateISO: event.start,
-						displayDate: new Date(event.start).toLocaleDateString('en-US', {
-							weekday: 'short',
-							month: 'short',
-							day: 'numeric',
-						}),
-						timeRange: `${new Date(event.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – ${new Date(event.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`,
-						location: event.location,
-						description: event.description,
-						interested: 0,
-						category:
-							ALL_CATEGORIES.find(
-								(category) => category === String(event.category).toUpperCase()
-							) ?? 'OTHER',
-						isStarred: saved,
-					}))
-				);
-			})
-			.catch(() => {
-				if (!controller.signal.aborted)
-					setError('Unable to load events. Please try again.');
-			})
-			.finally(() => {
-				if (!controller.signal.aborted) setLoading(false);
-			});
-		return () => controller.abort();
-	}, [saved, attempt]);
+	const {
+		events: data,
+		isLoading: loading,
+		error,
+		retry,
+	} = useEventList(`/api/user/${saved ? 'saved' : 'events'}`);
+	const events: Event[] = data.map((event) => ({
+		id: String(event.id),
+		title: event.name,
+		dateISO: event.start,
+		displayDate: new Date(event.start).toLocaleDateString('en-US', {
+			weekday: 'short',
+			month: 'short',
+			day: 'numeric',
+		}),
+		timeRange: `${new Date(event.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – ${new Date(event.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`,
+		location: event.location,
+		description: event.description,
+		interested: 0,
+		category:
+			ALL_CATEGORIES.find((category) => category === String(event.category).toUpperCase()) ??
+			'OTHER',
+		isStarred: saved,
+	}));
 	const { colors } = useTheme();
 	const themeColors = colors as any;
 
@@ -423,40 +406,20 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 
 			{/* Grid */}
 			{loading ? (
-				<p role='status'>Loading events…</p>
+				<Loading columns={3} rows={2} />
 			) : error ? (
-				<div role='alert'>
-					<p>{error}</p>
-					<button
-						onClick={() => {
-							setError('');
-							setLoading(true);
-							setAttempt((value) => value + 1);
-						}}
-					>
-						Try again
-					</button>
-				</div>
+				<ErrorState onRetry={retry} />
 			) : filtered.length === 0 ? (
-				<div
-					style={{
-						marginTop: 60,
-						textAlign: 'center',
-						color: themeColors.gray500,
-						fontSize: 14,
-					}}
-				>
-					{events.length > 0
-						? 'No events match your filters.'
-						: saved
-							? 'You haven’t saved any events yet. Save events from the calendar to find them here.'
-							: 'You haven’t created any events yet. Events you create will appear here.'}
-					{events.length === 0 && (
-						<p>
-							<Link href='/'>Browse Calendar</Link>
-						</p>
-					)}
-				</div>
+				<Empty
+					message={
+						events.length > 0
+							? 'No events match your filters.'
+							: saved
+								? 'Save an event to find it here.'
+								: "You haven't created any events yet."
+					}
+					calendarLink={events.length === 0}
+				/>
 			) : (
 				<div
 					style={{

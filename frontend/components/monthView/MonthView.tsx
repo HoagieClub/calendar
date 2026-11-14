@@ -2,6 +2,7 @@
 
 import { useTheme } from 'evergreen-ui';
 
+import { Loading, ErrorState } from '@/components/AsyncState';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -55,7 +56,14 @@ export default function MonthView({ month, year, onSelect }: MonthViewProps) {
 
 	const startTime = new Date(displayYear, displayMonth, 1);
 	const endTime = new Date(displayYear, displayMonth + 1, 0, 23, 59, 59);
-	const { events } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
+
+	if (isLoading) {
+		return <Loading columns={7} rows={weeks.length} label='Getting your calendar ready.' />;
+	}
+	if (error) {
+		return <ErrorState onRetry={retry} />;
+	}
 
 	return (
 		<div
