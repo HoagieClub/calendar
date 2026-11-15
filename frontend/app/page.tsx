@@ -78,7 +78,7 @@ export function Home() {
 				paddingTop={majorScale(5)}
 				paddingBottom={majorScale(7)}
 			>
-				<CalendarIcon size={100} color='gray800' />
+				<CalendarIcon size={100} color='gray800' marginX='auto' />
 				<Heading size={900} className='hoagie'>
 					Every event on campus,
 					<br />
