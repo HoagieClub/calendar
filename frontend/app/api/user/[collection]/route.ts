@@ -20,10 +20,7 @@ export async function GET(
 		if (!baseURL) {
 			console.error('BACKEND_URL is not configured');
 
-			return NextResponse.json(
-				{ error: 'Backend is not configured' },
-				{ status: 500 }
-			);
+			return NextResponse.json({ error: 'Backend is not configured' }, { status: 500 });
 		}
 		const response = await fetch(`${baseURL.replace(/\/$/, '')}/user/${collection}/`, {
 			headers: { Authorization: `Bearer ${token}` },
