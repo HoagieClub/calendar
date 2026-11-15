@@ -171,7 +171,7 @@ export function Nav({
 								/>
 							</Popover>
 						)}
-						{!user && <Link href='/auth/login'>Profile</Link>}
+						{!user && <a href='/auth/login'>Profile</a>}
 					</Pane>
 				</Pane>
 			</Pane>

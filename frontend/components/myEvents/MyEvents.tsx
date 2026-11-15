@@ -460,7 +460,7 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 					{emptyMessage}
 					{events.length === 0 && (
 						<p>
-							<Link href='/'>Browse Calendar</Link>
+							<Link href='/calendar'>Browse Calendar</Link>
 						</p>
 					)}
 				</div>
