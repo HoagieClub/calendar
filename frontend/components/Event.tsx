@@ -72,13 +72,13 @@ const CATEGORY_STYLES: Record<
 };
 
 export type CalendarEvent = {
-	id: number;
+	id: number | string;
 	name: string;
 	startHour: number;
 	endHour: number;
 	location: string;
 	host: string;
-	attendees: number;
+	attendees?: number;
 	category?: EventCategory;
 	description?: string;
 };
@@ -89,6 +89,7 @@ type EventProps = {
 	left: string;
 	width: string;
 	height: number;
+	onClick?: () => void;
 };
 
 export function formatEventTime(startHour: number, endHour: number): string {
@@ -104,7 +105,7 @@ export function formatEventTime(startHour: number, endHour: number): string {
 	return `${toLabel(startHour)} - ${toLabel(endHour)}`;
 }
 
-export function Event({ event, top, left, width, height }: EventProps) {
+export function Event({ event, top, left, width, height, onClick }: EventProps) {
 	const { colors } = useTheme();
 	const showExpandedDetails = height >= 120;
 	const showLocation = height >= 80;
@@ -142,6 +143,7 @@ export function Event({ event, top, left, width, height }: EventProps) {
 			border={`1px solid ${categoryStyle.border}22`}
 			overflow='hidden'
 			textAlign='left'
+			onClick={onClick}
 			onMouseEnter={() => setIsHighlighted(true)}
 			onMouseLeave={() => setIsHighlighted(false)}
 			onFocus={() => setIsHighlighted(true)}
@@ -193,7 +195,7 @@ export function Event({ event, top, left, width, height }: EventProps) {
 						>
 							{formatEventTime(event.startHour, event.endHour)}
 						</Text>
-						{cardWidth >= 130 ? (
+						{cardWidth >= 130 && event.attendees !== undefined ? (
 							<Text
 								size={200}
 								fontSize={12}

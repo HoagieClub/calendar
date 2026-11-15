@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { useTheme } from 'evergreen-ui';
 
+import { Empty, ErrorState, Loading } from '@/components/states';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -151,18 +152,26 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 	return result;
 }
 
-export default function WeekView() {
+export default function WeekView({
+	date,
+	onSelect,
+	onAddEvent,
+}: {
+	date: Date;
+	onSelect?: (event: CalendarEvent) => void;
+	onAddEvent?: () => void;
+}) {
 	const { colors } = useTheme();
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const now = new Date();
-	const weekDates = getWeekDates(now);
-	const todayIndex = now.getDay();
+	const weekDates = getWeekDates(date);
+	const todayIndex = weekDates.findIndex((d) => d.toDateString() === now.toDateString());
 	const currentMinuteOffset = (now.getHours() * 60 + now.getMinutes()) * (HOUR_HEIGHT / 60);
 
 	const startTime = weekDates[0];
 	const endTime = new Date(weekDates[6]);
 	endTime.setHours(23, 59, 59);
-	const { events } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
 
 	useEffect(() => {
 		if (scrollRef.current) {
@@ -301,6 +310,7 @@ export default function WeekView() {
 									<div
 										key={event.id}
 										title={event.name}
+										onClick={() => onSelect?.(event)}
 										style={{
 											background: color.border,
 											borderRadius: 3,
@@ -323,227 +333,260 @@ export default function WeekView() {
 				})}
 			</div>
 
-			{/* ── Scrollable grid body ── */}
+			{/* ── Scrollable grid body (+ loading / error / empty layers) ── */}
 			<div
-				ref={scrollRef}
-				style={{ flex: 1, overflowY: 'scroll', overflowX: 'hidden', position: 'relative' }}
+				style={{
+					position: 'relative',
+					flex: 1,
+					minHeight: 0,
+					display: 'flex',
+					flexDirection: 'column',
+				}}
 			>
-				<div style={{ display: 'flex', position: 'relative', height: 24 * HOUR_HEIGHT }}>
-					{/* ── Time labels column ── */}
+				<div
+					ref={scrollRef}
+					style={{
+						flex: 1,
+						overflowY: 'scroll',
+						overflowX: 'hidden',
+						position: 'relative',
+					}}
+				>
 					<div
-						style={{
-							width: TIME_COL_WIDTH,
-							flexShrink: 0,
-							position: 'relative',
-							background: colors.gray200,
-							borderRight: `1px solid ${colors.gray400}`,
-						}}
+						style={{ display: 'flex', position: 'relative', height: 24 * HOUR_HEIGHT }}
 					>
-						{Array.from({ length: 24 }, (_, hour) => (
-							<div
-								key={hour}
-								style={{
-									position: 'absolute',
-									top: hour * HOUR_HEIGHT - 7,
-									right: 8,
-									height: HOUR_HEIGHT,
-									display: 'flex',
-									alignItems: 'flex-start',
-									color: colors.gray700,
-									fontSize: 10,
-									fontWeight: 400,
-									whiteSpace: 'nowrap',
-									userSelect: 'none',
-								}}
-							>
-								{hour === 0 ? '' : formatHour(hour)}
-							</div>
-						))}
-					</div>
-
-					{/* ── Day columns ── */}
-					<div style={{ flex: 1, display: 'flex', position: 'relative' }}>
-						{weekDates.map((date, colIdx) => {
-							const timedEvents = events.filter(
-								(e) => isSameDay(new Date(e.start), date) && !isAllDay(e)
-							);
-							const positioned = layoutEvents(timedEvents);
-
-							return (
+						{/* ── Time labels column ── */}
+						<div
+							style={{
+								width: TIME_COL_WIDTH,
+								flexShrink: 0,
+								position: 'relative',
+								background: colors.gray200,
+								borderRight: `1px solid ${colors.gray400}`,
+							}}
+						>
+							{Array.from({ length: 24 }, (_, hour) => (
 								<div
-									key={colIdx}
+									key={hour}
 									style={{
-										flex: 1,
-										borderLeft: `1px solid ${colors.gray400}`,
-										position: 'relative',
+										position: 'absolute',
+										top: hour * HOUR_HEIGHT - 7,
+										right: 8,
+										height: HOUR_HEIGHT,
+										display: 'flex',
+										alignItems: 'flex-start',
+										color: colors.gray700,
+										fontSize: 10,
+										fontWeight: 400,
+										whiteSpace: 'nowrap',
+										userSelect: 'none',
 									}}
 								>
-									{/* Hour lines */}
-									{Array.from({ length: 24 }, (_, hour) => (
-										<div
-											key={hour}
-											style={{
-												position: 'absolute',
-												top: hour * HOUR_HEIGHT,
-												left: 0,
-												right: 0,
-												height: HOUR_HEIGHT,
-												borderTop:
-													hour === 0 ? 'none' : `1px solid #D1D5DB`,
-												boxSizing: 'border-box',
-												zIndex: 0,
-												pointerEvents: 'none', // important
-											}}
-										>
-											{/* Half-hour dashed line */}
-										</div>
-									))}
+									{hour === 0 ? '' : formatHour(hour)}
+								</div>
+							))}
+						</div>
 
-									{/* ── Event tiles ── */}
-									{positioned.map(
-										({
-											event,
-											top,
-											height,
-											colIndex,
-											numCols,
-											isLast,
-											overflow,
-											overflowColors,
-										}) => {
-											const color = getCategoryColor(event.category);
-											const leftPct = (colIndex / numCols) * 100;
-											const widthPct = (1 / numCols) * 100;
-											const showTime = height > 42;
+						{/* ── Day columns ── */}
+						<div style={{ flex: 1, display: 'flex', position: 'relative' }}>
+							{weekDates.map((date, colIdx) => {
+								const timedEvents = events.filter(
+									(e) => isSameDay(new Date(e.start), date) && !isAllDay(e)
+								);
+								const positioned = layoutEvents(timedEvents);
 
-											return (
-												<div
-													key={event.id}
-													title={event.name}
-													style={{
-														position: 'absolute',
-														top: top + 1,
-														left: `calc(${leftPct}% + 2px)`,
-														width: `calc(${widthPct}% - 4px)`,
-														height: height,
-														background: `${color.bg}99`,
-														borderLeft: `3px solid ${color.border}`,
-														borderRadius: 4,
-														padding: '3px 6px',
-														overflow: 'hidden',
-														cursor: 'pointer',
-														zIndex: 0,
-														boxSizing: 'border-box',
-													}}
-												>
-													{/* Black bold title */}
+								return (
+									<div
+										key={colIdx}
+										style={{
+											flex: 1,
+											borderLeft: `1px solid ${colors.gray400}`,
+											position: 'relative',
+										}}
+									>
+										{/* Hour lines */}
+										{Array.from({ length: 24 }, (_, hour) => (
+											<div
+												key={hour}
+												style={{
+													position: 'absolute',
+													top: hour * HOUR_HEIGHT,
+													left: 0,
+													right: 0,
+													height: HOUR_HEIGHT,
+													borderTop:
+														hour === 0 ? 'none' : `1px solid #D1D5DB`,
+													boxSizing: 'border-box',
+													zIndex: 0,
+													pointerEvents: 'none', // important
+												}}
+											>
+												{/* Half-hour dashed line */}
+											</div>
+										))}
+
+										{/* ── Event tiles ── */}
+										{positioned.map(
+											({
+												event,
+												top,
+												height,
+												colIndex,
+												numCols,
+												isLast,
+												overflow,
+												overflowColors,
+											}) => {
+												const color = getCategoryColor(event.category);
+												const leftPct = (colIndex / numCols) * 100;
+												const widthPct = (1 / numCols) * 100;
+												const showTime = height > 42;
+
+												return (
 													<div
+														key={event.id}
+														title={event.name}
+														onClick={() => onSelect?.(event)}
 														style={{
-															fontSize: 11,
-															fontWeight: 700,
-															color: '#111827',
-															whiteSpace: 'nowrap',
+															position: 'absolute',
+															top: top + 1,
+															left: `calc(${leftPct}% + 2px)`,
+															width: `calc(${widthPct}% - 4px)`,
+															height: height,
+															background: `${color.bg}99`,
+															borderLeft: `3px solid ${color.border}`,
+															borderRadius: 4,
+															padding: '3px 6px',
 															overflow: 'hidden',
-															textOverflow: 'ellipsis',
-															lineHeight: 1.3,
+															cursor: 'pointer',
+															zIndex: 0,
+															boxSizing: 'border-box',
 														}}
 													>
-														{event.name}
-													</div>
-													{/* Gray time underneath */}
-													{showTime && (
+														{/* Black bold title */}
 														<div
 															style={{
-																fontSize: 10,
-																color: '#6B7280',
+																fontSize: 11,
+																fontWeight: 700,
+																color: '#111827',
 																whiteSpace: 'nowrap',
 																overflow: 'hidden',
 																textOverflow: 'ellipsis',
-																marginTop: 1,
+																lineHeight: 1.3,
 															}}
 														>
-															{formatEventTime(event.start)} –{' '}
-															{formatEventTime(event.end)}
+															{event.name}
 														</div>
-													)}
-
-													{/* Overflow pill */}
-													{isLast && overflow > 0 && (
-														<div
-															style={{
-																position: 'absolute',
-																top: 4,
-																right: 4,
-																display: 'flex',
-																alignItems: 'center',
-																gap: 2,
-																background: colors.white,
-																border: `1px solid ${colors.gray300}`,
-																borderRadius: 10,
-																padding: '1px 5px',
-																cursor: 'pointer',
-																zIndex: 3,
-															}}
-														>
-															{overflowColors.map((c, ci) => (
-																<div
-																	key={ci}
-																	style={{
-																		width: 6,
-																		height: 6,
-																		borderRadius: '50%',
-																		background: c,
-																	}}
-																/>
-															))}
-															<span
+														{/* Gray time underneath */}
+														{showTime && (
+															<div
 																style={{
 																	fontSize: 10,
-																	fontWeight: 600,
-																	color: colors.gray700,
-																	marginLeft: 1,
+																	color: '#6B7280',
+																	whiteSpace: 'nowrap',
+																	overflow: 'hidden',
+																	textOverflow: 'ellipsis',
+																	marginTop: 1,
 																}}
 															>
-																+{overflow}
-															</span>
-														</div>
-													)}
-												</div>
-											);
-										}
-									)}
-								</div>
-							);
-						})}
+																{formatEventTime(event.start)} –{' '}
+																{formatEventTime(event.end)}
+															</div>
+														)}
 
-						{/* ── Current time indicator ── */}
-						<div
-							style={{
-								position: 'absolute',
-								top: currentMinuteOffset,
-								left: `calc(${(100 / 7) * todayIndex}%)`,
-								width: `calc(${100 / 7}%)`,
-								zIndex: 5,
-								pointerEvents: 'none',
-							}}
-						>
+														{/* Overflow pill */}
+														{isLast && overflow > 0 && (
+															<div
+																style={{
+																	position: 'absolute',
+																	top: 4,
+																	right: 4,
+																	display: 'flex',
+																	alignItems: 'center',
+																	gap: 2,
+																	background: colors.white,
+																	border: `1px solid ${colors.gray300}`,
+																	borderRadius: 10,
+																	padding: '1px 5px',
+																	cursor: 'pointer',
+																	zIndex: 3,
+																}}
+															>
+																{overflowColors.map((c, ci) => (
+																	<div
+																		key={ci}
+																		style={{
+																			width: 6,
+																			height: 6,
+																			borderRadius: '50%',
+																			background: c,
+																		}}
+																	/>
+																))}
+																<span
+																	style={{
+																		fontSize: 10,
+																		fontWeight: 600,
+																		color: colors.gray700,
+																		marginLeft: 1,
+																	}}
+																>
+																	+{overflow}
+																</span>
+															</div>
+														)}
+													</div>
+												);
+											}
+										)}
+									</div>
+								);
+							})}
+
+							{/* ── Current time indicator ── */}
 							<div
 								style={{
 									position: 'absolute',
-									left: -4,
-									top: -4,
-									width: 8,
-									height: 8,
-									borderRadius: '50%',
-									background: colors.red500,
+									top: currentMinuteOffset,
+									left: `calc(${(100 / 7) * todayIndex}%)`,
+									width: `calc(${100 / 7}%)`,
+									zIndex: 5,
+									pointerEvents: 'none',
 								}}
-							/>
-							<div
-								style={{ height: 2, background: colors.red500, borderRadius: 1 }}
-							/>
+							>
+								<div
+									style={{
+										position: 'absolute',
+										left: -4,
+										top: -4,
+										width: 8,
+										height: 8,
+										borderRadius: '50%',
+										background: colors.red500,
+									}}
+								/>
+								<div
+									style={{
+										height: 2,
+										background: colors.red500,
+										borderRadius: 1,
+									}}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
+				{isLoading && <Loading overlay variant='columns' columns={7} />}
+				{error && <ErrorState overlay onRetry={retry} />}
+				{!isLoading && !error && events.length === 0 && (
+					<Empty
+						overlay
+						message='Nothing on the calendar this week.'
+						action={
+							onAddEvent ? { label: 'Add an event.', onClick: onAddEvent } : undefined
+						}
+					/>
+				)}
 			</div>
 		</div>
 	);
