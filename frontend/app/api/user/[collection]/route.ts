@@ -16,7 +16,15 @@ export async function GET(
 	}
 	try {
 		const { token } = await auth0.getAccessToken();
-		const baseURL = process.env.BACKEND_URL || 'http://localhost:8000';
+		const baseURL = process.env.BACKEND_URL;
+		if (!baseURL) {
+			console.error('BACKEND_URL is not configured');
+
+			return NextResponse.json(
+				{ error: 'Backend is not configured' },
+				{ status: 500 }
+			);
+		}
 		const response = await fetch(`${baseURL.replace(/\/$/, '')}/user/${collection}/`, {
 			headers: { Authorization: `Bearer ${token}` },
 			cache: 'no-store',

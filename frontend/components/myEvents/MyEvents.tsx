@@ -7,7 +7,11 @@ import Link from 'next/link';
 
 import type { CalendarEvent } from '@/types';
 
+import type { DefaultTheme } from 'evergreen-ui';
+
 // ── Types ─────────────────────────────────────────────────────
+
+type ThemeColors = DefaultTheme['colors'] & { 'hoagie-teal'?: string };
 
 type SortOption = 'Date (soonest)' | 'Date (latest)';
 
@@ -55,7 +59,7 @@ const SORT_OPTIONS: SortOption[] = ['Date (soonest)', 'Date (latest)'];
 
 // ── Dropdown Hook ─────────────────────────────────────────────
 
-function useClickOutside(ref: React.RefObject<HTMLElement>, cb: () => void) {
+function useClickOutside(ref: React.RefObject<HTMLElement | null>, cb: () => void) {
 	useEffect(() => {
 		function handler(e: MouseEvent) {
 			if (ref.current && !ref.current.contains(e.target as Node)) cb();
@@ -110,7 +114,7 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 		return () => controller.abort();
 	}, [saved, attempt]);
 	const { colors } = useTheme();
-	const themeColors = colors as any;
+	const themeColors = colors as ThemeColors;
 
 	const TEAL = themeColors['hoagie-teal'] ?? '#00897B';
 
@@ -120,8 +124,8 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 	const [categoryOpen, setCategoryOpen] = useState(false);
 	const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
 
-	const sortRef = useRef<HTMLDivElement>(null!);
-	const categoryRef = useRef<HTMLDivElement>(null!);
+	const sortRef = useRef<HTMLDivElement>(null);
+	const categoryRef = useRef<HTMLDivElement>(null);
 
 	useClickOutside(sortRef, () => setSortOpen(false));
 	useClickOutside(categoryRef, () => setCategoryOpen(false));
@@ -149,12 +153,19 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 		);
 	}
 
-	const categoryLabel =
-		selectedCategories.length === 0
-			? 'Category'
-			: selectedCategories.length === 1
-				? selectedCategories[0]
-				: `${selectedCategories.length} categories`;
+	let categoryLabel = 'Category';
+	if (selectedCategories.length === 1) {
+		categoryLabel = selectedCategories[0];
+	} else if (selectedCategories.length > 1) {
+		categoryLabel = `${selectedCategories.length} categories`;
+	}
+
+	let emptyMessage = saved
+		? 'You haven’t saved any events yet. Save events from the calendar to find them here.'
+		: 'You haven’t created any events yet. Events you create will appear here.';
+	if (events.length > 0) {
+		emptyMessage = 'No events match your filters.';
+	}
 
 	return (
 		<div style={{ padding: 32, background: colors.white, minHeight: '100%' }}>
@@ -422,9 +433,8 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 			)}
 
 			{/* Grid */}
-			{loading ? (
-				<p role='status'>Loading events…</p>
-			) : error ? (
+			{loading && <p role='status'>Loading events…</p>}
+			{!loading && error && (
 				<div role='alert'>
 					<p>{error}</p>
 					<button
@@ -437,7 +447,8 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 						Try again
 					</button>
 				</div>
-			) : filtered.length === 0 ? (
+			)}
+			{!loading && !error && filtered.length === 0 && (
 				<div
 					style={{
 						marginTop: 60,
@@ -446,18 +457,15 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 						fontSize: 14,
 					}}
 				>
-					{events.length > 0
-						? 'No events match your filters.'
-						: saved
-							? 'You haven’t saved any events yet. Save events from the calendar to find them here.'
-							: 'You haven’t created any events yet. Events you create will appear here.'}
+					{emptyMessage}
 					{events.length === 0 && (
 						<p>
 							<Link href='/'>Browse Calendar</Link>
 						</p>
 					)}
 				</div>
-			) : (
+			)}
+			{!loading && !error && filtered.length > 0 && (
 				<div
 					style={{
 						marginTop: 20,
@@ -484,8 +492,8 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 // ── Dropdown helpers ──────────────────────────────────────────
 
 function dropdownButtonStyle(
-	themeColors: any,
-	colors: any,
+	themeColors: ThemeColors,
+	colors: ThemeColors,
 	isOpen: boolean,
 	teal: string,
 	hasActive = false
@@ -542,7 +550,7 @@ function DropdownItem({
 }: {
 	label: string;
 	selected: boolean;
-	themeColors: any;
+	themeColors: ThemeColors;
 	teal: string;
 	onClick: () => void;
 }) {
@@ -586,8 +594,8 @@ function EventCard({
 	colors,
 }: {
 	event: Event;
-	themeColors: any;
-	colors: any;
+	themeColors: ThemeColors;
+	colors: ThemeColors;
 	teal: string;
 }) {
 	const catStyle = CATEGORY_COLORS[event.category];
