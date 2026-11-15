@@ -40,7 +40,7 @@ export function Home() {
 	} else {
 		Profile = (
 			<Pane>
-				<Link href='/feature1'>
+				<Link href='/calendar'>
 					<Button
 						height={56}
 						width={majorScale(35)}
@@ -48,7 +48,7 @@ export function Home() {
 						marginBottom={20}
 						iconBefore={ArrowRightIcon}
 					>
-						Call to Action
+						Browse Calendar
 					</Button>
 				</Link>
 				<br />
