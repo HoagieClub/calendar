@@ -1,9 +1,12 @@
 /**
- * @overview Authenticated proxy from the Next.js app to the Hoagie Calendar backend.
+ * @overview Authenticated proxy from the browser to the Hoagie Calendar backend.
  *
- * `/api/hoagie/<path>` forwards to `${HOAGIE_API_URL}<path>/` with the signed-in user's Auth0
- * access token as a Bearer header. Mirrors the route used by HoagieMail so the frontend never
- * holds backend credentials. `HOAGIE_API_URL` must end with a trailing slash.
+ * `/api/hoagie/<path>` forwards to `<HOAGIE_API_URL>/<path>/` on behalf of the signed-in user.
+ * The token and the backend URL are handled by the server-only `apiFetch` in `lib/api.ts`, so
+ * this file never touches Auth0 or `HOAGIE_API_URL` itself. The path always goes after a `/`
+ * that this route inserts, so a request path can never change which host is called.
+ *
+ * Browser code should call this through `backendFetch` in `lib/backendFetch.ts`.
  *
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
@@ -16,6 +19,7 @@
 
 import { NextResponse } from 'next/server';
 
+import { apiFetch } from '@/lib/api';
 import { auth0 } from '@/lib/auth0';
 
 import type { NextRequest } from 'next/server';
@@ -27,55 +31,57 @@ function errorMessage(error: unknown): string {
 }
 
 async function handler(request: NextRequest, { params }: RouteContext) {
-	const path = (await params).path.join('/');
-	const search = request.nextUrl.search;
-
-	const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-
-	try {
-		const accessToken = await auth0.getAccessToken();
-		headers.Authorization = `Bearer ${accessToken.token}`;
-	} catch (error) {
-		return NextResponse.json({ error: errorMessage(error) }, { status: 401 });
+	const session = await auth0.getSession();
+	if (!session) {
+		return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
 	}
 
-	const init: RequestInit = { method: request.method, headers };
+	// Segments are already URL-decoded and normalised by Next.js. Re-joined and placed after a
+	// leading slash, they can only ever select a path on the configured backend host.
+	const path = (await params).path.join('/');
+	const backendPath = `/${path}/${request.nextUrl.search}`;
+
+	const init: RequestInit = {
+		method: request.method,
+		headers: { 'Content-Type': 'application/json' },
+		cache: 'no-store',
+	};
 	if (request.method !== 'GET' && request.method !== 'HEAD') {
 		init.body = await request.text();
 	}
 
-	const base = process.env.HOAGIE_API_URL ?? '';
-	return proxyRequest(`${base}${path}/${search}`, init);
-}
-
-async function proxyRequest(url: string, init: RequestInit) {
+	let response: Response;
 	try {
-		const response = await fetch(url, init);
-
-		if (response.status === 204) {
-			return new NextResponse(null, { status: 204 });
-		}
-
-		const text = await response.text();
-		if (!response.ok) {
-			let body: unknown = text;
-			try {
-				body = JSON.parse(text);
-			} catch {
-				// Non-JSON error body; forward the raw text.
-			}
-			return NextResponse.json(typeof body === 'string' ? { error: body } : body, {
-				status: response.status,
-			});
-		}
-
-		return new NextResponse(text, {
-			status: response.status,
-			headers: { 'Content-Type': 'application/json' },
-		});
+		response = await apiFetch(backendPath, init);
 	} catch (error) {
-		return NextResponse.json({ error: errorMessage(error) }, { status: 502 });
+		const message = errorMessage(error);
+		// Misconfiguration (no HOAGIE_API_URL) is a server error; anything else means the
+		// backend could not be reached or the token could not be issued.
+		const status = message.includes('HOAGIE_API_URL') ? 500 : 502;
+		return NextResponse.json({ error: message }, { status });
 	}
+
+	if (response.status === 204) {
+		return new NextResponse(null, { status: 204 });
+	}
+
+	const text = await response.text();
+	if (!response.ok) {
+		let body: unknown = text;
+		try {
+			body = JSON.parse(text);
+		} catch {
+			// Non-JSON error body; forward the raw text.
+		}
+		return NextResponse.json(typeof body === 'string' ? { error: body } : body, {
+			status: response.status,
+		});
+	}
+
+	return new NextResponse(text, {
+		status: response.status,
+		headers: { 'Content-Type': 'application/json' },
+	});
 }
 
 export const GET = handler;

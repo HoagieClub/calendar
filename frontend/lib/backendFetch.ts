@@ -1,9 +1,12 @@
 /**
- * @overview Thin fetch wrapper for calls to the Hoagie Calendar backend.
+ * @overview Browser-side fetch wrapper for calls to the Hoagie Calendar backend.
  *
- * Requests go through the Next.js route at `app/api/hoagie/[...path]`, which attaches the
- * Auth0 access token and forwards to `HOAGIE_API_URL`. Pass backend paths exactly as Django
- * routes them, e.g. `apiFetch('/event/')` or `apiFetch('/category/')`.
+ * This runs in client components. It never talks to Django directly: requests go to the Next.js
+ * route at `app/api/hoagie/[...path]`, which uses the server-only `apiFetch` in `lib/api.ts` to
+ * attach the Auth0 access token and build the backend URL. Pass backend paths exactly as Django
+ * routes them, e.g. `backendFetch('/event/')` or `backendFetch('/category/')`.
+ *
+ * Not to be confused with `apiFetch` in `lib/api.ts`, which is server-only.
  *
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
@@ -14,7 +17,8 @@
  * and/or sell copies of the software. This software is provided "as-is", without warranty of any kind.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '/api/hoagie';
+/** The Next.js proxy route that fronts the backend. */
+const PROXY_BASE = '/api/hoagie';
 
 export class ApiError extends Error {
 	status: number;
@@ -28,7 +32,7 @@ export class ApiError extends Error {
 	}
 }
 
-export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
+export interface BackendFetchOptions extends Omit<RequestInit, 'body'> {
 	/** JSON-serialisable body. Objects are stringified and sent as application/json. */
 	body?: object | string;
 }
@@ -66,9 +70,9 @@ function describeError(body: unknown, status: number): string {
  * Fetch JSON from the backend. Throws `ApiError` on any non-2xx response so callers can
  * `try/catch` and never report success for a failed request.
  */
-export async function apiFetch<T = unknown>(
+export async function backendFetch<T = unknown>(
 	path: string,
-	options: ApiFetchOptions = {}
+	options: BackendFetchOptions = {}
 ): Promise<T> {
 	const { body, headers, ...rest } = options;
 	// Next.js redirects `/api/hoagie/event/` to `/api/hoagie/event` (308), so strip the trailing
@@ -77,12 +81,15 @@ export async function apiFetch<T = unknown>(
 	const trimmed = rawPath.replace(/\/+$/, '');
 	const normalisedPath = `${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}${query ? `?${query}` : ''}`;
 
-	const response = await fetch(`${API_BASE}${normalisedPath}`, {
+	// Build real Headers so a caller may pass a plain object, an array, or a Headers instance.
+	const requestHeaders = new Headers(headers);
+	if (!requestHeaders.has('Content-Type')) {
+		requestHeaders.set('Content-Type', 'application/json');
+	}
+
+	const response = await fetch(`${PROXY_BASE}${normalisedPath}`, {
 		...rest,
-		headers: {
-			'Content-Type': 'application/json',
-			...headers,
-		},
+		headers: requestHeaders,
 		body: body === undefined || typeof body === 'string' ? body : JSON.stringify(body),
 	});
 
@@ -103,4 +110,4 @@ export async function apiFetch<T = unknown>(
 	return parsed as T;
 }
 
-export default apiFetch;
+export default backendFetch;

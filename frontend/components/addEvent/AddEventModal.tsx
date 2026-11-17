@@ -3,7 +3,7 @@
  *
  * Two-column layout at desktop width (~880px), single column below 1024px.
  * Left: name, start row, end row, location, description. Right: organizer, category grid, submit.
- * Submits `POST /event/` through `apiFetch` with local-offset ISO datetimes.
+ * Submits `POST /event/` through `backendFetch` with local-offset ISO datetimes.
  *
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  *
@@ -20,7 +20,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 
 import { toast } from 'sonner';
 
-import { apiFetch } from '@/lib/apiFetch';
+import { backendFetch } from '@/lib/backendFetch';
 
 export interface Category {
 	id: number;
@@ -68,6 +68,8 @@ interface FormState {
 type FieldErrors = Partial<Record<keyof FormState, string>>;
 
 const MAX_TEXT = 100;
+// The backend serializer requires at least 3 characters for name, location and organizer.
+const MIN_TEXT = 3;
 const MAX_DESCRIPTION = 10000;
 
 /**
@@ -172,6 +174,8 @@ function validate(form: FormState): FieldErrors {
 
 	if (!name) {
 		errors.name = 'Event name is required.';
+	} else if (name.length < MIN_TEXT) {
+		errors.name = `Minimum ${MIN_TEXT} characters.`;
 	} else if (name.length > MAX_TEXT) {
 		errors.name = `Maximum ${MAX_TEXT} characters.`;
 	}
@@ -197,8 +201,8 @@ function validate(form: FormState): FieldErrors {
 
 	if (!location) {
 		errors.location = 'Location is required.';
-	} else if (location.length < 3) {
-		errors.location = 'Minimum 3 characters.';
+	} else if (location.length < MIN_TEXT) {
+		errors.location = `Minimum ${MIN_TEXT} characters.`;
 	} else if (location.length > MAX_TEXT) {
 		errors.location = `Maximum ${MAX_TEXT} characters.`;
 	}
@@ -211,6 +215,8 @@ function validate(form: FormState): FieldErrors {
 
 	if (!host) {
 		errors.host = 'Organizer is required.';
+	} else if (host.length < MIN_TEXT) {
+		errors.host = `Minimum ${MIN_TEXT} characters.`;
 	} else if (host.length > MAX_TEXT) {
 		errors.host = `Maximum ${MAX_TEXT} characters.`;
 	}
@@ -283,7 +289,7 @@ export function AddEventModal({ open, onClose, onCreated }: AddEventModalProps) 
 		let cancelled = false;
 		setCategoriesLoading(true);
 		setCategoriesError(null);
-		apiFetch<Category[]>('/category/')
+		backendFetch<Category[]>('/category/')
 			.then((data) => {
 				if (!cancelled) {
 					setCategories(Array.isArray(data) ? data : []);
@@ -370,7 +376,7 @@ export function AddEventModal({ open, onClose, onCreated }: AddEventModalProps) 
 
 		setSubmitting(true);
 		try {
-			const created = await apiFetch<CreatedEvent>('/event/', {
+			const created = await backendFetch<CreatedEvent>('/event/', {
 				method: 'POST',
 				body: payload,
 			});

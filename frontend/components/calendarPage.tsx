@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { useTheme } from 'evergreen-ui';
 
+import { AddEventModal } from '@/components/addEvent/AddEventModal';
 import DayView from '@/components/DayView';
 import MonthView from '@/components/monthView/MonthView';
 import WeekView from '@/components/weekView/weekView';
@@ -146,7 +147,10 @@ export default function CalendarPage({
 	onAddEvent,
 }: {
 	onSelect?: (event: CalendarEvent) => void;
-	/** Wires the "Add an event." link in the empty Day and Week states. */
+	/**
+	 * Called by the "+ New Event" button and the "Add an event." link in the empty Day and
+	 * Week states. Defaults to opening the built-in create modal.
+	 */
 	onAddEvent?: () => void;
 }) {
 	const { colors } = useTheme();
@@ -155,6 +159,11 @@ export default function CalendarPage({
 
 	const [view, setView] = useState<ViewType>('Week');
 	const [currentDate, setCurrentDate] = useState(new Date());
+	const [isAddOpen, setIsAddOpen] = useState(false);
+	// Bumped after a successful create so the visible view refetches without a reload.
+	const [eventsVersion, setEventsVersion] = useState(0);
+
+	const openAddEvent = onAddEvent ?? (() => setIsAddOpen(true));
 
 	const goToToday = () => setCurrentDate(new Date());
 	const goBack = () => setCurrentDate(navigate(view, currentDate, -1));
@@ -237,7 +246,24 @@ export default function CalendarPage({
 				{/* Spacer */}
 				<div style={{ flex: 1 }} />
 
-				{/* Right side: icon buttons + view switcher */}
+				{/* Right side: new event, icon buttons, view switcher */}
+				<button
+					onClick={openAddEvent}
+					style={{
+						height: 32,
+						padding: '0 14px',
+						borderRadius: 8,
+						border: 'none',
+						background: TEAL,
+						color: colors.white,
+						fontSize: 13,
+						fontWeight: 600,
+						cursor: 'pointer',
+						marginRight: 4,
+					}}
+				>
+					+ New Event
+				</button>
 				<button style={iconButtonStyle} title='Search'>
 					<SearchIcon />
 				</button>
@@ -287,12 +313,22 @@ export default function CalendarPage({
 			<div style={{ flex: 1, overflow: 'hidden', padding: 16 }}>
 				{view === 'Day' && (
 					<div style={{ height: '100%' }}>
-						<DayView date={currentDate} onSelect={onSelect} onAddEvent={onAddEvent} />
+						<DayView
+							date={currentDate}
+							onSelect={onSelect}
+							onAddEvent={openAddEvent}
+							refreshToken={eventsVersion}
+						/>
 					</div>
 				)}
 				{view === 'Week' && (
 					<div style={{ height: '100%' }}>
-						<WeekView date={currentDate} onSelect={onSelect} onAddEvent={onAddEvent} />
+						<WeekView
+							date={currentDate}
+							onSelect={onSelect}
+							onAddEvent={openAddEvent}
+							refreshToken={eventsVersion}
+						/>
 					</div>
 				)}
 				{view === 'Month' && (
@@ -301,10 +337,17 @@ export default function CalendarPage({
 							month={currentDate.getMonth()}
 							year={currentDate.getFullYear()}
 							onSelect={onSelect}
+							refreshToken={eventsVersion}
 						/>
 					</div>
 				)}
 			</div>
+
+			<AddEventModal
+				open={isAddOpen}
+				onClose={() => setIsAddOpen(false)}
+				onCreated={() => setEventsVersion((n) => n + 1)}
+			/>
 		</div>
 	);
 }

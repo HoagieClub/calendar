@@ -43,9 +43,11 @@ interface MonthViewProps {
 	month?: number;
 	year?: number;
 	onSelect?: (event: CalendarEvent) => void;
+	/** Bump to refetch the current range without a reload (see useEvents). */
+	refreshToken?: number;
 }
 
-export default function MonthView({ month, year, onSelect }: MonthViewProps) {
+export default function MonthView({ month, year, onSelect, refreshToken }: MonthViewProps) {
 	const { colors } = useTheme();
 
 	const now = new Date();
@@ -56,7 +58,7 @@ export default function MonthView({ month, year, onSelect }: MonthViewProps) {
 
 	const startTime = new Date(displayYear, displayMonth, 1);
 	const endTime = new Date(displayYear, displayMonth + 1, 0, 23, 59, 59);
-	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
 
 	return (
 		<div

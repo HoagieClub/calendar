@@ -156,10 +156,13 @@ export default function WeekView({
 	date,
 	onSelect,
 	onAddEvent,
+	refreshToken,
 }: {
 	date: Date;
 	onSelect?: (event: CalendarEvent) => void;
 	onAddEvent?: () => void;
+	/** Bump to refetch the current range without a reload (see useEvents). */
+	refreshToken?: number;
 }) {
 	const { colors } = useTheme();
 	const scrollRef = useRef<HTMLDivElement>(null);
@@ -171,7 +174,7 @@ export default function WeekView({
 	const startTime = weekDates[0];
 	const endTime = new Date(weekDates[6]);
 	endTime.setHours(23, 59, 59);
-	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
 
 	useEffect(() => {
 		if (scrollRef.current) {

@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { AddEventModal, type CreatedEvent } from '@/components/addEvent/AddEventModal';
-import { apiFetch } from '@/lib/apiFetch';
+import { backendFetch } from '@/lib/backendFetch';
 
 function formatRange(start: string, end: string): string {
 	const s = new Date(start);
@@ -46,7 +46,7 @@ export default function AddEventTestPage() {
 				start_time: start.toISOString(),
 				end_time: end.toISOString(),
 			});
-			const data = await apiFetch<CreatedEvent[]>(`/event/?${params.toString()}`);
+			const data = await backendFetch<CreatedEvent[]>(`/event/?${params.toString()}`);
 			setServerEvents(data);
 		} catch (error: unknown) {
 			toast.error('Could not load events', {
