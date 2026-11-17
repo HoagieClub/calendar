@@ -1,6 +1,8 @@
 import { auth0 } from './auth0';
 
-const HOAGIE_API_URL = process.env.HOAGIE_API_URL;
+// Accept the base URL with or without a trailing slash; callers always pass paths that
+// start with `/`, so the host can never be altered by the path.
+const HOAGIE_API_URL = process.env.HOAGIE_API_URL?.replace(/\/+$/, '');
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
 	if (!HOAGIE_API_URL) {

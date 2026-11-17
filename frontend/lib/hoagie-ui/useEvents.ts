@@ -822,16 +822,22 @@ type Settled = { key: string; events: CalendarEvent[]; error: string | null };
 
 const USE_FAKE_FALLBACK = process.env.NEXT_PUBLIC_USE_FAKE_EVENTS === 'true';
 
-export function useEvents(startTime: Date, endTime: Date): UseEventsResult {
+/**
+ * Fetch events overlapping [startTime, endTime].
+ *
+ * @param refreshToken - Bump this number to refetch the same range, e.g. after creating an
+ * event, without a page reload. Defaults to 0.
+ */
+export function useEvents(startTime: Date, endTime: Date, refreshToken = 0): UseEventsResult {
 	const [settled, setSettled] = useState<Settled | null>(null);
 	const [attempt, setAttempt] = useState(0);
 
 	const start = startTime.getTime();
 	const end = endTime.getTime();
-	// One key per (range, attempt). Whatever settled for a different key is stale, so
-	// navigating to a new range or pressing Retry reads as loading without any
-	// setState call inside the effect.
-	const key = `${start}-${end}-${attempt}`;
+	// One key per (range, attempt, refreshToken). Whatever settled for a different key is
+	// stale, so navigating to a new range, pressing Retry, or bumping the refresh token reads
+	// as loading without any setState call inside the effect.
+	const key = `${start}-${end}-${attempt}-${refreshToken}`;
 
 	useEffect(() => {
 		let cancelled = false;

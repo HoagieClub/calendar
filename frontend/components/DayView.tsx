@@ -46,16 +46,19 @@ export function DayView({
 	date,
 	onSelect,
 	onAddEvent,
+	refreshToken,
 }: {
 	date: Date;
 	onSelect?: (event: ApiEvent) => void;
 	onAddEvent?: () => void;
+	/** Bump to refetch the current range without a reload (see useEvents). */
+	refreshToken?: number;
 }) {
 	const startTime = new Date(date);
 	startTime.setHours(0, 0, 0, 0);
 	const endTime = new Date(date);
 	endTime.setHours(23, 59, 59, 0);
-	const { events, isLoading, error, retry } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
 	const cardEvents = events.map(toCardEvent);
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 	const hasAutoScrolledRef = useRef(false);
