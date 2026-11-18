@@ -27,6 +27,10 @@ class Event(models.Model):
 	ordering = models.PositiveIntegerField(default=0)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
+	attendees = models.ManyToManyField(User, related_name="events_attending", blank=True)
+
+	def attending_count(self) -> int:
+		return self.attendees.count()
 
 	def __str__(self) -> str:
 		return self.name
