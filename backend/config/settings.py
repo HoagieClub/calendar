@@ -134,9 +134,11 @@ AUTHENTICATION_BACKENDS = ["hoagiecalendar.api.auth.auth.NoPasswordBackend"]
 AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN", "")
 AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE", "")
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "https://calendar.hoagie.io", "https://calendar-preview.hoagie.io"] + [
-	origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()
-]
+CORS_ALLOWED_ORIGINS = [
+	"http://localhost:3000",
+	"https://calendar.hoagie.io",
+	"https://calendar-preview.hoagie.io",
+] + [origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()]
 
 REST_FRAMEWORK = {
 	"DEFAULT_AUTHENTICATION_CLASSES": [

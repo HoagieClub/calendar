@@ -52,8 +52,17 @@ class Auth0JWTAuthentication(BaseAuthentication):
 		domain = settings.AUTH0_DOMAIN
 		audience = settings.AUTH0_AUDIENCE
 		parsed = urlparse(f"https://{domain}")
-		if (not audience or not domain or parsed.netloc != domain or not parsed.hostname
-				or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment):
+		if (
+			not audience
+			or not domain
+			or parsed.netloc != domain
+			or not parsed.hostname
+			or parsed.username
+			or parsed.password
+			or parsed.path
+			or parsed.query
+			or parsed.fragment
+		):
 			raise ImproperlyConfigured("Set AUTH0_DOMAIN to a hostname and configure AUTH0_AUDIENCE.")
 		issuer = f"https://{domain}/"
 
@@ -100,8 +109,13 @@ class Auth0JWTAuthentication(BaseAuthentication):
 			with transaction.atomic():
 				user, _ = get_user_model().objects.get_or_create(
 					auth0_subject=subject,
-					defaults={"username": username, "email": email, "first_name": first_name,
-						"last_name": last_name, "password": make_password(None)},
+					defaults={
+						"username": username,
+						"email": email,
+						"first_name": first_name,
+						"last_name": last_name,
+						"password": make_password(None),
+					},
 				)
 				if not user.is_active:
 					raise exceptions.AuthenticationFailed("User account is inactive.")

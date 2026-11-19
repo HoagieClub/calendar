@@ -42,8 +42,11 @@ class Auth0AuthenticationTests(TestCase):
 
 	def event_data(self):
 		return {
-			"name": "Campus event", "location": "Frist", "host": "Club",
-			"start": "2026-11-20T12:00:00Z", "end": "2026-11-20T13:00:00Z",
+			"name": "Campus event",
+			"location": "Frist",
+			"host": "Club",
+			"start": "2026-11-20T12:00:00Z",
+			"end": "2026-11-20T13:00:00Z",
 			"description": "Hello",
 		}
 
@@ -53,8 +56,10 @@ class Auth0AuthenticationTests(TestCase):
 		response = self.client.post("/event/", self.event_data(), format="json")
 		self.assertEqual(response.status_code, 201)
 		user = get_user_model().objects.get(auth0_subject="auth0|alice")
-		self.assertEqual((user.username, user.email, user.first_name, user.last_name),
-			("alice", "alice@princeton.edu", "Alice", "Smith"))
+		self.assertEqual(
+			(user.username, user.email, user.first_name, user.last_name),
+			("alice", "alice@princeton.edu", "Alice", "Smith"),
+		)
 		self.assertFalse(user.has_usable_password())
 		self.assertEqual(Event.objects.get().owner, user)
 		self.assertEqual(self.client.get("/user/events/").status_code, 200)
@@ -62,9 +67,11 @@ class Auth0AuthenticationTests(TestCase):
 
 	def test_invalid_tokens_cannot_provision_users(self):
 		for token in (
-			self.token(aud="other-api"), self.token(iss="https://other.example/"),
+			self.token(aud="other-api"),
+			self.token(iss="https://other.example/"),
 			self.token(exp=datetime.now(timezone.utc) - timedelta(seconds=1)),
-			self.token(gty="client-credentials"), "invalid.token.value",
+			self.token(gty="client-credentials"),
+			"invalid.token.value",
 		):
 			with self.subTest(token=token):
 				self.authorize(token)
@@ -97,7 +104,9 @@ class Auth0AuthenticationTests(TestCase):
 	def test_profile_changes_and_netid_conflicts(self):
 		self.authorize(self.token())
 		self.assertEqual(self.client.get("/user/events/").status_code, 200)
-		self.authorize(self.token(**{"https://hoagie.io/email": "alice2@princeton.edu", "https://hoagie.io/name": "Alice Jones"}))
+		self.authorize(
+			self.token(**{"https://hoagie.io/email": "alice2@princeton.edu", "https://hoagie.io/name": "Alice Jones"})
+		)
 		self.assertEqual(self.client.get("/user/events/").status_code, 200)
 		user = get_user_model().objects.get(auth0_subject="auth0|alice")
 		self.assertEqual((user.username, user.last_name), ("alice2", "Jones"))
@@ -111,10 +120,18 @@ class Auth0AuthenticationTests(TestCase):
 		self.assertFalse(get_user_model().objects.exists())
 
 	def test_cors_preflight(self):
-		response = self.client.options("/event/", HTTP_ORIGIN="http://localhost:3000",
-			HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST", HTTP_ACCESS_CONTROL_REQUEST_HEADERS="authorization,content-type")
+		response = self.client.options(
+			"/event/",
+			HTTP_ORIGIN="http://localhost:3000",
+			HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST",
+			HTTP_ACCESS_CONTROL_REQUEST_HEADERS="authorization,content-type",
+		)
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual(response["Access-Control-Allow-Origin"], "http://localhost:3000")
-		response = self.client.options("/event/", HTTP_ORIGIN="https://calendar-preview.hoagie.io",
-			HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST", HTTP_ACCESS_CONTROL_REQUEST_HEADERS="authorization")
+		response = self.client.options(
+			"/event/",
+			HTTP_ORIGIN="https://calendar-preview.hoagie.io",
+			HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST",
+			HTTP_ACCESS_CONTROL_REQUEST_HEADERS="authorization",
+		)
 		self.assertEqual(response["Access-Control-Allow-Origin"], "https://calendar-preview.hoagie.io")
