@@ -4,8 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Pane, Text, majorScale } from 'evergreen-ui';
 
+import AllDayStrip, { useScrollbarWidth } from '@/components/AllDayStrip';
 import Event, { type CalendarEvent, type EventCategory } from '@/components/Event';
 import { Empty, ErrorState, Loading } from '@/components/states';
+import { isAllDayEvent } from '@/lib/allDayEvents';
 import { useEvents } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent as ApiEvent } from '@/types';
 
@@ -59,8 +61,10 @@ export function DayView({
 	const endTime = new Date(date);
 	endTime.setHours(23, 59, 59, 0);
 	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
-	const cardEvents = events.map(toCardEvent);
+	const timedEvents = events.filter((event) => !isAllDayEvent(event));
+	const cardEvents = timedEvents.map(toCardEvent);
 	const scrollRef = useRef<HTMLDivElement | null>(null);
+	const scrollbarWidth = useScrollbarWidth(scrollRef);
 	const hasAutoScrolledRef = useRef(false);
 	const [now, setNow] = useState(() => {
 		const d = new Date();
@@ -99,7 +103,15 @@ export function DayView({
 
 	return (
 		<Pane paddingX={majorScale(2)} paddingY={majorScale(2)} width='100%'>
-			<Pane position='relative' borderRadius={16} overflow='hidden'>
+			<Pane position='relative' borderRadius={16}>
+				<AllDayStrip
+					key={date.toDateString()}
+					events={events}
+					dates={[date]}
+					gutter={TIME_LABEL_WIDTH}
+					rightInset={scrollbarWidth + 16}
+					onSelect={onSelect}
+				/>
 				<Pane
 					ref={scrollRef}
 					background='#f8fafc'
@@ -195,7 +207,7 @@ export function DayView({
 										left={`calc(${lane * (100 / EVENT_LANES)}% + 8px)`}
 										width={laneWidth}
 										height={Math.max(height - 4 - topGap - bottomGap, 52)}
-										onClick={() => onSelect?.(events[index])}
+										onClick={() => onSelect?.(timedEvents[index])}
 									/>
 								);
 							})}

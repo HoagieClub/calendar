@@ -30,6 +30,36 @@ const FRI = SUN + 5;
 const SAT = SUN + 6;
 
 const PLACEHOLDER_EVENTS: CalendarEvent[] = [
+	// Friday through next Sunday: crosses the week boundary for clipping tests.
+	{
+		id: 'multi-day-test',
+		name: 'Weekend Hackathon (Fri–Sun)',
+		start: d(FRI, 18),
+		end: d(SAT + 1, 17),
+		location: 'Friend Center',
+		description: 'Multi-day test event: Friday 6 PM through Sunday 5 PM.',
+		host: 'HackPrinceton',
+		owner: '',
+		category: 'academic',
+		from_mail: false,
+		ordering: 0,
+	},
+
+	// Overlaps the hackathon and Friday's all-day event to exercise overflow.
+	{
+		id: 'multi-day-overflow-test',
+		name: 'Campus Arts Festival (Fri–Sun)',
+		start: d(FRI, 17),
+		end: d(SAT + 1, 20),
+		location: 'Lewis Center',
+		description: 'Overflow test: overlaps the weekend hackathon and Friday all-day event.',
+		host: 'Arts Council',
+		owner: '',
+		category: 'social',
+		from_mail: false,
+		ordering: 0,
+	},
+
 	// ── All-day events ──
 	{
 		id: 'a1',
@@ -844,15 +874,8 @@ export function useEvents(startTime: Date, endTime: Date, refreshToken = 0): Use
 		const fake = PLACEHOLDER_EVENTS.filter(
 			(e) => new Date(e.start).getTime() <= end && new Date(e.end).getTime() >= start
 		);
-		const params = new URLSearchParams({
-			start_time: new Date(start).toISOString(),
-			end_time: new Date(end).toISOString(),
-		});
-		fetch(`/api/event?${params}`)
-			.then((res) => {
-				if (!res.ok) throw new Error(`Request failed (${res.status})`);
-				return res.json();
-			})
+		// Temporary: use the existing sample events while the backend is unavailable.
+		Promise.resolve(fake)
 			.then((data: unknown) => {
 				if (!Array.isArray(data)) throw new Error('Unexpected response');
 				if (cancelled) return;
