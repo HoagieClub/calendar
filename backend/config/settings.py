@@ -47,9 +47,11 @@ INSTALLED_APPS = [
 	# Local apps
 	"hoagiecalendar",
 	"rest_framework",
+	"corsheaders",
 ]
 
 MIDDLEWARE = [
+	"corsheaders.middleware.CorsMiddleware",
 	"django.middleware.security.SecurityMiddleware",
 	"django.contrib.sessions.middleware.SessionMiddleware",
 	"django.middleware.common.CommonMiddleware",
@@ -126,3 +128,21 @@ STATIC_URL = "static/"
 
 # Custom User Model
 AUTH_USER_MODEL = "hoagiecalendar.User"
+# End users authenticate only through Auth0; do not enable Django password login.
+AUTHENTICATION_BACKENDS = ["hoagiecalendar.api.auth.auth.NoPasswordBackend"]
+
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN", "")
+AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE", "")
+
+CORS_ALLOWED_ORIGINS = [
+	"http://localhost:3000",
+	"https://calendar.hoagie.io",
+	"https://calendar-preview.hoagie.io",
+] + [origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()]
+
+REST_FRAMEWORK = {
+	"DEFAULT_AUTHENTICATION_CLASSES": [
+		"hoagiecalendar.api.auth.auth.Auth0JWTAuthentication",
+	],
+	"DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+}

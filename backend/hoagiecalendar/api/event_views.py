@@ -165,7 +165,7 @@ class EventDetailView(APIView):
 
 	def put(self, request, event_id) -> Response:
 		# Logic to update details of an event
-		event = get_object_or_404(Event, id=event_id)
+		event = get_object_or_404(Event, id=event_id, owner=request.user)
 		serializer = EventSerializer(event, data=request.data)
 		serializer.is_valid(raise_exception=True)
 		serializer.save()
@@ -173,6 +173,6 @@ class EventDetailView(APIView):
 
 	def delete(self, request, event_id) -> Response:
 		# Logic to delete an event
-		event = get_object_or_404(Event, id=event_id)
+		event = get_object_or_404(Event, id=event_id, owner=request.user)
 		event.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
