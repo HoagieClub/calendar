@@ -96,3 +96,17 @@ await test('exclusive midnight endings retain timed duration and exclude the fol
 	assert.ok(isAllDayEvent(event('full-day', '2026-11-20T00:00:00', '2026-11-21T00:00:00')));
 	assert.equal(endDayNumber('2027-01-01T00:00:00'), dayNumber('2026-12-31T00:00:00'));
 });
+
+await test('formats midnight endings without adding spurious minutes', () => {
+	const formatterContext = { exports: {} };
+	const formatter = ts.transpileModule(
+		readFileSync(new URL('./formatEventTime.ts', import.meta.url), 'utf8'),
+		{ compilerOptions: { module: ts.ModuleKind.CommonJS } }
+	).outputText;
+	vm.runInNewContext(formatter, formatterContext);
+	const { formatEventTime } = formatterContext.exports;
+	assert.equal(formatEventTime(23, 24), '11 PM - 12 AM');
+	assert.equal(formatEventTime(22.5, 24), '10:30 PM - 12 AM');
+	assert.equal(formatEventTime(0, 0.5), '12 AM - 12:30 AM');
+	assert.equal(formatEventTime(11.5, 12), '11:30 AM - 12 PM');
+});
