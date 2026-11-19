@@ -7,7 +7,7 @@ import { useTheme } from 'evergreen-ui';
 import { AddEventModal } from '@/components/addEvent/AddEventModal';
 import DayView from '@/components/DayView';
 import MonthView from '@/components/monthView/MonthView';
-import CalendarSidebar from '@/components/sidebar/CalendarSidebar';
+import CalendarSidebar, { SIDEBAR_ID } from '@/components/sidebar/CalendarSidebar';
 import type { DateRange } from '@/components/sidebar/MiniCalendar';
 import WeekView from '@/components/weekView/weekView';
 import type { CalendarEvent } from '@/types';
@@ -67,6 +67,24 @@ function navigate(view: ViewType, date: Date, direction: 1 | -1): Date {
 }
 
 // Icons as simple SVG components
+function SidebarIcon() {
+	return (
+		<svg
+			width='18'
+			height='18'
+			viewBox='0 0 24 24'
+			fill='none'
+			stroke='currentColor'
+			strokeWidth='2'
+			strokeLinecap='round'
+			strokeLinejoin='round'
+		>
+			<rect x='3' y='3' width='18' height='18' rx='2' />
+			<line x1='9' y1='3' x2='9' y2='21' />
+		</svg>
+	);
+}
+
 function SearchIcon() {
 	return (
 		<svg
@@ -174,6 +192,7 @@ export default function CalendarPage({
 	const [view, setView] = useState<ViewType>('Week');
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [isAddOpen, setIsAddOpen] = useState(false);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	// Bumped after a successful create so the visible view refetches without a reload.
 	const [eventsVersion, setEventsVersion] = useState(0);
 
@@ -225,6 +244,18 @@ export default function CalendarPage({
 					gap: 8,
 				}}
 			>
+				{/* Sidebar toggle. It lives here, not in the sidebar, so it stays put when the sidebar is hidden. */}
+				<button
+					style={iconButtonStyle}
+					onClick={() => setIsSidebarOpen((open) => !open)}
+					title={isSidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+					aria-label='Sidebar'
+					aria-expanded={isSidebarOpen}
+					aria-controls={SIDEBAR_ID}
+				>
+					<SidebarIcon />
+				</button>
+
 				{/* Navigation: back, Today, forward, date label */}
 				<button style={iconButtonStyle} onClick={goBack} title='Previous'>
 					<ChevronLeft />
@@ -326,6 +357,7 @@ export default function CalendarPage({
 			<div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
 				{/* ── Sidebar ── */}
 				<CalendarSidebar
+					open={isSidebarOpen}
 					selectedDate={currentDate}
 					visibleRange={getVisibleRange(view, currentDate)}
 					onDateChange={setCurrentDate}
