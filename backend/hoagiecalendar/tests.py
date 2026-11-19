@@ -25,8 +25,13 @@ class AttendeesMigrationTests(TransactionTestCase):
 		old_user = old_apps.get_model("hoagiecalendar", "User").objects.create(username="alice")
 		old_event_model = old_apps.get_model("hoagiecalendar", "Event")
 		event = old_event_model.objects.create(
-			owner_id=old_user.pk, name="Event", location="Frist", host="Club", description="",
-			start="2026-11-20T12:00:00Z", end="2026-11-20T13:00:00Z",
+			owner_id=old_user.pk,
+			name="Event",
+			location="Frist",
+			host="Club",
+			description="",
+			start="2026-11-20T12:00:00Z",
+			end="2026-11-20T13:00:00Z",
 		)
 		event.attendees.add(old_user)
 		MigrationExecutor(connection).migrate([second])
@@ -202,6 +207,8 @@ class Auth0AuthenticationTests(TestCase):
 			HTTP_ACCESS_CONTROL_REQUEST_HEADERS="authorization",
 		)
 		self.assertEqual(response["Access-Control-Allow-Origin"], "https://calendar-preview.hoagie.io")
+
+
 from datetime import timedelta
 
 from django.utils import timezone
