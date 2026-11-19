@@ -104,26 +104,26 @@ class Auth0JWTAuthentication(BaseAuthentication):
 		first_name = name_parts[0][:150]
 		last_name = name_parts[1][:150] if len(name_parts) > 1 else ""
 
-		# The verified subject owns the account. Never link accounts by email or netid.
+		# Link a legacy account once; never replace an existing Auth0 subject.
 		try:
 			with transaction.atomic():
-				user, _ = get_user_model().objects.get_or_create(
-					auth0_subject=subject,
-					defaults={
-						"username": username,
-						"email": email,
-						"first_name": first_name,
-						"last_name": last_name,
-						"password": make_password(None),
-					},
-				)
+				users = get_user_model().objects.select_for_update()
+				user = users.filter(auth0_subject=subject).first()
+				if user is None:
+					user, _ = users.get_or_create(
+						username=username,
+						defaults={"auth0_subject": subject, "password": make_password(None)},
+					)
 				if not user.is_active:
 					raise exceptions.AuthenticationFailed("User account is inactive.")
+				if user.auth0_subject not in (None, "", subject):
+					raise exceptions.AuthenticationFailed("This netid is already associated with another account.")
+				user.auth0_subject = subject
 				user.username = username
 				user.email = email
 				user.first_name = first_name
 				user.last_name = last_name
-				user.save(update_fields=["username", "email", "first_name", "last_name"])
+				user.save(update_fields=["auth0_subject", "username", "email", "first_name", "last_name"])
 		except IntegrityError as exc:
 			raise exceptions.AuthenticationFailed("This netid is already associated with another account.") from exc
 		return user

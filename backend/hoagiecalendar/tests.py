@@ -5,10 +5,42 @@ from unittest.mock import patch
 import jwt
 from cryptography.hazmat.primitives.asymmetric import rsa
 from django.contrib.auth import authenticate, get_user_model
-from django.test import TestCase, override_settings
+from django.db import connection
+from django.db.migrations.executor import MigrationExecutor
+from django.test import TestCase, TransactionTestCase, override_settings
 from rest_framework.test import APIClient
 
 from .models import Event
+
+
+class AttendeesMigrationTests(TransactionTestCase):
+	def test_attendees_table_is_removed_for_fresh_and_existing_migrations(self):
+		initial = ("hoagiecalendar", "0001_initial")
+		second = ("hoagiecalendar", "0002_alter_event_options_remove_event_attendees_and_more")
+		latest = ("hoagiecalendar", "0003_remove_legacy_attendees_table")
+		self.addCleanup(lambda: MigrationExecutor(connection).migrate([latest]))
+		executor = MigrationExecutor(connection)
+		executor.migrate([initial])
+		old_apps = executor.loader.project_state([initial]).apps
+		old_user = old_apps.get_model("hoagiecalendar", "User").objects.create(username="alice")
+		old_event_model = old_apps.get_model("hoagiecalendar", "Event")
+		event = old_event_model.objects.create(
+			owner_id=old_user.pk, name="Event", location="Frist", host="Club", description="",
+			start="2026-11-20T12:00:00Z", end="2026-11-20T13:00:00Z",
+		)
+		event.attendees.add(old_user)
+		MigrationExecutor(connection).migrate([second])
+		self.assertNotIn("Event_attendees", connection.introspection.table_names())
+
+		# Simulate a database where the previous, state-only version of 0002 ran.
+		through = old_event_model._meta.get_field("attendees").remote_field.through
+		with connection.schema_editor() as editor:
+			editor.create_model(through)
+		through.objects.create(event_id=event.pk, user_id=old_user.pk)
+		MigrationExecutor(connection).migrate([latest])
+		self.assertNotIn("Event_attendees", connection.introspection.table_names())
+		Event.objects.get(pk=event.pk).delete()
+		get_user_model().objects.get(pk=old_user.pk).delete()
 
 
 @override_settings(AUTH0_DOMAIN="example.auth0.com", AUTH0_AUDIENCE="calendar-api")
@@ -78,6 +110,20 @@ class Auth0AuthenticationTests(TestCase):
 				self.assertEqual(self.client.post("/event/", self.event_data(), format="json").status_code, 401)
 		self.assertFalse(get_user_model().objects.exists())
 
+	def test_event_reads_require_authentication(self):
+		self.authorize(self.token())
+		event_id = self.client.post("/event/", self.event_data(), format="json").data["id"]
+		list_url = "/event/?start_time=2026-11-20T00:00:00Z&end_time=2026-11-21T00:00:00Z"
+		detail_url = f"/event/{event_id}/"
+		for url in (list_url, detail_url):
+			with self.subTest(url=url):
+				self.client.credentials()
+				self.assertEqual(self.client.get(url).status_code, 401)
+				self.authorize("invalid.token.value")
+				self.assertEqual(self.client.get(url).status_code, 401)
+				self.authorize(self.token())
+				self.assertEqual(self.client.get(url).status_code, 200)
+
 	def test_bad_signature_and_inactive_user_are_rejected(self):
 		self.mock_jwks.return_value.get_signing_key_from_jwt.return_value = SimpleNamespace(
 			key=rsa.generate_private_key(public_exponent=65537, key_size=2048).public_key()
@@ -96,6 +142,27 @@ class Auth0AuthenticationTests(TestCase):
 		self.assertEqual(self.client.put(f"/event/{event_id}/", self.event_data(), format="json").status_code, 404)
 		self.authorize(self.token())
 		self.assertEqual(self.client.delete(f"/event/{event_id}/").status_code, 204)
+
+	def test_legacy_user_is_linked_and_keeps_event_ownership(self):
+		user = get_user_model().objects.create_user(username="alice")
+		data = self.event_data()
+		event = Event.objects.create(owner=user, **data)
+		self.authorize(self.token())
+		response = self.client.get("/user/events/")
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual([item["id"] for item in response.data], [event.id])
+		user.refresh_from_db()
+		self.assertEqual(user.auth0_subject, "auth0|alice")
+		self.assertEqual(get_user_model().objects.count(), 1)
+		self.assertEqual(self.client.put(f"/event/{event.id}/", data, format="json").status_code, 200)
+		self.assertEqual(self.client.delete(f"/event/{event.id}/").status_code, 204)
+
+	def test_inactive_legacy_user_is_not_linked(self):
+		user = get_user_model().objects.create_user(username="alice", is_active=False)
+		self.authorize(self.token())
+		self.assertEqual(self.client.get("/user/events/").status_code, 401)
+		user.refresh_from_db()
+		self.assertIsNone(user.auth0_subject)
 
 	def test_local_password_login_is_disabled(self):
 		get_user_model().objects.create_user(username="local", password="example-password")

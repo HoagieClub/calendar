@@ -21,17 +21,18 @@ The first valid bearer token for a subject creates a local user with an unusable
 password. The username is the email local part, and email and name are refreshed
 from the `https://hoagie.io/email` and `https://hoagie.io/name` access-token
 claims on each request. Configure the tenant to emit these claims. Accounts are
-identified by Auth0 subject; a netid collision is rejected rather than linking
-accounts automatically. Only configure this API for
+identified by Auth0 subject. On first sign-in, an existing user with the same
+netid and no Auth0 subject is linked; a user already linked to another subject
+is rejected. This assumes the tenant issues the email claim only for the owner
+of that netid; ensure its SSO policy enforces that assumption before enabling
+automatic linking. Only configure this API for
 user-delegated access; machine-to-machine access is not supported. Local Django
 password authentication is disabled. The built-in Django admin cannot be used
 until a separate Auth0 SSO integration is added for it.
 
-Requests use `Authorization: Bearer <access token>`. See `EventView.get_permissions`
-in `hoagiecalendar/api/event_views.py` for a route guard: event reads are public,
-while POST requires authentication and assigns `request.user` as the owner. Event
+Requests use `Authorization: Bearer <access token>`. Event reads and creation
+require authentication, and creation assigns `request.user` as the owner. Event
 updates and deletes require the owner; `/user/events/` requires authentication.
-The Next.js proxy currently requires a session even for its event reads.
 The DRF authentication class is `hoagiecalendar/api/auth/auth.py`, following
 Hoagie Mail's `Auth0JWTAuthentication` and `verify_token` structure. NetIDs come
 from the email claim, not from parsing the subject.
@@ -64,13 +65,13 @@ path("user/profile/", MyProfileView.as_view(), name="user-profile"),
 
 DRF validates the `Authorization: Bearer <access token>` header before the
 handler runs, and sets `request.user` to the corresponding Django user. Missing
-or invalid credentials receive a 401. For a deliberately public view, use
-`permission_classes = [AllowAny]` (imported from `rest_framework.permissions`).
+or invalid credentials receive a 401. All routes require login for the MVP.
 When changing a specific object, also check that `request.user` is allowed to
 change it; authentication alone does not establish ownership.
 
 The committed initial migration was recovered from this checkout's previously
 ignored local migrations. Existing databases may have different migration
 histories or schemas: inspect and reconcile those before running migrations.
-The follow-up migration preserves the old attendees table while removing it from
-Django's model state; it does not delete its data.
+The follow-up migrations drop the old attendees table, including any data in
+it. Export any attendee data you need before migrating. A cleanup migration also
+removes the table on databases that applied the earlier state-only migration.

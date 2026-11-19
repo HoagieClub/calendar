@@ -14,10 +14,9 @@ class Migration(migrations.Migration):
             name='event',
             options={'ordering': ['start', 'ordering']},
         ),
-        # The old local initial migration included attendees, but the current
-        # model does not. Preserve its database table while aligning the state.
-        migrations.SeparateDatabaseAndState(
-            state_operations=[migrations.RemoveField(model_name='event', name='attendees')],
+        migrations.RemoveField(
+            model_name='event',
+            name='attendees',
         ),
         migrations.AddField(
             model_name='event',
