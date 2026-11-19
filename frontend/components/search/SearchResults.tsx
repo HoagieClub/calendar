@@ -18,6 +18,7 @@ type Props = {
 	onSelectEvent: (event: EventResult) => void;
 };
 
+// The parent should pass key={query} so this component remounts (fresh state) on each new search.
 export default function SearchResults({ query, categories, onSelectEvent }: Props) {
 	const [results, setResults] = useState<EventResult[] | null>(null);
 	const [error, setError] = useState(false);
@@ -26,8 +27,6 @@ export default function SearchResults({ query, categories, onSelectEvent }: Prop
 
 	useEffect(() => {
 		const ctrl = new AbortController(); // ignore stale responses
-		setResults(null);
-		setError(false);
 
 		fetch(`/api/event/?q=${encodeURIComponent(query)}`, { signal: ctrl.signal })
 			.then((r) => {

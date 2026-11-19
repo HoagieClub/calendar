@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 
 const TEAL = '#1fa8a8';
 
 type SearchBarProps = {
 	/** Fires on Enter or the Search button only, with a trimmed non-empty query. */
 	onSearch: (query: string) => void;
-	/** Fires on Esc or the X. Parent returns to the calendar. */
+	/** Fires on Esc (from inside the bar) or the X. Parent returns to the calendar. */
 	onClear: () => void;
 	placeholder?: string;
 };
@@ -25,50 +25,39 @@ export default function SearchBar({
 		onClear();
 	}
 
-	// Global shortcuts. The handler lives in a ref so the listener is bound once
-	// but always sees current props/state.
-	const keyHandler = useRef<(e: KeyboardEvent) => void>(() => {});
-	keyHandler.current = (e) => {
-		if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
-
-		const el = e.target as HTMLElement | null;
-		const tag = el?.tagName;
-		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable)
-			return;
-
-		e.preventDefault(); // don't type the "/" into the input
-		inputRef.current?.focus();
-	};
-
-	useEffect(() => {
-		function onKeyDown(e: KeyboardEvent) {
-			if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
-			const el = e.target as HTMLElement | null;
-			const tag = el?.tagName;
-			if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable)
-				return;
-			e.preventDefault();
-			inputRef.current?.focus();
-		}
-		window.addEventListener('keydown', onKeyDown);
-		return () => window.removeEventListener('keydown', onKeyDown);
-	}, []);
-
 	function submit() {
 		const q = query.trim();
 		if (!q) return; // backend returns 400 without q, so never send an empty search
 		onSearch(q);
 	}
 
+	// "/" focuses the search input unless the user is already typing somewhere.
+	useEffect(() => {
+		function onKeyDown(e: KeyboardEvent) {
+			if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+
+			const el = e.target as HTMLElement | null;
+			const tag = el?.tagName;
+			if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable)
+				return;
+
+			e.preventDefault(); // don't type the "/" into the input
+			inputRef.current?.focus();
+		}
+
+		window.addEventListener('keydown', onKeyDown);
+		return () => window.removeEventListener('keydown', onKeyDown);
+	}, []);
+
 	return (
 		<form
 			role='search'
-			onKeyDown={(e) => {
-				if (e.key === 'Escape') clear();
-			}}
 			onSubmit={(e) => {
 				e.preventDefault();
 				submit();
+			}}
+			onKeyDown={(e) => {
+				if (e.key === 'Escape') clear(); // only when focus is inside the bar
 			}}
 			style={{
 				display: 'flex',
@@ -113,14 +102,14 @@ export default function SearchBar({
 	);
 }
 
-const iconButton: React.CSSProperties = {
+const iconButton: CSSProperties = {
 	border: 'none',
 	background: 'transparent',
 	cursor: 'pointer',
 	fontSize: 18,
 };
 
-const primaryButton: React.CSSProperties = {
+const primaryButton: CSSProperties = {
 	background: TEAL,
 	color: '#fff',
 	border: 'none',
