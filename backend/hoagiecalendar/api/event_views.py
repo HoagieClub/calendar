@@ -55,6 +55,16 @@ class EventSerializer(serializers.ModelSerializer):
 		]
 		read_only_fields = ["id", "owner", "created_at", "updated_at"]
 
+	# fields that can be set when an event is created but never changed afterwards.
+	# from_mail records where the event came from, so an edit must not flip it.
+	immutable_on_update = ("owner", "from_mail")
+
+	def update(self, instance: Event, validated_data: dict) -> Event:
+		# ignore these fields like DRF ignores read-only input, instead of rejecting the request.
+		for field in self.immutable_on_update:
+			validated_data.pop(field, None)
+		return super().update(instance, validated_data)
+
 
 class EventView(APIView):
 	def get(self, request) -> Response:
