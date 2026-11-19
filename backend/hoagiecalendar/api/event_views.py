@@ -143,7 +143,8 @@ class EventView(APIView):
 			)
 
 		# make sure events returned are unique (in case of multiple category matches)
-		queryset = queryset.distinct().order_by("start")
+		# Match the model default so events that share a start time keep their manual order.
+		queryset = queryset.distinct().order_by("start", "ordering")
 		serializer = EventSerializer(queryset, many=True)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 

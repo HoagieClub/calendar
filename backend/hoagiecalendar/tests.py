@@ -1,4 +1,3 @@
-# Create your tests here.
 from datetime import timedelta
 
 from django.utils import timezone
@@ -22,7 +21,7 @@ class EventSearchTests(APITestCase):
 		cls.past = cls._event("Robotics Workshop", "Princeton Robotics Club", now - timedelta(days=7))
 
 	@classmethod
-	def _event(cls, name: str, host: str, start) -> Event:
+	def _event(cls, name: str, host: str, start, ordering: int = 0) -> Event:
 		event = Event.objects.create(
 			name=name,
 			host=host,
@@ -31,6 +30,7 @@ class EventSearchTests(APITestCase):
 			start=start,
 			end=start + timedelta(hours=2),
 			owner=cls.owner,
+			ordering=ordering,
 		)
 		event.category.add(cls.category)
 		return event
@@ -65,6 +65,13 @@ class EventSearchTests(APITestCase):
 	def test_invalid_start_time_is_rejected(self) -> None:
 		response = self.client.get("/event/", {"q": "robotics", "start_time": "2026-13-01T00:00:00Z"})
 		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+	def test_same_start_time_sorts_by_ordering(self) -> None:
+		start = timezone.now() + timedelta(days=2)
+		self._event("Second at 7pm", "Club B", start, ordering=1)
+		self._event("First at 7pm", "Club A", start, ordering=0)
+		response = self.client.get("/event/", {"q": "7pm"})
+		self.assertEqual(self._names(response), ["First at 7pm", "Second at 7pm"])
 
 	def test_window_without_q_still_works(self) -> None:
 		now = timezone.now()
