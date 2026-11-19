@@ -8,9 +8,11 @@ from django.contrib.auth import authenticate, get_user_model
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase, TransactionTestCase, override_settings
-from rest_framework.test import APIClient
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
-from .models import Event
+from .models.event import Category, Event
+from .models.user import User
 
 
 class AttendeesMigrationTests(TransactionTestCase):
@@ -207,16 +209,6 @@ class Auth0AuthenticationTests(TestCase):
 			HTTP_ACCESS_CONTROL_REQUEST_HEADERS="authorization",
 		)
 		self.assertEqual(response["Access-Control-Allow-Origin"], "https://calendar-preview.hoagie.io")
-
-
-from datetime import timedelta
-
-from django.utils import timezone
-from rest_framework import status
-from rest_framework.test import APITestCase
-
-from .models.event import Category, Event
-from .models.user import User
 
 
 class EventSearchTests(APITestCase):
