@@ -78,6 +78,7 @@ export default function SearchBar({
 			</span>
 			<input
 				ref={inputRef}
+				autoFocus
 				value={query}
 				onChange={(e) => setQuery(e.target.value)}
 				placeholder={placeholder}

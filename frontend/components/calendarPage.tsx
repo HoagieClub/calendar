@@ -7,6 +7,7 @@ import { useTheme } from 'evergreen-ui';
 import { AddEventModal } from '@/components/addEvent/AddEventModal';
 import DayView from '@/components/DayView';
 import MonthView from '@/components/monthView/MonthView';
+import SearchBar from '@/components/search/SearchBar';
 import WeekView from '@/components/weekView/weekView';
 import type { CalendarEvent } from '@/types';
 
@@ -160,6 +161,7 @@ export default function CalendarPage({
 	const [view, setView] = useState<ViewType>('Week');
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [isAddOpen, setIsAddOpen] = useState(false);
+	const [searchOpen, setSearchOpen] = useState(false);
 	// Bumped after a successful create so the visible view refetches without a reload.
 	const [eventsVersion, setEventsVersion] = useState(0);
 
@@ -243,8 +245,14 @@ export default function CalendarPage({
 					{formatHeaderDate(view, currentDate)}
 				</span>
 
-				{/* Spacer */}
-				<div style={{ flex: 1 }} />
+				{/* Spacer, or the search bar when open */}
+				{searchOpen ? (
+					<div style={{ flex: 1 }}>
+						<SearchBar onSearch={() => {}} onClear={() => setSearchOpen(false)} />
+					</div>
+				) : (
+					<div style={{ flex: 1 }} />
+				)}
 
 				{/* Right side: new event, icon buttons, view switcher */}
 				<button
@@ -264,7 +272,7 @@ export default function CalendarPage({
 				>
 					+ New Event
 				</button>
-				<button style={iconButtonStyle} title='Search'>
+				<button style={iconButtonStyle} title='Search' onClick={() => setSearchOpen(true)}>
 					<SearchIcon />
 				</button>
 				<button style={iconButtonStyle} title='Help'>
