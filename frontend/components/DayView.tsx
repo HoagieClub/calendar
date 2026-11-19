@@ -102,8 +102,22 @@ export function DayView({
 	const hours = Array.from({ length: 24 }, (_, hour) => hour);
 
 	return (
-		<Pane paddingX={majorScale(2)} paddingY={majorScale(2)} width='100%'>
-			<Pane position='relative' borderRadius={16}>
+		<Pane
+			paddingX={majorScale(2)}
+			paddingY={majorScale(2)}
+			width='100%'
+			height='100%'
+			minHeight={0}
+			boxSizing='border-box'
+		>
+			<Pane
+				position='relative'
+				borderRadius={16}
+				display='flex'
+				flexDirection='column'
+				height='100%'
+				minHeight={0}
+			>
 				<AllDayStrip
 					key={date.toDateString()}
 					events={events}
@@ -118,8 +132,8 @@ export function DayView({
 					border='1px solid rgba(148, 163, 184, 0.18)'
 					borderRadius={16}
 					boxShadow='0 8px 24px rgba(15, 23, 42, 0.06)'
-					height='calc(100vh - 170px)'
-					minHeight={560}
+					flex={1}
+					minHeight={0}
 					overflowY='auto'
 					position='relative'
 				>
