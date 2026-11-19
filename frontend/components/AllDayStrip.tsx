@@ -60,10 +60,8 @@ export default function AllDayStrip({
 			document.removeEventListener('keydown', escape);
 		};
 	}, []);
-	// Remount the range-specific content to dismiss overflow on navigation.
 	return (
 		<div
-			key={range}
 			ref={root}
 			style={{
 				display: 'flex',
