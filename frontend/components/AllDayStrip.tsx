@@ -41,6 +41,8 @@ export default function AllDayStrip({
 	onSelect?: (event: CalendarEvent) => void;
 }) {
 	const { bars, hidden } = layoutAllDayEvents(events, dates);
+	const laneCount = Math.max(1, ...bars.map((bar) => bar.lane + 1));
+	const hasOverflow = hidden.some((items) => items.length > 0);
 	const [openDay, setOpenDay] = useState<number | null>(null);
 	const root = useRef<HTMLDivElement>(null);
 	const range = dates.map((date) => date.toDateString()).join();
@@ -91,7 +93,7 @@ export default function AllDayStrip({
 					minWidth: 0,
 					display: 'grid',
 					gridTemplateColumns: `repeat(${dates.length}, minmax(0, 1fr))`,
-					gridTemplateRows: 'repeat(2, 26px) 24px',
+					gridTemplateRows: `repeat(${laneCount}, 26px)${hasOverflow ? ' 24px' : ''}`,
 					padding: '3px 0',
 					position: 'relative',
 				}}
@@ -139,7 +141,11 @@ export default function AllDayStrip({
 						items.length > 0 && (
 							<div
 								key={`${range}-${day}`}
-								style={{ gridColumn: day + 1, gridRow: 3, position: 'relative' }}
+								style={{
+									gridColumn: day + 1,
+									gridRow: laneCount + 1,
+									position: 'relative',
+								}}
 							>
 								<button
 									type='button'
