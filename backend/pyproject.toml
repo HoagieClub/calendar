@@ -21,8 +21,10 @@ maintainers = [
 dependencies = [
     "dj-database-url>=3.1.0",
     "django>=6.0",
+    "django-cors-headers>=4.7",
     "djangorestframework>=3.16.1",
     "postgres>=4.0",
+    "pyjwt[crypto]>=2.10.1",
     "python-dotenv>=1.2.1",
 ]
 

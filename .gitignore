@@ -41,6 +41,7 @@
 # Environment variable files (Global)
 .env
 *.env
+!.env.example
 
 # Frontend environment variables
 /frontend/.env
@@ -188,7 +189,7 @@ temp/
 # Migrations (Backend)
 # ===============================
 # Django migrations (optional)
-/backend/**/migrations/
+# Django migrations are committed so database schemas are reproducible.
 
 # ===============================
 # Miscellaneous

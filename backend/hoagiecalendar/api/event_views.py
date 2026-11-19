@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -56,6 +57,10 @@ class EventSerializer(serializers.ModelSerializer):
 
 
 class EventView(APIView):
+	def get_permissions(self):
+		# Example route guard: browsing is public, but creating requires a valid token.
+		return [IsAuthenticated()] if self.request.method == "POST" else [AllowAny()]
+
 	def get(self, request) -> Response:
 		start_time = request.query_params.get("start_time")
 		end_time = request.query_params.get("end_time")
@@ -92,6 +97,9 @@ class EventView(APIView):
 
 
 class EventDetailView(APIView):
+	def get_permissions(self):
+		return [AllowAny()] if self.request.method == "GET" else [IsAuthenticated()]
+
 	def get(self, request, event_id) -> Response:
 		# Logic to get details of an event
 		event = get_object_or_404(Event, id=event_id)
@@ -100,7 +108,7 @@ class EventDetailView(APIView):
 
 	def put(self, request, event_id) -> Response:
 		# Logic to update details of an event
-		event = get_object_or_404(Event, id=event_id)
+		event = get_object_or_404(Event, id=event_id, owner=request.user)
 		serializer = EventSerializer(event, data=request.data)
 		serializer.is_valid(raise_exception=True)
 		serializer.save()
@@ -108,6 +116,6 @@ class EventDetailView(APIView):
 
 	def delete(self, request, event_id) -> Response:
 		# Logic to delete an event
-		event = get_object_or_404(Event, id=event_id)
+		event = get_object_or_404(Event, id=event_id, owner=request.user)
 		event.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)

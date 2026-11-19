@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -7,6 +8,8 @@ from .event_views import EventSerializer
 
 
 class UserEventsView(APIView):
+	permission_classes = [IsAuthenticated]
+
 	# Logic to get events user created
 	def get(self, request) -> Response:
 		events = Event.objects.filter(owner=request.user)
