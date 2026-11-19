@@ -7,10 +7,24 @@ import { useTheme } from 'evergreen-ui';
 import { AddEventModal } from '@/components/addEvent/AddEventModal';
 import DayView from '@/components/DayView';
 import MonthView from '@/components/monthView/MonthView';
+import CalendarSidebar from '@/components/sidebar/CalendarSidebar';
+import type { DateRange } from '@/components/sidebar/MiniCalendar';
 import WeekView from '@/components/weekView/weekView';
 import type { CalendarEvent } from '@/types';
 
 type ViewType = 'Day' | 'Week' | 'Month';
+
+/** The days the main calendar shows for a view: one day, Sunday to Saturday, or the month. */
+function getVisibleRange(view: ViewType, date: Date): DateRange {
+	const year = date.getFullYear();
+	const month = date.getMonth();
+	if (view === 'Day') return { start: date, end: date };
+	if (view === 'Week') {
+		const sunday = date.getDate() - date.getDay();
+		return { start: new Date(year, month, sunday), end: new Date(year, month, sunday + 6) };
+	}
+	return { start: new Date(year, month, 1), end: new Date(year, month + 1, 0) };
+}
 
 function formatHeaderDate(view: ViewType, date: Date): string {
 	const opts: Intl.DateTimeFormatOptions = { month: 'long', year: 'numeric' };
@@ -309,38 +323,48 @@ export default function CalendarPage({
 				</div>
 			</div>
 
-			{/* ── Main content ── */}
-			<div style={{ flex: 1, overflow: 'hidden', padding: 16 }}>
-				{view === 'Day' && (
-					<div style={{ height: '100%' }}>
-						<DayView
-							date={currentDate}
-							onSelect={onSelect}
-							onAddEvent={openAddEvent}
-							refreshToken={eventsVersion}
-						/>
-					</div>
-				)}
-				{view === 'Week' && (
-					<div style={{ height: '100%' }}>
-						<WeekView
-							date={currentDate}
-							onSelect={onSelect}
-							onAddEvent={openAddEvent}
-							refreshToken={eventsVersion}
-						/>
-					</div>
-				)}
-				{view === 'Month' && (
-					<div style={{ height: '100%' }}>
-						<MonthView
-							month={currentDate.getMonth()}
-							year={currentDate.getFullYear()}
-							onSelect={onSelect}
-							refreshToken={eventsVersion}
-						/>
-					</div>
-				)}
+			<div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+				{/* ── Sidebar ── */}
+				<CalendarSidebar
+					selectedDate={currentDate}
+					visibleRange={getVisibleRange(view, currentDate)}
+					onDateChange={setCurrentDate}
+					refreshToken={eventsVersion}
+				/>
+
+				{/* ── Main content ── */}
+				<div style={{ flex: 1, minWidth: 0, overflow: 'hidden', padding: 16 }}>
+					{view === 'Day' && (
+						<div style={{ height: '100%' }}>
+							<DayView
+								date={currentDate}
+								onSelect={onSelect}
+								onAddEvent={openAddEvent}
+								refreshToken={eventsVersion}
+							/>
+						</div>
+					)}
+					{view === 'Week' && (
+						<div style={{ height: '100%' }}>
+							<WeekView
+								date={currentDate}
+								onSelect={onSelect}
+								onAddEvent={openAddEvent}
+								refreshToken={eventsVersion}
+							/>
+						</div>
+					)}
+					{view === 'Month' && (
+						<div style={{ height: '100%' }}>
+							<MonthView
+								month={currentDate.getMonth()}
+								year={currentDate.getFullYear()}
+								onSelect={onSelect}
+								refreshToken={eventsVersion}
+							/>
+						</div>
+					)}
+				</div>
 			</div>
 
 			<AddEventModal
