@@ -21,12 +21,12 @@ const dates = (start, count) =>
 		return date;
 	});
 
-test('classifies multi-day and legacy all-day events, leaving timed events alone', () => {
+await test('classifies multi-day and legacy all-day events, leaving timed events alone', () => {
 	assert.ok(isAllDayEvent(event('a', '2026-11-20T18:00:00', '2026-11-22T17:00:00')));
 	assert.ok(isAllDayEvent(event('b', '2026-11-20T00:00:00', '2026-11-20T23:59:00')));
 	assert.equal(isAllDayEvent(event('c', '2026-11-20T10:00:00', '2026-11-20T11:00:00')), false);
 });
-test('Fri–Sun clips across Sunday week boundaries and occupies midnight end date', () => {
+await test('Fri–Sun clips across Sunday week boundaries and occupies midnight end date', () => {
 	const item = event('a', '2026-11-20T18:00:00', '2026-11-22T00:00:00');
 	const first = layoutAllDayEvents([item], dates('2026-11-15', 7)).bars[0];
 	assert.equal(first.start, 5);
@@ -40,7 +40,7 @@ test('Fri–Sun clips across Sunday week boundaries and occupies midnight end da
 	const middle = layoutAllDayEvents([item], dates('2026-11-21', 1)).bars[0];
 	assert.ok(middle.continuesBefore && middle.continuesAfter);
 });
-test('uses two lanes, counts hidden spans per day and reuses free lanes', () => {
+await test('uses two lanes, counts hidden spans per day and reuses free lanes', () => {
 	const items = [
 		event('a', '2026-11-20T00:00:00', '2026-11-22T12:00:00'),
 		event('b', '2026-11-20T01:00:00', '2026-11-21T12:00:00'),
@@ -58,7 +58,7 @@ test('uses two lanes, counts hidden spans per day and reuses free lanes', () => 
 		JSON.stringify(layoutAllDayEvents([...items].reverse(), dates('2026-11-20', 3)))
 	);
 });
-test('sorts numeric and string IDs consistently when event dates tie', () => {
+await test('sorts numeric and string IDs consistently when event dates tie', () => {
 	const items = [2, '3', 1].map((id) => event(id, '2026-11-20T18:00:00', '2026-11-22T17:00:00'));
 	const result = layoutAllDayEvents(items, dates('2026-11-20', 3));
 	assert.equal(result.bars[0].event.id, 1);
@@ -69,7 +69,7 @@ test('sorts numeric and string IDs consistently when event dates tie', () => {
 		JSON.stringify(layoutAllDayEvents([...items].reverse(), dates('2026-11-20', 3)))
 	);
 });
-test('handles year boundaries, DST and events outside the range', () => {
+await test('handles year boundaries, DST and events outside the range', () => {
 	assert.equal(dayNumber('2026-03-09T00:00:00') - dayNumber('2026-03-08T00:00:00'), 1);
 	const result = layoutAllDayEvents(
 		[
