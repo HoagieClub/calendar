@@ -2,22 +2,30 @@
 
 import { useState } from 'react';
 
-import SearchBar, { type SearchFilters, emptyFilters } from '@/components/search/SearchBar';
+import SearchBar from '@/components/search/SearchBar';
 import SearchResults from '@/components/search/SearchResults';
 
-export default function SearchTestPage() {
-	const [filters, setFilters] = useState<SearchFilters>(emptyFilters);
+// Temporary hardcode, replace later
+const categories = [
+	{ id: 1, name: 'Academic' },
+	{ id: 3, name: 'Social' },
+];
 
-	const hasFilters = Object.values(filters).some(Boolean);
+export default function SearchTestPage() {
+	const [submitted, setSubmitted] = useState<string | null>(null);
 
 	return (
 		<div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-			<SearchBar onSearch={setFilters} />
+			<SearchBar onSearch={setSubmitted} onClear={() => setSubmitted(null)} />
 
-			{hasFilters ? (
-				<SearchResults filters={filters} onSelectEvent={(ev) => console.log('open popup for', ev)} />
+			{submitted === null ? (
+				<p>Calendar goes here.</p>
 			) : (
-				<p>Calendar goes here.</p> // shown when everything is cleared
+				<SearchResults
+					query={submitted}
+					categories={categories}
+					onSelectEvent={(ev) => console.log('open popup for', ev)}
+				/>
 			)}
 		</div>
 	);
