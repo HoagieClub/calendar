@@ -874,8 +874,15 @@ export function useEvents(startTime: Date, endTime: Date, refreshToken = 0): Use
 		const fake = PLACEHOLDER_EVENTS.filter(
 			(e) => new Date(e.start).getTime() <= end && new Date(e.end).getTime() >= start
 		);
-		// Temporary: use the existing sample events while the backend is unavailable.
-		Promise.resolve(fake)
+		const params = new URLSearchParams({
+			start_time: new Date(start).toISOString(),
+			end_time: new Date(end).toISOString(),
+		});
+		fetch(`/api/event?${params}`)
+			.then((res) => {
+				if (!res.ok) throw new Error(`Request failed (${res.status})`);
+				return res.json();
+			})
 			.then((data: unknown) => {
 				if (!Array.isArray(data)) throw new Error('Unexpected response');
 				if (cancelled) return;
