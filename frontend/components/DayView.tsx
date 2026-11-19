@@ -4,8 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Pane, Text, majorScale } from 'evergreen-ui';
 
+import AllDayStrip, { useScrollbarWidth } from '@/components/AllDayStrip';
 import Event, { type CalendarEvent, type EventCategory } from '@/components/Event';
 import { Empty, ErrorState, Loading } from '@/components/states';
+import { endMinutes, isAllDayEvent } from '@/lib/allDayEvents';
 import { useEvents } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent as ApiEvent } from '@/types';
 
@@ -24,12 +26,11 @@ const CATEGORY_MAP: Record<string, EventCategory> = {
 
 function toCardEvent(e: ApiEvent): CalendarEvent {
 	const s = new Date(e.start);
-	const en = new Date(e.end);
 	return {
 		id: e.id,
 		name: e.name,
 		startHour: s.getHours() + s.getMinutes() / 60,
-		endHour: en.getHours() + en.getMinutes() / 60,
+		endHour: endMinutes(e) / 60,
 		location: e.location,
 		host: e.host,
 		category: CATEGORY_MAP[e.category] ?? 'Other',
@@ -59,8 +60,12 @@ export function DayView({
 	const endTime = new Date(date);
 	endTime.setHours(23, 59, 59, 0);
 	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
-	const cardEvents = events.map(toCardEvent);
+	const timedEvents = events.filter(
+		(event) => !isAllDayEvent(event) && new Date(event.end).getTime() > startTime.getTime()
+	);
+	const cardEvents = timedEvents.map(toCardEvent);
 	const scrollRef = useRef<HTMLDivElement | null>(null);
+	const scrollbarWidth = useScrollbarWidth(scrollRef);
 	const hasAutoScrolledRef = useRef(false);
 	const [now, setNow] = useState(() => {
 		const d = new Date();
@@ -98,16 +103,38 @@ export function DayView({
 	const hours = Array.from({ length: 24 }, (_, hour) => hour);
 
 	return (
-		<Pane paddingX={majorScale(2)} paddingY={majorScale(2)} width='100%'>
-			<Pane position='relative' borderRadius={16} overflow='hidden'>
+		<Pane
+			paddingX={majorScale(2)}
+			paddingY={majorScale(2)}
+			width='100%'
+			height='100%'
+			minHeight={0}
+			boxSizing='border-box'
+		>
+			<Pane
+				position='relative'
+				borderRadius={16}
+				display='flex'
+				flexDirection='column'
+				height='100%'
+				minHeight={0}
+			>
+				<AllDayStrip
+					key={date.toDateString()}
+					events={events}
+					dates={[date]}
+					gutter={TIME_LABEL_WIDTH}
+					rightInset={scrollbarWidth + 16}
+					onSelect={onSelect}
+				/>
 				<Pane
 					ref={scrollRef}
 					background='#f8fafc'
 					border='1px solid rgba(148, 163, 184, 0.18)'
 					borderRadius={16}
 					boxShadow='0 8px 24px rgba(15, 23, 42, 0.06)'
-					height='calc(100vh - 170px)'
-					minHeight={560}
+					flex={1}
+					minHeight={0}
 					overflowY='auto'
 					position='relative'
 				>
@@ -195,7 +222,7 @@ export function DayView({
 										left={`calc(${lane * (100 / EVENT_LANES)}% + 8px)`}
 										width={laneWidth}
 										height={Math.max(height - 4 - topGap - bottomGap, 52)}
-										onClick={() => onSelect?.(events[index])}
+										onClick={() => onSelect?.(timedEvents[index])}
 									/>
 								);
 							})}
