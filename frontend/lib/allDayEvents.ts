@@ -6,16 +6,28 @@ export function dayNumber(value: string | Date): number {
 	return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000;
 }
 
+/** Last covered day; an exclusive midnight ending belongs to the preceding day. */
+export function endDayNumber(value: string | Date): number {
+	return dayNumber(new Date(new Date(value).getTime() - 1));
+}
+
+/** Timed grid end position relative to the start date; next midnight is 24:00. */
+export function endMinutes(event: CalendarEvent): number {
+	const end = new Date(event.end);
+	return (
+		(dayNumber(end) - dayNumber(event.start)) * 1440 + end.getHours() * 60 + end.getMinutes()
+	);
+}
+
 export function isAllDayEvent(event: CalendarEvent): boolean {
 	const start = new Date(event.start);
 	const end = new Date(event.end);
 	return (
-		dayNumber(end) > dayNumber(start) ||
-		(dayNumber(start) === dayNumber(end) &&
+		endDayNumber(end) > dayNumber(start) ||
+		(dayNumber(start) === endDayNumber(end) &&
 			start.getHours() === 0 &&
 			start.getMinutes() === 0 &&
-			end.getHours() === 23 &&
-			end.getMinutes() === 59)
+			((end.getHours() === 23 && end.getMinutes() === 59) || endMinutes(event) === 1440))
 	);
 }
 
@@ -27,7 +39,7 @@ export function layoutAllDayEvents(events: CalendarEvent[], dates: Date[]) {
 		.map((event) => ({
 			event,
 			start: dayNumber(event.start),
-			end: dayNumber(event.end),
+			end: endDayNumber(event.end),
 		}))
 		.filter(({ start, end }) => start <= last && end >= first)
 		.sort(

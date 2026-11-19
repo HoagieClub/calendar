@@ -12,7 +12,7 @@ const compiled = ts.transpileModule(
 ).outputText;
 const context = { exports: {} };
 vm.runInNewContext(compiled, context);
-const { isAllDayEvent, layoutAllDayEvents, dayNumber } = context.exports;
+const { isAllDayEvent, layoutAllDayEvents, dayNumber, endDayNumber, endMinutes } = context.exports;
 const event = (id, start, end) => ({ id, start, end, name: id });
 const dates = (start, count) =>
 	Array.from({ length: count }, (_, i) => {
@@ -26,8 +26,8 @@ await test('classifies multi-day and legacy all-day events, leaving timed events
 	assert.ok(isAllDayEvent(event('b', '2026-11-20T00:00:00', '2026-11-20T23:59:00')));
 	assert.equal(isAllDayEvent(event('c', '2026-11-20T10:00:00', '2026-11-20T11:00:00')), false);
 });
-await test('Fri–Sun clips across Sunday week boundaries and occupies midnight end date', () => {
-	const item = event('a', '2026-11-20T18:00:00', '2026-11-22T00:00:00');
+await test('Fri–Sun clips across Sunday week boundaries with continuation arrows', () => {
+	const item = event('a', '2026-11-20T18:00:00', '2026-11-22T17:00:00');
 	const first = layoutAllDayEvents([item], dates('2026-11-15', 7)).bars[0];
 	assert.equal(first.start, 5);
 	assert.equal(first.end, 6);
@@ -81,4 +81,18 @@ await test('handles year boundaries, DST and events outside the range', () => {
 	assert.equal(result.bars.length, 1);
 	assert.equal(result.bars[0].end, 1);
 	assert.ok(result.bars[0].continuesBefore);
+});
+
+await test('exclusive midnight endings retain timed duration and exclude the following date', () => {
+	const late = event('late', '2026-11-19T23:00:00', '2026-11-20T00:00:00');
+	assert.equal(isAllDayEvent(late), false);
+	assert.equal(endMinutes(late), 1440);
+	assert.equal(endDayNumber(late.end), dayNumber(late.start));
+	const item = event('weekend', '2026-11-20T18:00:00', '2026-11-22T00:00:00');
+	const first = layoutAllDayEvents([item], dates('2026-11-15', 7)).bars[0];
+	assert.equal(first.end, 6);
+	assert.equal(first.continuesAfter, false);
+	assert.equal(layoutAllDayEvents([item], dates('2026-11-22', 1)).bars.length, 0);
+	assert.ok(isAllDayEvent(event('full-day', '2026-11-20T00:00:00', '2026-11-21T00:00:00')));
+	assert.equal(endDayNumber('2027-01-01T00:00:00'), dayNumber('2026-12-31T00:00:00'));
 });

@@ -6,7 +6,7 @@ import { useTheme } from 'evergreen-ui';
 
 import AllDayStrip, { useScrollbarWidth } from '@/components/AllDayStrip';
 import { Empty, ErrorState, Loading } from '@/components/states';
-import { isAllDayEvent } from '@/lib/allDayEvents';
+import { endMinutes, isAllDayEvent } from '@/lib/allDayEvents';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -113,9 +113,8 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 
 	for (const ev of sorted) {
 		const start = new Date(ev.start);
-		const end = new Date(ev.end);
 		const startMin = minutesFromMidnight(start);
-		const endMin = minutesFromMidnight(end);
+		const endMin = endMinutes(ev);
 
 		if (startMin >= groupEnd) {
 			flushGroup();
@@ -127,7 +126,7 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 		let placed = false;
 		for (const col of columns) {
 			const last = col[col.length - 1];
-			const lastEnd = minutesFromMidnight(new Date(last.end));
+			const lastEnd = endMinutes(last);
 			if (startMin >= lastEnd) {
 				col.push(ev);
 				placed = true;

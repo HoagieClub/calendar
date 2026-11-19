@@ -7,7 +7,7 @@ import { Pane, Text, majorScale } from 'evergreen-ui';
 import AllDayStrip, { useScrollbarWidth } from '@/components/AllDayStrip';
 import Event, { type CalendarEvent, type EventCategory } from '@/components/Event';
 import { Empty, ErrorState, Loading } from '@/components/states';
-import { isAllDayEvent } from '@/lib/allDayEvents';
+import { endMinutes, isAllDayEvent } from '@/lib/allDayEvents';
 import { useEvents } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent as ApiEvent } from '@/types';
 
@@ -26,12 +26,11 @@ const CATEGORY_MAP: Record<string, EventCategory> = {
 
 function toCardEvent(e: ApiEvent): CalendarEvent {
 	const s = new Date(e.start);
-	const en = new Date(e.end);
 	return {
 		id: e.id,
 		name: e.name,
 		startHour: s.getHours() + s.getMinutes() / 60,
-		endHour: en.getHours() + en.getMinutes() / 60,
+		endHour: endMinutes(e) / 60,
 		location: e.location,
 		host: e.host,
 		category: CATEGORY_MAP[e.category] ?? 'Other',
@@ -61,7 +60,9 @@ export function DayView({
 	const endTime = new Date(date);
 	endTime.setHours(23, 59, 59, 0);
 	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
-	const timedEvents = events.filter((event) => !isAllDayEvent(event));
+	const timedEvents = events.filter(
+		(event) => !isAllDayEvent(event) && new Date(event.end).getTime() > startTime.getTime()
+	);
 	const cardEvents = timedEvents.map(toCardEvent);
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 	const scrollbarWidth = useScrollbarWidth(scrollRef);

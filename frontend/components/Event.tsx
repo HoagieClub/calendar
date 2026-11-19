@@ -94,7 +94,7 @@ type EventProps = {
 
 export function formatEventTime(startHour: number, endHour: number): string {
 	const toLabel = (value: number) => {
-		const hours = Math.floor(value);
+		const hours = Math.floor(value) % 24;
 		const minutes = Math.round((value - hours) * 60);
 		const period = hours < 12 ? 'AM' : 'PM';
 		const normalizedHour = hours % 12 === 0 ? 12 : hours % 12;
