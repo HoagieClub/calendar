@@ -30,6 +30,21 @@ const FRI = SUN + 5;
 const SAT = SUN + 6;
 
 const PLACEHOLDER_EVENTS: CalendarEvent[] = [
+	// Ends at exclusive midnight: stays in Thursday's timed grid, not Friday's strip.
+	{
+		id: 'midnight-ending-test',
+		name: 'Late-night Study Break (11 PM–midnight)',
+		start: d(THU, 23),
+		end: d(FRI, 0),
+		location: 'Frist Campus Center',
+		description: 'Midnight regression example: Thursday 11 PM to Friday 12 AM.',
+		host: 'Student Gov',
+		owner: '',
+		category: 'social',
+		from_mail: false,
+		ordering: 0,
+	},
+
 	// Friday through next Sunday: crosses the week boundary for clipping tests.
 	{
 		id: 'multi-day-test',
