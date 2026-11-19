@@ -4,7 +4,9 @@ import { useEffect, useRef } from 'react';
 
 import { useTheme } from 'evergreen-ui';
 
+import AllDayStrip, { useScrollbarWidth } from '@/components/AllDayStrip';
 import { Empty, ErrorState, Loading } from '@/components/states';
+import { endMinutes, isAllDayEvent } from '@/lib/allDayEvents';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -45,17 +47,6 @@ function isSameDay(a: Date, b: Date): boolean {
 		a.getFullYear() === b.getFullYear() &&
 		a.getMonth() === b.getMonth() &&
 		a.getDate() === b.getDate()
-	);
-}
-
-function isAllDay(event: CalendarEvent): boolean {
-	const start = new Date(event.start);
-	const end = new Date(event.end);
-	return (
-		start.getHours() === 0 &&
-		start.getMinutes() === 0 &&
-		end.getHours() === 23 &&
-		end.getMinutes() === 59
 	);
 }
 
@@ -122,9 +113,8 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 
 	for (const ev of sorted) {
 		const start = new Date(ev.start);
-		const end = new Date(ev.end);
 		const startMin = minutesFromMidnight(start);
-		const endMin = minutesFromMidnight(end);
+		const endMin = endMinutes(ev);
 
 		if (startMin >= groupEnd) {
 			flushGroup();
@@ -136,7 +126,7 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 		let placed = false;
 		for (const col of columns) {
 			const last = col[col.length - 1];
-			const lastEnd = minutesFromMidnight(new Date(last.end));
+			const lastEnd = endMinutes(last);
 			if (startMin >= lastEnd) {
 				col.push(ev);
 				placed = true;
@@ -166,6 +156,7 @@ export default function WeekView({
 }) {
 	const { colors } = useTheme();
 	const scrollRef = useRef<HTMLDivElement>(null);
+	const scrollbarWidth = useScrollbarWidth(scrollRef);
 	const now = new Date();
 	const weekDates = getWeekDates(date);
 	const todayIndex = weekDates.findIndex((d) => d.toDateString() === now.toDateString());
@@ -202,6 +193,7 @@ export default function WeekView({
 				style={{
 					display: 'flex',
 					borderBottom: `1px solid ${colors.gray400}`,
+					paddingRight: scrollbarWidth,
 					background: colors.gray200,
 					flexShrink: 0,
 					zIndex: 10,
@@ -259,82 +251,14 @@ export default function WeekView({
 				})}
 			</div>
 
-			{/* ── ALL-DAY row ── */}
-			<div
-				style={{
-					display: 'flex',
-					flexShrink: 0,
-					borderBottom: `2px solid ${colors.gray400}`,
-					minHeight: 32,
-				}}
-			>
-				<div
-					style={{
-						width: TIME_COL_WIDTH,
-						flexShrink: 0,
-						borderRight: `1px solid ${colors.gray400}`,
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'flex-end',
-						paddingRight: 8,
-					}}
-				>
-					<span
-						style={{
-							fontSize: 10,
-							color: colors.gray500,
-							letterSpacing: '0.04em',
-							textTransform: 'uppercase',
-						}}
-					>
-						All-day
-					</span>
-				</div>
-				{weekDates.map((date, i) => {
-					const allDayEvents = events.filter(
-						(e) => isSameDay(new Date(e.start), date) && isAllDay(e)
-					);
-					return (
-						<div
-							key={i}
-							style={{
-								flex: 1,
-								borderLeft: `1px solid ${colors.gray400}`,
-								overflow: 'hidden',
-								padding: '3px 3px',
-								display: 'flex',
-								flexDirection: 'column',
-								gap: 2,
-							}}
-						>
-							{allDayEvents.map((event) => {
-								const color = getCategoryColor(event.category);
-								return (
-									<div
-										key={event.id}
-										title={event.name}
-										onClick={() => onSelect?.(event)}
-										style={{
-											background: color.border,
-											borderRadius: 3,
-											padding: '2px 6px',
-											fontSize: 11,
-											fontWeight: 600,
-											color: '#ffffff',
-											whiteSpace: 'nowrap',
-											overflow: 'hidden',
-											textOverflow: 'ellipsis',
-											cursor: 'pointer',
-										}}
-									>
-										{event.name}
-									</div>
-								);
-							})}
-						</div>
-					);
-				})}
-			</div>
+			<AllDayStrip
+				key={startTime.toDateString()}
+				events={events}
+				dates={weekDates}
+				gutter={TIME_COL_WIDTH}
+				rightInset={scrollbarWidth}
+				onSelect={onSelect}
+			/>
 
 			{/* ── Scrollable grid body (+ loading / error / empty layers) ── */}
 			<div
@@ -394,7 +318,7 @@ export default function WeekView({
 						<div style={{ flex: 1, display: 'flex', position: 'relative' }}>
 							{weekDates.map((date, colIdx) => {
 								const timedEvents = events.filter(
-									(e) => isSameDay(new Date(e.start), date) && !isAllDay(e)
+									(e) => isSameDay(new Date(e.start), date) && !isAllDayEvent(e)
 								);
 								const positioned = layoutEvents(timedEvents);
 
