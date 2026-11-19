@@ -10,12 +10,35 @@ type SearchBarProps = {
 	/** Fires on Esc (from inside the bar) or the X. Parent returns to the calendar. */
 	onClear: () => void;
 	placeholder?: string;
+	/** Small navbar version: fixed width, no Search button (Enter still searches), X always shown. */
+	compact?: boolean;
 };
+
+function MagnifierIcon() {
+	return (
+		<svg
+			width='16'
+			height='16'
+			viewBox='0 0 24 24'
+			fill='none'
+			stroke='currentColor'
+			strokeWidth='2'
+			strokeLinecap='round'
+			strokeLinejoin='round'
+			aria-hidden
+			style={{ flexShrink: 0, color: '#6b7280' }}
+		>
+			<circle cx='11' cy='11' r='8' />
+			<line x1='21' y1='21' x2='16.65' y2='16.65' />
+		</svg>
+	);
+}
 
 export default function SearchBar({
 	onSearch,
 	onClear,
 	placeholder = 'Search events...',
+	compact = false,
 }: SearchBarProps) {
 	const [query, setQuery] = useState('');
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -63,19 +86,18 @@ export default function SearchBar({
 				display: 'flex',
 				alignItems: 'center',
 				gap: 8,
-				width: '100%',
-				maxWidth: 1440,
-				border: `2px solid ${TEAL}`,
-				borderRadius: 10,
-				padding: '6px 10px',
+				width: compact ? 260 : '100%',
+				maxWidth: compact ? undefined : 1440,
+				flexShrink: 0,
+				border: `${compact ? 1.5 : 2}px solid ${TEAL}`,
+				borderRadius: compact ? 8 : 10,
+				padding: compact ? '4px 8px' : '6px 10px',
 				background: '#fff',
 				fontFamily: "'Inter', sans-serif",
 				fontSize: 14,
 			}}
 		>
-			<span aria-hidden style={{ color: TEAL }}>
-				🔍
-			</span>
+			<MagnifierIcon />
 			<input
 				ref={inputRef}
 				autoFocus
@@ -85,20 +107,23 @@ export default function SearchBar({
 				aria-label='Search events'
 				style={{
 					flex: 1,
+					minWidth: 0,
 					border: 'none',
 					outline: 'none',
 					fontSize: 14,
 					background: 'transparent',
 				}}
 			/>
-			{query && (
+			{(compact || query) && (
 				<button type='button' onClick={clear} aria-label='Clear search' style={iconButton}>
 					×
 				</button>
 			)}
-			<button type='submit' style={primaryButton}>
-				Search
-			</button>
+			{!compact && (
+				<button type='submit' style={primaryButton}>
+					Search
+				</button>
+			)}
 		</form>
 	);
 }

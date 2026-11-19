@@ -245,16 +245,10 @@ export default function CalendarPage({
 					{formatHeaderDate(view, currentDate)}
 				</span>
 
-				{/* Spacer, or the search bar when open */}
-				{searchOpen ? (
-					<div style={{ flex: 1 }}>
-						<SearchBar onSearch={() => {}} onClear={() => setSearchOpen(false)} />
-					</div>
-				) : (
-					<div style={{ flex: 1 }} />
-				)}
+				{/* Spacer */}
+				<div style={{ flex: 1 }} />
 
-				{/* Right side: new event, icon buttons, view switcher */}
+				{/* Right side: new event, search, icon buttons, view switcher */}
 				<button
 					onClick={openAddEvent}
 					style={{
@@ -272,9 +266,21 @@ export default function CalendarPage({
 				>
 					+ New Event
 				</button>
-				<button style={iconButtonStyle} title='Search' onClick={() => setSearchOpen(true)}>
-					<SearchIcon />
-				</button>
+				{searchOpen ? (
+					<SearchBar
+						compact
+						onSearch={() => undefined}
+						onClear={() => setSearchOpen(false)}
+					/>
+				) : (
+					<button
+						style={iconButtonStyle}
+						title='Search'
+						onClick={() => setSearchOpen(true)}
+					>
+						<SearchIcon />
+					</button>
+				)}
 				<button style={iconButtonStyle} title='Help'>
 					<HelpIcon />
 				</button>
