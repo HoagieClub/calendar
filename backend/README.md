@@ -36,6 +36,39 @@ The DRF authentication class is `hoagiecalendar/api/auth/auth.py`, following
 Hoagie Mail's `Auth0JWTAuthentication` and `verify_token` structure. NetIDs come
 from the email claim, not from parsing the subject.
 
+### Adding an authenticated route
+
+DRF requires authentication by default. A view can make that guard explicit:
+
+```python
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+
+class MyProfileView(APIView):
+	permission_classes = [IsAuthenticated]
+
+	def get(self, request):
+		return Response({
+			"netid": request.user.username,
+			"email": request.user.email,
+		})
+```
+
+Import the view and register it in `config/urls.py`:
+
+```python
+path("user/profile/", MyProfileView.as_view(), name="user-profile"),
+```
+
+DRF validates the `Authorization: Bearer <access token>` header before the
+handler runs, and sets `request.user` to the corresponding Django user. Missing
+or invalid credentials receive a 401. For a deliberately public view, use
+`permission_classes = [AllowAny]` (imported from `rest_framework.permissions`).
+When changing a specific object, also check that `request.user` is allowed to
+change it; authentication alone does not establish ownership.
+
 The committed initial migration was recovered from this checkout's previously
 ignored local migrations. Existing databases may have different migration
 histories or schemas: inspect and reconcile those before running migrations.
