@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..models.event import Event
+from .permissions import IsOwnerOrReadOnly
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -54,6 +55,16 @@ class EventSerializer(serializers.ModelSerializer):
 		]
 		read_only_fields = ["id", "owner", "created_at", "updated_at"]
 
+	# fields that can be set when an event is created but never changed afterwards.
+	# from_mail records where the event came from, so an edit must not flip it.
+	immutable_on_update = ("owner", "from_mail")
+
+	def update(self, instance: Event, validated_data: dict) -> Event:
+		# ignore these fields like DRF ignores read-only input, instead of rejecting the request.
+		for field in self.immutable_on_update:
+			validated_data.pop(field, None)
+		return super().update(instance, validated_data)
+
 
 class EventView(APIView):
 	def get(self, request) -> Response:
@@ -92,15 +103,23 @@ class EventView(APIView):
 
 
 class EventDetailView(APIView):
+	# GET is open to everyone; PUT and DELETE are limited to the event's owner (403 otherwise).
+	permission_classes = [IsOwnerOrReadOnly]
+
+	def get_event(self, request, event_id) -> Event:
+		event = get_object_or_404(Event, id=event_id)
+		self.check_object_permissions(request, event)
+		return event
+
 	def get(self, request, event_id) -> Response:
 		# Logic to get details of an event
-		event = get_object_or_404(Event, id=event_id)
+		event = self.get_event(request, event_id)
 		serializer = EventSerializer(event)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def put(self, request, event_id) -> Response:
 		# Logic to update details of an event
-		event = get_object_or_404(Event, id=event_id)
+		event = self.get_event(request, event_id)
 		serializer = EventSerializer(event, data=request.data)
 		serializer.is_valid(raise_exception=True)
 		serializer.save()
@@ -108,6 +127,6 @@ class EventDetailView(APIView):
 
 	def delete(self, request, event_id) -> Response:
 		# Logic to delete an event
-		event = get_object_or_404(Event, id=event_id)
+		event = self.get_event(request, event_id)
 		event.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
