@@ -60,6 +60,16 @@ class EventSerializer(serializers.ModelSerializer):
 		},
 	)
 
+	owner_netid = serializers.CharField(
+		source="owner.username",
+		read_only=True,
+	)
+
+	owner_email = serializers.EmailField(
+		source="owner.email",
+		read_only=True,
+	)
+
 	class Meta:
 		model = Event
 		fields = [
@@ -70,12 +80,12 @@ class EventSerializer(serializers.ModelSerializer):
 			"location",
 			"description",
 			"host",
-			"owner",
+			"owner_netid",
+			"owner_email",
 			"category",
 			"from_mail",
-			"ordering",
 		]
-		read_only_fields = ["id", "owner", "created_at", "updated_at"]
+		read_only_fields = ["id", "owner_netid", "owner_email", "created_at", "updated_at"]
 
 
 class EventView(APIView):
