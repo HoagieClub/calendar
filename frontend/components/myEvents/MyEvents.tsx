@@ -57,6 +57,25 @@ interface Event {
 
 const SORT_OPTIONS: SortOption[] = ['Date (soonest)', 'Date (latest)'];
 
+const EVENT_VIEWS = {
+	created: {
+		title: 'My Events',
+		searchPlaceholder: 'Search my events...',
+		emptyMessage: 'You haven’t created any events yet. Events you create will appear here.',
+	},
+	saved: {
+		title: 'Saved Events',
+		searchPlaceholder: 'Search saved events...',
+		emptyMessage:
+			'You haven’t saved any events yet. Save events from the calendar to find them here.',
+	},
+	archive: {
+		title: 'Archive',
+		searchPlaceholder: 'Search archived events...',
+		emptyMessage: 'Past events you created will appear here.',
+	},
+};
+
 // ── Dropdown Hook ─────────────────────────────────────────────
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, cb: () => void) {
@@ -71,7 +90,10 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, cb: () => voi
 
 // ── Component ─────────────────────────────────────────────────
 
-export default function MyEvents({ saved = false }: { saved?: boolean }) {
+export default function MyEvents({ view = 'created' }: { view?: keyof typeof EVENT_VIEWS }) {
+	const saved = view === 'saved';
+	const archive = view === 'archive';
+	const { title, searchPlaceholder, emptyMessage } = EVENT_VIEWS[view];
 	const [events, setEvents] = useState<Event[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
@@ -82,8 +104,12 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 			.then(async (response) => {
 				if (!response.ok) throw new Error('Unable to load events. Please try again.');
 				const data: CalendarEvent[] = await response.json();
+				const now = Date.now();
+				const visibleEvents = archive
+					? data.filter((event) => Date.parse(event.end) <= now)
+					: data;
 				setEvents(
-					data.map((event) => ({
+					visibleEvents.map((event) => ({
 						id: String(event.id),
 						title: event.name,
 						dateISO: event.start,
@@ -112,14 +138,14 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 				if (!controller.signal.aborted) setLoading(false);
 			});
 		return () => controller.abort();
-	}, [saved, attempt]);
+	}, [saved, archive, attempt]);
 	const { colors } = useTheme();
 	const themeColors = colors as ThemeColors;
 
 	const TEAL = themeColors['hoagie-teal'] ?? '#00897B';
 
 	const [search, setSearch] = useState('');
-	const [sort, setSort] = useState<SortOption>('Date (soonest)');
+	const [sort, setSort] = useState<SortOption>(archive ? 'Date (latest)' : 'Date (soonest)');
 	const [sortOpen, setSortOpen] = useState(false);
 	const [categoryOpen, setCategoryOpen] = useState(false);
 	const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
@@ -160,13 +186,6 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 		categoryLabel = `${selectedCategories.length} categories`;
 	}
 
-	let emptyMessage = saved
-		? 'You haven’t saved any events yet. Save events from the calendar to find them here.'
-		: 'You haven’t created any events yet. Events you create will appear here.';
-	if (events.length > 0) {
-		emptyMessage = 'No events match your filters.';
-	}
-
 	return (
 		<div style={{ padding: 32, background: colors.white, minHeight: '100%' }}>
 			{/* Header */}
@@ -174,7 +193,7 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 				<h1
 					style={{ fontSize: 22, fontWeight: 700, color: themeColors.gray900, margin: 0 }}
 				>
-					{saved ? 'Saved Events' : 'My Events'}
+					{title}
 				</h1>
 			</div>
 
@@ -202,7 +221,7 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 					</svg>
 					<input
 						aria-label='Search events'
-						placeholder={saved ? 'Search saved events...' : 'Search my events...'}
+						placeholder={searchPlaceholder}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						style={{
@@ -457,7 +476,7 @@ export default function MyEvents({ saved = false }: { saved?: boolean }) {
 						fontSize: 14,
 					}}
 				>
-					{emptyMessage}
+					{events.length > 0 ? 'No events match your filters.' : emptyMessage}
 					{events.length === 0 && (
 						<p>
 							<Link href='/calendar'>Browse Calendar</Link>
