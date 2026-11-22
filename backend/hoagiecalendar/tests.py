@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.template import response
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -81,3 +82,52 @@ class EventSearchTests(APITestCase):
 		)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 		self.assertEqual(len(response.json()), 3)
+
+class EventOwnerTests(APITestCase):
+	"""GET expose creator netid and email (CALR-24)."""
+	
+	@classmethod
+	def setUpTestData(cls) -> None:
+		cls.owner = User.objects.create_user(
+            username="abc123",
+            email="abc123@princeton.edu",
+            password="testpassword123",
+        )
+
+		cls.start = timezone.now() + timedelta(days=1)
+		cls.event = Event.objects.create(
+            name="Test Event",
+            start=cls.start,
+            end=cls.start + timedelta(hours=1),
+            location="Test Location",
+            description="Test Description",
+            host="Test Host",
+            owner=cls.owner,
+        )
+
+	def test_event_detail_exposes_owner_fields(self) -> None:
+		response = self.client.get(f"/event/{self.event.id}/")
+
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+		data = response.json()
+		self.assertEqual(data["owner_netid"], "abc123")
+		self.assertEqual(data["owner_email"], "abc123@princeton.edu")
+		self.assertNotIn("owner", data)
+
+	def test_event_list_exposes_owner_fields(self) -> None:
+		response = self.client.get(
+            "/event/",
+            {
+                "start_time": (self.start - timedelta(minutes=1)).isoformat(),
+                "end_time": (self.start + timedelta(hours=2)).isoformat(),
+            },
+        )
+
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+		events = response.json()
+		self.assertEqual(len(events), 1)
+		self.assertEqual(events[0]["owner_netid"], "abc123")
+		self.assertEqual(events[0]["owner_email"], "abc123@princeton.edu")
+		self.assertNotIn("owner", events[0])
