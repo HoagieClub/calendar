@@ -82,27 +82,28 @@ class EventSearchTests(APITestCase):
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 		self.assertEqual(len(response.json()), 3)
 
+
 class EventOwnerTests(APITestCase):
 	"""GET expose creator netid and email (CALR-24)."""
-	
+
 	@classmethod
 	def setUpTestData(cls) -> None:
 		cls.owner = User.objects.create_user(
-            username="abc123",
-            email="abc123@princeton.edu",
-            password="testpassword123",
-        )
+			username="abc123",
+			email="abc123@princeton.edu",
+			password="testpassword123",
+		)
 
 		cls.start = timezone.now() + timedelta(days=1)
 		cls.event = Event.objects.create(
-            name="Test Event",
-            start=cls.start,
-            end=cls.start + timedelta(hours=1),
-            location="Test Location",
-            description="Test Description",
-            host="Test Host",
-            owner=cls.owner,
-        )
+			name="Test Event",
+			start=cls.start,
+			end=cls.start + timedelta(hours=1),
+			location="Test Location",
+			description="Test Description",
+			host="Test Host",
+			owner=cls.owner,
+		)
 
 	def test_event_detail_exposes_owner_fields(self) -> None:
 		response = self.client.get(f"/event/{self.event.id}/")
@@ -116,12 +117,12 @@ class EventOwnerTests(APITestCase):
 
 	def test_event_list_exposes_owner_fields(self) -> None:
 		response = self.client.get(
-            "/event/",
-            {
-                "start_time": (self.start - timedelta(minutes=1)).isoformat(),
-                "end_time": (self.start + timedelta(hours=2)).isoformat(),
-            },
-        )
+			"/event/",
+			{
+				"start_time": (self.start - timedelta(minutes=1)).isoformat(),
+				"end_time": (self.start + timedelta(hours=2)).isoformat(),
+			},
+		)
 
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 
