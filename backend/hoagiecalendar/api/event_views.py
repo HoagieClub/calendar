@@ -1,14 +1,23 @@
 from datetime import datetime
 
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework import serializers, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..models.event import Event
+
+
+def with_is_saved(queryset, user):
+	if not user.is_authenticated:
+		return queryset.annotate(is_saved=Value(False))
+
+	saved_events = Event.saved_by.through.objects.filter(event_id=OuterRef("pk"), user_id=user.pk)
+	return queryset.annotate(is_saved=Exists(saved_events))
 
 
 def _parse_query_datetime(value: str) -> datetime | None:
@@ -30,6 +39,8 @@ def _parse_query_datetime(value: str) -> datetime | None:
 
 
 class EventSerializer(serializers.ModelSerializer):
+	is_saved = serializers.BooleanField(read_only=True, default=False)
+
 	name = serializers.CharField(
 		max_length=100,
 		min_length=3,
@@ -74,6 +85,7 @@ class EventSerializer(serializers.ModelSerializer):
 			"category",
 			"from_mail",
 			"ordering",
+			"is_saved",
 		]
 		read_only_fields = ["id", "owner", "created_at", "updated_at"]
 
@@ -110,7 +122,7 @@ class EventView(APIView):
 			)
 
 		# prefetch categories so serializing N events does not run N extra queries.
-		queryset = Event.objects.all().prefetch_related("category")
+		queryset = with_is_saved(Event.objects.prefetch_related("category"), request.user)
 
 		# lower bound: the caller's start_time, or "now" for a search without start_time.
 		if start_time:
@@ -159,13 +171,13 @@ class EventView(APIView):
 class EventDetailView(APIView):
 	def get(self, request, event_id) -> Response:
 		# Logic to get details of an event
-		event = get_object_or_404(Event, id=event_id)
+		event = get_object_or_404(with_is_saved(Event.objects.all(), request.user), id=event_id)
 		serializer = EventSerializer(event)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def put(self, request, event_id) -> Response:
 		# Logic to update details of an event
-		event = get_object_or_404(Event, id=event_id)
+		event = get_object_or_404(with_is_saved(Event.objects.all(), request.user), id=event_id)
 		serializer = EventSerializer(event, data=request.data)
 		serializer.is_valid(raise_exception=True)
 		serializer.save()
@@ -175,4 +187,19 @@ class EventDetailView(APIView):
 		# Logic to delete an event
 		event = get_object_or_404(Event, id=event_id)
 		event.delete()
+		return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class EventSaveView(APIView):
+	permission_classes = [IsAuthenticated]
+
+	def post(self, request, event_id) -> Response:
+		event = get_object_or_404(Event, pk=event_id)
+		event.saved_by.add(request.user)
+		event = get_object_or_404(with_is_saved(Event.objects.all(), request.user), pk=event_id)
+		return Response(EventSerializer(event).data, status=status.HTTP_200_OK)
+
+	def delete(self, request, event_id) -> Response:
+		event = get_object_or_404(Event, pk=event_id)
+		event.saved_by.remove(request.user)
 		return Response(status=status.HTTP_204_NO_CONTENT)
