@@ -19,7 +19,7 @@ import {
 	minorScale,
 	Heading,
 	Spinner,
-	ArrowRightIcon,
+	CalendarIcon,
 	ArrowLeftIcon,
 	Button,
 	useTheme,
@@ -40,15 +40,15 @@ export function Home() {
 	} else {
 		Profile = (
 			<Pane>
-				<Link href='/feature1'>
+				<Link href='/calendar'>
 					<Button
 						height={56}
 						width={majorScale(35)}
 						backgroundColor={theme.colors.blue100}
 						marginBottom={20}
-						iconBefore={ArrowRightIcon}
+						iconBefore={CalendarIcon}
 					>
-						Call to Action
+						Browse Calendar
 					</Button>
 				</Link>
 				<br />
@@ -78,12 +78,13 @@ export function Home() {
 				paddingTop={majorScale(5)}
 				paddingBottom={majorScale(7)}
 			>
-				<ArrowLeftIcon size={48} color='gray800' />
+				<CalendarIcon size={100} color='gray800' marginX='auto' />
 				<Heading size={900} className='hoagie'>
-					Hoagie Calendar App
+					Every event on campus,
 					<br />
-					What will <b>you</b> build?
+					in <b>one</b> place.
 				</Heading>
+				<p>Browse what&apos;s happening at Princeton, save events, and post your own.</p>
 				<div>
 					<Pane
 						display='flex'

@@ -2,7 +2,9 @@
 
 import { useTheme } from 'evergreen-ui';
 
+import { ErrorState, Loading } from '@/components/states';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
+import type { CalendarEvent } from '@/types';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MAX_VISIBLE_EVENTS = 3;
@@ -38,11 +40,14 @@ function formatEventTime(iso: string): string {
 }
 
 interface MonthViewProps {
-	month?: number; // 0-indexed
+	month?: number;
 	year?: number;
+	onSelect?: (event: CalendarEvent) => void;
+	/** Bump to refetch the current range without a reload (see useEvents). */
+	refreshToken?: number;
 }
 
-export default function MonthView({ month, year }: MonthViewProps) {
+export default function MonthView({ month, year, onSelect, refreshToken }: MonthViewProps) {
 	const { colors } = useTheme();
 
 	const now = new Date();
@@ -53,7 +58,7 @@ export default function MonthView({ month, year }: MonthViewProps) {
 
 	const startTime = new Date(displayYear, displayMonth, 1);
 	const endTime = new Date(displayYear, displayMonth + 1, 0, 23, 59, 59);
-	const { events } = useEvents(startTime, endTime);
+	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
 
 	return (
 		<div
@@ -101,7 +106,9 @@ export default function MonthView({ month, year }: MonthViewProps) {
 			</div>
 
 			{/* ── Calendar rows ── */}
-			<div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+			<div
+				style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}
+			>
 				{weeks.map((week, wi) => (
 					<div
 						key={wi}
@@ -176,6 +183,7 @@ export default function MonthView({ month, year }: MonthViewProps) {
 														<div
 															key={event.id}
 															title={event.name}
+															onClick={() => onSelect?.(event)}
 															style={{
 																background: color.bg,
 																color: color.border,
@@ -215,6 +223,8 @@ export default function MonthView({ month, year }: MonthViewProps) {
 						})}
 					</div>
 				))}
+				{isLoading && <Loading overlay variant='grid' columns={7} rows={weeks.length} />}
+				{error && <ErrorState overlay onRetry={retry} />}
 			</div>
 		</div>
 	);

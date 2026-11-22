@@ -22,7 +22,10 @@ class Event(models.Model):
 	host = models.CharField(max_length=100)
 	owner = models.ForeignKey(User, on_delete=models.CASCADE)
 	category = models.ManyToManyField(Category, related_name="events", blank=True)
+	saved_by = models.ManyToManyField(User, related_name="saved_events", blank=True)
 	from_mail = models.BooleanField(default=False)
+	# Manual sort position among events that share the same start time (lower comes first).
+	ordering = models.PositiveIntegerField(default=0)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -31,4 +34,4 @@ class Event(models.Model):
 
 	class Meta:
 		db_table = "Event"
-		ordering = ["start"]
+		ordering = ["start", "ordering"]

@@ -12,12 +12,13 @@
 
 import { type User } from '@auth0/nextjs-auth0/types';
 import { majorScale, Button, Heading, Card, Avatar, Text, useTheme } from 'evergreen-ui';
+import Link from 'next/link';
 
 /**
  * ProfileCard is a profile card meant for display of user information
  *  throughout different Hoagie applications.
  */
-export function ProfileCard({ user }: { user: User }) {
+export function ProfileCard({ user, onNavigate }: { user: User; onNavigate?: () => void }) {
 	const theme = useTheme();
 	const name = user?.name;
 	const email = user?.email || (user?.sub?.includes('@') ? user.sub.split('|').pop() : 'N/A');
@@ -40,8 +41,13 @@ export function ProfileCard({ user }: { user: User }) {
 			<Text color='muted' size={300} marginTop={2}>
 				{email}
 			</Text>
+			<Button is={Link} href='/archive' marginTop={8} onClick={onNavigate}>
+				Archive
+			</Button>
 			<a href='/auth/logout'>
-				<Button marginTop={16}>Log Out</Button>
+				<Button marginTop={8} width='100%'>
+					Log Out
+				</Button>
 			</a>
 		</Card>
 	);

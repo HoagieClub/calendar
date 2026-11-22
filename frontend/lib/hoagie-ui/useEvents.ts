@@ -4,6 +4,8 @@
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  */
 
+import { useCallback, useEffect, useState } from 'react';
+
 import type { CalendarEvent } from '@/types';
 
 const y = new Date().getFullYear();
@@ -28,6 +30,51 @@ const FRI = SUN + 5;
 const SAT = SUN + 6;
 
 const PLACEHOLDER_EVENTS: CalendarEvent[] = [
+	// Ends at exclusive midnight: stays in Thursday's timed grid, not Friday's strip.
+	{
+		id: 'midnight-ending-test',
+		name: 'Late-night Study Break (11 PM–midnight)',
+		start: d(THU, 23),
+		end: d(FRI, 0),
+		location: 'Frist Campus Center',
+		description: 'Midnight regression example: Thursday 11 PM to Friday 12 AM.',
+		host: 'Student Gov',
+		owner: '',
+		category: 'social',
+		from_mail: false,
+		ordering: 0,
+	},
+
+	// Friday through next Sunday: crosses the week boundary for clipping tests.
+	{
+		id: 'multi-day-test',
+		name: 'Weekend Hackathon (Fri–Sun)',
+		start: d(FRI, 18),
+		end: d(SAT + 1, 17),
+		location: 'Friend Center',
+		description: 'Multi-day test event: Friday 6 PM through Sunday 5 PM.',
+		host: 'HackPrinceton',
+		owner: '',
+		category: 'academic',
+		from_mail: false,
+		ordering: 0,
+	},
+
+	// Overlaps the hackathon and Friday's all-day event to exercise overflow.
+	{
+		id: 'multi-day-overflow-test',
+		name: 'Campus Arts Festival (Fri–Sun)',
+		start: d(FRI, 17),
+		end: d(SAT + 1, 20),
+		location: 'Lewis Center',
+		description: 'Overflow test: overlaps the weekend hackathon and Friday all-day event.',
+		host: 'Arts Council',
+		owner: '',
+		category: 'social',
+		from_mail: false,
+		ordering: 0,
+	},
+
 	// ── All-day events ──
 	{
 		id: 'a1',
@@ -809,13 +856,73 @@ export function getCategoryColor(category: string): { bg: string; border: string
 
 type UseEventsResult = {
 	events: CalendarEvent[];
+	/** True from the moment the range (or attempt) changes until its fetch settles. */
 	isLoading: boolean;
 	error: string | null;
+	/** Re-runs the fetch for the current range; no page reload. */
+	retry: () => void;
 };
 
-export function useEvents(startTime: Date, endTime: Date): UseEventsResult {
-	const events = PLACEHOLDER_EVENTS.filter(
-		(e) => new Date(e.start) <= endTime && new Date(e.end) >= startTime
-	);
-	return { events, isLoading: false, error: null };
+type Settled = { key: string; events: CalendarEvent[]; error: string | null };
+
+const USE_FAKE_FALLBACK = process.env.NEXT_PUBLIC_USE_FAKE_EVENTS === 'true';
+
+/**
+ * Fetch events overlapping [startTime, endTime].
+ *
+ * @param refreshToken - Bump this number to refetch the same range, e.g. after creating an
+ * event, without a page reload. Defaults to 0.
+ */
+export function useEvents(startTime: Date, endTime: Date, refreshToken = 0): UseEventsResult {
+	const [settled, setSettled] = useState<Settled | null>(null);
+	const [attempt, setAttempt] = useState(0);
+
+	const start = startTime.getTime();
+	const end = endTime.getTime();
+	// One key per (range, attempt, refreshToken). Whatever settled for a different key is
+	// stale, so navigating to a new range, pressing Retry, or bumping the refresh token reads
+	// as loading without any setState call inside the effect.
+	const key = `${start}-${end}-${attempt}-${refreshToken}`;
+
+	useEffect(() => {
+		let cancelled = false;
+		const fake = PLACEHOLDER_EVENTS.filter(
+			(e) => new Date(e.start).getTime() <= end && new Date(e.end).getTime() >= start
+		);
+		const params = new URLSearchParams({
+			start_time: new Date(start).toISOString(),
+			end_time: new Date(end).toISOString(),
+		});
+		fetch(`/api/event?${params}`)
+			.then((res) => {
+				if (!res.ok) throw new Error(`Request failed (${res.status})`);
+				return res.json();
+			})
+			.then((data: unknown) => {
+				if (!Array.isArray(data)) throw new Error('Unexpected response');
+				if (cancelled) return;
+				const events =
+					USE_FAKE_FALLBACK && data.length === 0 ? fake : (data as CalendarEvent[]);
+				setSettled({ key, events, error: null });
+			})
+			.catch((err: unknown) => {
+				if (cancelled) return;
+				if (USE_FAKE_FALLBACK) {
+					setSettled({ key, events: fake, error: null });
+				} else {
+					const message = err instanceof Error ? err.message : 'Request failed';
+					setSettled({ key, events: [], error: message });
+				}
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [key, start, end]);
+
+	const retry = useCallback(() => setAttempt((n) => n + 1), []);
+
+	if (settled === null || settled.key !== key) {
+		return { events: [], isLoading: true, error: null, retry };
+	}
+	return { events: settled.events, isLoading: false, error: settled.error, retry };
 }
