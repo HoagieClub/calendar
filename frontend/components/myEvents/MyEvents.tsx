@@ -116,6 +116,7 @@ export default function MyEvents({ view = 'created' }: { view?: keyof typeof EVE
 						displayDate: new Date(event.start).toLocaleDateString('en-US', {
 							weekday: 'short',
 							month: 'short',
+							year: archive ? 'numeric' : undefined,
 							day: 'numeric',
 						}),
 						timeRange: `${new Date(event.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – ${new Date(event.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`,
