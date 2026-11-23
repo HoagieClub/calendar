@@ -7,6 +7,7 @@ import { useTheme } from 'evergreen-ui';
 import { AddEventModal } from '@/components/addEvent/AddEventModal';
 import DayView from '@/components/DayView';
 import MonthView from '@/components/monthView/MonthView';
+import SearchBar from '@/components/search/SearchBar';
 import CalendarSidebar, { SIDEBAR_ID } from '@/components/sidebar/CalendarSidebar';
 import type { DateRange } from '@/components/sidebar/MiniCalendar';
 import WeekView from '@/components/weekView/weekView';
@@ -193,6 +194,7 @@ export default function CalendarPage({
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [isAddOpen, setIsAddOpen] = useState(false);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+	const [searchOpen, setSearchOpen] = useState(false);
 	// Bumped after a successful create so the visible view refetches without a reload.
 	const [eventsVersion, setEventsVersion] = useState(0);
 
@@ -291,27 +293,22 @@ export default function CalendarPage({
 				{/* Spacer */}
 				<div style={{ flex: 1 }} />
 
-				{/* Right side: new event, icon buttons, view switcher */}
-				<button
-					onClick={openAddEvent}
-					style={{
-						height: 32,
-						padding: '0 14px',
-						borderRadius: 8,
-						border: 'none',
-						background: TEAL,
-						color: colors.white,
-						fontSize: 13,
-						fontWeight: 600,
-						cursor: 'pointer',
-						marginRight: 4,
-					}}
-				>
-					+ New Event
-				</button>
-				<button style={iconButtonStyle} title='Search'>
-					<SearchIcon />
-				</button>
+				{/* Right side: search, icon buttons, view switcher */}
+				{searchOpen ? (
+					<SearchBar
+						compact
+						onSearch={() => undefined}
+						onClear={() => setSearchOpen(false)}
+					/>
+				) : (
+					<button
+						style={iconButtonStyle}
+						title='Search'
+						onClick={() => setSearchOpen(true)}
+					>
+						<SearchIcon />
+					</button>
+				)}
 				<button style={iconButtonStyle} title='Help'>
 					<HelpIcon />
 				</button>
@@ -365,7 +362,15 @@ export default function CalendarPage({
 				/>
 
 				{/* ── Main content ── */}
-				<div style={{ flex: 1, minWidth: 0, overflow: 'hidden', padding: 16 }}>
+				<div
+					style={{
+						flex: 1,
+						minWidth: 0,
+						overflow: 'hidden',
+						padding: 16,
+						paddingBottom: view === 'Month' ? 192 : 16,
+					}}
+				>
 					{view === 'Day' && (
 						<div style={{ height: '100%' }}>
 							<DayView
@@ -398,7 +403,29 @@ export default function CalendarPage({
 					)}
 				</div>
 			</div>
-
+			{/* Floating New Event button */}
+			<button
+				type='button'
+				onClick={openAddEvent}
+				style={{
+					position: 'fixed',
+					bottom: 32,
+					right: 35,
+					zIndex: 20,
+					minHeight: 48,
+					padding: '0 20px',
+					borderRadius: 12,
+					border: 'none',
+					background: TEAL,
+					color: colors.white,
+					fontSize: 15,
+					fontWeight: 600,
+					cursor: 'pointer',
+					boxShadow: '0 4px 14px rgba(0, 0, 0, 0.18)',
+				}}
+			>
+				+ New Event
+			</button>
 			<AddEventModal
 				open={isAddOpen}
 				onClose={() => setIsAddOpen(false)}

@@ -38,6 +38,7 @@
 		"next-env.d.ts",
 		"**/*.ts",
 		"**/*.tsx",
+		"lib/allDayEvents.test.mjs",
 		"postcss.config.mjs",
 		".next/types/**/*.ts",
 		"eslint.config.mjs",
