@@ -104,10 +104,17 @@ export default function MonthView({ month, year, onSelect, refreshToken }: Month
 					</div>
 				))}
 			</div>
-
 			{/* ── Calendar rows ── */}
 			<div
-				style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}
+				style={{
+					flex: 1,
+					minHeight: 0,
+					display: 'flex',
+					flexDirection: 'column',
+					position: 'relative',
+					overflowY: 'auto',
+					scrollbarWidth: 'none',
+				}}
 			>
 				{weeks.map((week, wi) => (
 					<div

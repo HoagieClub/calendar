@@ -248,24 +248,7 @@ export default function CalendarPage({
 				{/* Spacer */}
 				<div style={{ flex: 1 }} />
 
-				{/* Right side: new event, search, icon buttons, view switcher */}
-				<button
-					onClick={openAddEvent}
-					style={{
-						height: 32,
-						padding: '0 14px',
-						borderRadius: 8,
-						border: 'none',
-						background: TEAL,
-						color: colors.white,
-						fontSize: 13,
-						fontWeight: 600,
-						cursor: 'pointer',
-						marginRight: 4,
-					}}
-				>
-					+ New Event
-				</button>
+				{/* Right side: search, icon buttons, view switcher */}
 				{searchOpen ? (
 					<SearchBar
 						compact
@@ -324,7 +307,14 @@ export default function CalendarPage({
 			</div>
 
 			{/* ── Main content ── */}
-			<div style={{ flex: 1, overflow: 'hidden', padding: 16 }}>
+			<div
+				style={{
+					flex: 1,
+					overflow: 'hidden',
+					padding: 16,
+					paddingBottom: view === 'Month' ? 192 : 16,
+				}}
+			>
 				{view === 'Day' && (
 					<div style={{ height: '100%' }}>
 						<DayView
@@ -356,7 +346,29 @@ export default function CalendarPage({
 					</div>
 				)}
 			</div>
-
+			{/* Floating New Event button */}
+			<button
+				type='button'
+				onClick={openAddEvent}
+				style={{
+					position: 'fixed',
+					bottom: 32,
+					right: 35,
+					zIndex: 20,
+					minHeight: 48,
+					padding: '0 20px',
+					borderRadius: 12,
+					border: 'none',
+					background: TEAL,
+					color: colors.white,
+					fontSize: 15,
+					fontWeight: 600,
+					cursor: 'pointer',
+					boxShadow: '0 4px 14px rgba(0, 0, 0, 0.18)',
+				}}
+			>
+				+ New Event
+			</button>
 			<AddEventModal
 				open={isAddOpen}
 				onClose={() => setIsAddOpen(false)}
