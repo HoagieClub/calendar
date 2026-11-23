@@ -21,6 +21,7 @@ class Event(models.Model):
 	host = models.CharField(max_length=100)
 	owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	category = models.ManyToManyField(Category, related_name="events", blank=True)
+	saved_by = models.ManyToManyField(User, related_name="saved_events", blank=True)
 	from_mail = models.BooleanField(default=False)
 	# Manual sort position among events that share the same start time (lower comes first).
 	ordering = models.PositiveIntegerField(default=0)
