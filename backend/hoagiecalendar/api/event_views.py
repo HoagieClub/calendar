@@ -71,6 +71,16 @@ class EventSerializer(serializers.ModelSerializer):
 		},
 	)
 
+	owner_netid = serializers.CharField(
+		source="owner.username",
+		read_only=True,
+	)
+
+	owner_email = serializers.EmailField(
+		source="owner.email",
+		read_only=True,
+	)
+
 	class Meta:
 		model = Event
 		fields = [
@@ -81,13 +91,14 @@ class EventSerializer(serializers.ModelSerializer):
 			"location",
 			"description",
 			"host",
-			"owner",
+			"owner_netid",
+			"owner_email",
 			"category",
 			"from_mail",
 			"ordering",
 			"is_saved",
 		]
-		read_only_fields = ["id", "owner", "created_at", "updated_at"]
+		read_only_fields = ["id", "owner_netid", "owner_email", "created_at", "updated_at"]
 
 
 class EventView(APIView):
@@ -122,7 +133,7 @@ class EventView(APIView):
 			)
 
 		# prefetch categories so serializing N events does not run N extra queries.
-		queryset = with_is_saved(Event.objects.prefetch_related("category"), request.user)
+		queryset = with_is_saved(Event.objects.select_related("owner").prefetch_related("category"), request.user)
 
 		# lower bound: the caller's start_time, or "now" for a search without start_time.
 		if start_time:
@@ -171,7 +182,7 @@ class EventView(APIView):
 class EventDetailView(APIView):
 	def get(self, request, event_id) -> Response:
 		# Logic to get details of an event
-		event = get_object_or_404(with_is_saved(Event.objects.all(), request.user), id=event_id)
+		event = get_object_or_404(with_is_saved(Event.objects.select_related("owner"), request.user), id=event_id)
 		serializer = EventSerializer(event)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
