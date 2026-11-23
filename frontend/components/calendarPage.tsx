@@ -191,9 +191,7 @@ export default function CalendarPage({
 			style={{
 				display: 'flex',
 				flexDirection: 'column',
-				flex: '1 1 auto',
-				minHeight: 0,
-				overflow: 'hidden',
+				height: '100vh',
 				background: colors.gray100,
 				fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
 			}}
@@ -266,7 +264,6 @@ export default function CalendarPage({
 						<SearchIcon />
 					</button>
 				)}
-
 				<button style={iconButtonStyle} title='Help'>
 					<HelpIcon />
 				</button>
@@ -313,15 +310,13 @@ export default function CalendarPage({
 			<div
 				style={{
 					flex: 1,
-					minHeight: 0,
 					overflow: 'hidden',
 					padding: 16,
-					display: 'flex',
-					flexDirection: 'column',
+					paddingBottom: view === 'Month' ? 192 : 16,
 				}}
 			>
 				{view === 'Day' && (
-					<div style={{ flex: 1, minHeight: 0 }}>
+					<div style={{ height: '100%' }}>
 						<DayView
 							date={currentDate}
 							onSelect={onSelect}
@@ -331,7 +326,7 @@ export default function CalendarPage({
 					</div>
 				)}
 				{view === 'Week' && (
-					<div style={{ flex: 1, minHeight: 0 }}>
+					<div style={{ height: '100%' }}>
 						<WeekView
 							date={currentDate}
 							onSelect={onSelect}
@@ -341,7 +336,7 @@ export default function CalendarPage({
 					</div>
 				)}
 				{view === 'Month' && (
-					<div style={{ flex: 1, minHeight: 0 }}>
+					<div style={{ height: '100%' }}>
 						<MonthView
 							month={currentDate.getMonth()}
 							year={currentDate.getFullYear()}
@@ -358,7 +353,7 @@ export default function CalendarPage({
 				style={{
 					position: 'fixed',
 					bottom: 32,
-					right: 48,
+					right: 35,
 					zIndex: 20,
 					minHeight: 48,
 					padding: '0 20px',
@@ -374,7 +369,6 @@ export default function CalendarPage({
 			>
 				+ New Event
 			</button>
-
 			<AddEventModal
 				open={isAddOpen}
 				onClose={() => setIsAddOpen(false)}
