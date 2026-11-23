@@ -48,18 +48,27 @@ export function DayView({
 	onSelect,
 	onAddEvent,
 	refreshToken,
+	categories,
+	onClearFilter,
 }: {
 	date: Date;
 	onSelect?: (event: ApiEvent) => void;
 	onAddEvent?: () => void;
 	/** Bump to refetch the current range without a reload (see useEvents). */
 	refreshToken?: number;
+	categories?: string[];
+	onClearFilter?: () => void;
 }) {
 	const startTime = new Date(date);
 	startTime.setHours(0, 0, 0, 0);
 	const endTime = new Date(date);
 	endTime.setHours(23, 59, 59, 0);
-	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
+	const { events, totalCount, isLoading, error, retry } = useEvents(
+		startTime,
+		endTime,
+		refreshToken,
+		categories
+	);
 	const timedEvents = events.filter(
 		(event) => !isAllDayEvent(event) && new Date(event.end).getTime() > startTime.getTime()
 	);
@@ -254,7 +263,19 @@ export function DayView({
 				</Pane>
 				{isLoading && <Loading overlay variant='columns' columns={1} />}
 				{error && <ErrorState overlay onRetry={retry} />}
-				{!isLoading && !error && events.length === 0 && (
+
+				{!isLoading && !error && totalCount > 0 && events.length === 0 && (
+					<Empty
+						overlay
+						message='No events match this filter.'
+						action={
+							onClearFilter
+								? { label: 'Clear filter', onClick: onClearFilter }
+								: undefined
+						}
+					/>
+				)}
+				{!isLoading && !error && totalCount === 0 && (
 					<Empty
 						overlay
 						message='Nothing on the calendar today.'

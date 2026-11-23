@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTheme } from 'evergreen-ui';
 
 import { AddEventModal } from '@/components/addEvent/AddEventModal';
+import CategoryFilter from '@/components/categoryFilter';
 import DayView from '@/components/DayView';
 import MonthView from '@/components/monthView/MonthView';
 import SearchBar from '@/components/search/SearchBar';
@@ -164,6 +165,7 @@ export default function CalendarPage({
 	const [searchOpen, setSearchOpen] = useState(false);
 	// Bumped after a successful create so the visible view refetches without a reload.
 	const [eventsVersion, setEventsVersion] = useState(0);
+	const [categories, setCategories] = useState<string[]>([]);
 
 	const openAddEvent = onAddEvent ?? (() => setIsAddOpen(true));
 
@@ -324,37 +326,57 @@ export default function CalendarPage({
 			</div>
 
 			{/* ── Main content ── */}
-			<div style={{ flex: 1, overflow: 'hidden', padding: 16 }}>
-				{view === 'Day' && (
-					<div style={{ height: '100%' }}>
-						<DayView
-							date={currentDate}
-							onSelect={onSelect}
-							onAddEvent={openAddEvent}
-							refreshToken={eventsVersion}
-						/>
-					</div>
-				)}
-				{view === 'Week' && (
-					<div style={{ height: '100%' }}>
-						<WeekView
-							date={currentDate}
-							onSelect={onSelect}
-							onAddEvent={openAddEvent}
-							refreshToken={eventsVersion}
-						/>
-					</div>
-				)}
-				{view === 'Month' && (
-					<div style={{ height: '100%' }}>
-						<MonthView
-							month={currentDate.getMonth()}
-							year={currentDate.getFullYear()}
-							onSelect={onSelect}
-							refreshToken={eventsVersion}
-						/>
-					</div>
-				)}
+			<div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+				<aside
+					style={{
+						width: 280,
+						flexShrink: 0,
+						padding: 16,
+						background: colors.white,
+						borderRight: `1px solid ${colors.gray300}`,
+						overflowY: 'auto',
+					}}
+				>
+					<CategoryFilter selected={categories} onChange={setCategories} />
+				</aside>
+				<div style={{ flex: 1, overflow: 'hidden', padding: 16 }}>
+					{view === 'Day' && (
+						<div style={{ height: '100%' }}>
+							<DayView
+								date={currentDate}
+								onSelect={onSelect}
+								onAddEvent={openAddEvent}
+								refreshToken={eventsVersion}
+								categories={categories}
+								onClearFilter={() => setCategories([])}
+							/>
+						</div>
+					)}
+					{view === 'Week' && (
+						<div style={{ height: '100%' }}>
+							<WeekView
+								date={currentDate}
+								onSelect={onSelect}
+								onAddEvent={openAddEvent}
+								refreshToken={eventsVersion}
+								categories={categories}
+								onClearFilter={() => setCategories([])}
+							/>
+						</div>
+					)}
+					{view === 'Month' && (
+						<div style={{ height: '100%' }}>
+							<MonthView
+								month={currentDate.getMonth()}
+								year={currentDate.getFullYear()}
+								onSelect={onSelect}
+								refreshToken={eventsVersion}
+								categories={categories}
+								onClearFilter={() => setCategories([])}
+							/>
+						</div>
+					)}
+				</div>
 			</div>
 
 			<AddEventModal

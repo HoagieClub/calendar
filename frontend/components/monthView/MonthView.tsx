@@ -2,7 +2,7 @@
 
 import { useTheme } from 'evergreen-ui';
 
-import { ErrorState, Loading } from '@/components/states';
+import { Empty, ErrorState, Loading } from '@/components/states';
 import { useEvents, getCategoryColor } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
@@ -45,9 +45,18 @@ interface MonthViewProps {
 	onSelect?: (event: CalendarEvent) => void;
 	/** Bump to refetch the current range without a reload (see useEvents). */
 	refreshToken?: number;
+	categories?: string[];
+	onClearFilter?: () => void;
 }
 
-export default function MonthView({ month, year, onSelect, refreshToken }: MonthViewProps) {
+export default function MonthView({
+	month,
+	year,
+	onSelect,
+	refreshToken,
+	categories,
+	onClearFilter,
+}: MonthViewProps) {
 	const { colors } = useTheme();
 
 	const now = new Date();
@@ -58,7 +67,12 @@ export default function MonthView({ month, year, onSelect, refreshToken }: Month
 
 	const startTime = new Date(displayYear, displayMonth, 1);
 	const endTime = new Date(displayYear, displayMonth + 1, 0, 23, 59, 59);
-	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
+	const { events, totalCount, isLoading, error, retry } = useEvents(
+		startTime,
+		endTime,
+		refreshToken,
+		categories
+	);
 
 	return (
 		<div
@@ -223,8 +237,20 @@ export default function MonthView({ month, year, onSelect, refreshToken }: Month
 						})}
 					</div>
 				))}
-				{isLoading && <Loading overlay variant='grid' columns={7} rows={weeks.length} />}
+
+				{isLoading && <Loading overlay variant='columns' columns={1} />}
 				{error && <ErrorState overlay onRetry={retry} />}
+				{!isLoading && !error && totalCount > 0 && events.length === 0 && (
+					<Empty
+						overlay
+						message='No events match this filter.'
+						action={
+							onClearFilter
+								? { label: 'Clear filter', onClick: onClearFilter }
+								: undefined
+						}
+					/>
+				)}
 			</div>
 		</div>
 	);

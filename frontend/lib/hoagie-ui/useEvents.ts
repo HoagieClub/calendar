@@ -4,7 +4,7 @@
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 
 import type { CalendarEvent } from '@/types';
 
@@ -857,6 +857,7 @@ export function getCategoryColor(category: string): { bg: string; border: string
 type UseEventsResult = {
 	events: CalendarEvent[];
 	/** True from the moment the range (or attempt) changes until its fetch settles. */
+	totalCount: number;
 	isLoading: boolean;
 	error: string | null;
 	/** Re-runs the fetch for the current range; no page reload. */
@@ -873,7 +874,12 @@ const USE_FAKE_FALLBACK = process.env.NEXT_PUBLIC_USE_FAKE_EVENTS === 'true';
  * @param refreshToken - Bump this number to refetch the same range, e.g. after creating an
  * event, without a page reload. Defaults to 0.
  */
-export function useEvents(startTime: Date, endTime: Date, refreshToken = 0): UseEventsResult {
+export function useEvents(
+	startTime: Date,
+	endTime: Date,
+	refreshToken = 0,
+	categories?: string[]
+): UseEventsResult {
 	const [settled, setSettled] = useState<Settled | null>(null);
 	const [attempt, setAttempt] = useState(0);
 
@@ -921,8 +927,23 @@ export function useEvents(startTime: Date, endTime: Date, refreshToken = 0): Use
 
 	const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
-	if (settled === null || settled.key !== key) {
-		return { events: [], isLoading: true, error: null, retry };
+	const isCurrent = settled !== null && settled.key === key;
+	const settledEvents = isCurrent ? settled.events : null;
+
+	const filtered = useMemo(() => {
+		if (!settledEvents) return [];
+		if (!categories || categories.length === 0) return settledEvents;
+		return settledEvents.filter((e) => categories.includes(e.category || 'other'));
+	}, [settledEvents, categories]);
+
+	if (!isCurrent) {
+		return { events: [], totalCount: 0, isLoading: true, error: null, retry };
 	}
-	return { events: settled.events, isLoading: false, error: settled.error, retry };
+	return {
+		events: filtered,
+		totalCount: settled.events.length,
+		isLoading: false,
+		error: settled.error,
+		retry,
+	};
 }
