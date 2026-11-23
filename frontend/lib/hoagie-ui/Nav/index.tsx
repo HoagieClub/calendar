@@ -156,7 +156,9 @@ export function Nav({
 						</TabNavigation>
 						{user && (
 							<Popover
-								content={<ProfileCard user={user} />}
+								content={({ close }) => (
+									<ProfileCard user={user} onNavigate={close} />
+								)}
 								position={Position.BOTTOM}
 							>
 								<Avatar
