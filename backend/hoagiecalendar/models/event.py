@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from hoagiecalendar.models.user import User
+
 
 class Category(models.Model):
 	name = models.CharField(max_length=50)
