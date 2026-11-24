@@ -8,6 +8,8 @@ from .event_views import EventSerializer, with_is_saved
 
 
 class UserEventsView(APIView):
+	permission_classes = [IsAuthenticated]
+
 	# Logic to get events user created
 	def get(self, request) -> Response:
 		events = with_is_saved(Event.objects.filter(owner=request.user).prefetch_related("category"), request.user)

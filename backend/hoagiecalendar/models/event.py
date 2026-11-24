@@ -1,6 +1,7 @@
+from django.conf import settings
 from django.db import models
 
-from .user import User
+from hoagiecalendar.models.user import User
 
 
 class Category(models.Model):
@@ -20,7 +21,7 @@ class Event(models.Model):
 	location = models.CharField(max_length=100)
 	description = models.TextField()
 	host = models.CharField(max_length=100)
-	owner = models.ForeignKey(User, on_delete=models.CASCADE)
+	owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	category = models.ManyToManyField(Category, related_name="events", blank=True)
 	saved_by = models.ManyToManyField(User, related_name="saved_events", blank=True)
 	from_mail = models.BooleanField(default=False)

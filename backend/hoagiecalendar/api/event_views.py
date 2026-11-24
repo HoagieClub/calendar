@@ -196,7 +196,7 @@ class EventDetailView(APIView):
 
 	def delete(self, request, event_id) -> Response:
 		# Logic to delete an event
-		event = get_object_or_404(Event, id=event_id)
+		event = get_object_or_404(Event, id=event_id, owner=request.user)
 		event.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
