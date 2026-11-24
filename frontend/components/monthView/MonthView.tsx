@@ -118,10 +118,17 @@ export default function MonthView({
 					</div>
 				))}
 			</div>
-
 			{/* ── Calendar rows ── */}
 			<div
-				style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}
+				style={{
+					flex: 1,
+					minHeight: 0,
+					display: 'flex',
+					flexDirection: 'column',
+					position: 'relative',
+					overflowY: 'auto',
+					scrollbarWidth: 'none',
+				}}
 			>
 				{weeks.map((week, wi) => (
 					<div
@@ -238,7 +245,7 @@ export default function MonthView({
 					</div>
 				))}
 
-				{isLoading && <Loading overlay variant='columns' columns={1} />}
+				{isLoading && <Loading overlay variant='grid' columns={7} rows={weeks.length} />}
 				{error && <ErrorState overlay onRetry={retry} />}
 				{!isLoading && !error && totalCount > 0 && events.length === 0 && (
 					<Empty

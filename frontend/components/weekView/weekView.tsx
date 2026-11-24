@@ -515,7 +515,7 @@ export default function WeekView({
 					</div>
 				</div>
 
-				{isLoading && <Loading overlay variant='columns' columns={1} />}
+				{isLoading && <Loading overlay variant='columns' columns={7} />}
 				{error && <ErrorState overlay onRetry={retry} />}
 				{!isLoading && !error && totalCount > 0 && events.length === 0 && (
 					<Empty
