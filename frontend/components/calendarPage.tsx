@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTheme } from 'evergreen-ui';
 
 import { AddEventModal } from '@/components/addEvent/AddEventModal';
+import CategoryFilter from '@/components/categoryFilter';
 import DayView from '@/components/DayView';
 import MonthView from '@/components/monthView/MonthView';
 import SearchBar from '@/components/search/SearchBar';
@@ -197,6 +198,7 @@ export default function CalendarPage({
 	const [searchOpen, setSearchOpen] = useState(false);
 	// Bumped after a successful create so the visible view refetches without a reload.
 	const [eventsVersion, setEventsVersion] = useState(0);
+	const [categories, setCategories] = useState<string[]>([]);
 
 	const openAddEvent = onAddEvent ?? (() => setIsAddOpen(true));
 
@@ -315,6 +317,25 @@ export default function CalendarPage({
 				<button style={iconButtonStyle} title='Settings'>
 					<SettingsIcon />
 				</button>
+				{categories.length > 0 && (
+					<button
+						onClick={() => setIsSidebarOpen(true)}
+						title='Show filters'
+						style={{
+							height: 32,
+							padding: '0 12px',
+							borderRadius: 8,
+							border: `1px solid ${TEAL}`,
+							background: colors.white,
+							color: TEAL,
+							fontSize: 13,
+							fontWeight: 600,
+							cursor: 'pointer',
+						}}
+					>
+						Filter ({categories.length})
+					</button>
+				)}
 
 				{/* View switcher */}
 				<div
@@ -359,6 +380,7 @@ export default function CalendarPage({
 					visibleRange={getVisibleRange(view, currentDate)}
 					onDateChange={setCurrentDate}
 					refreshToken={eventsVersion}
+					filters={<CategoryFilter selected={categories} onChange={setCategories} />}
 				/>
 
 				{/* ── Main content ── */}
@@ -378,6 +400,8 @@ export default function CalendarPage({
 								onSelect={onSelect}
 								onAddEvent={openAddEvent}
 								refreshToken={eventsVersion}
+								categories={categories}
+								onClearFilter={() => setCategories([])}
 							/>
 						</div>
 					)}
@@ -388,6 +412,8 @@ export default function CalendarPage({
 								onSelect={onSelect}
 								onAddEvent={openAddEvent}
 								refreshToken={eventsVersion}
+								categories={categories}
+								onClearFilter={() => setCategories([])}
 							/>
 						</div>
 					)}
@@ -398,6 +424,8 @@ export default function CalendarPage({
 								year={currentDate.getFullYear()}
 								onSelect={onSelect}
 								refreshToken={eventsVersion}
+								categories={categories}
+								onClearFilter={() => setCategories([])}
 							/>
 						</div>
 					)}

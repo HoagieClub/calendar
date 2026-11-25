@@ -81,9 +81,7 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 		const visibleCols = columns.slice(0, MAX_COLUMNS);
 		const hiddenEvents = columns.slice(MAX_COLUMNS).flat();
 		const overflow = hiddenEvents.length;
-		const overflowColors = hiddenEvents
-			.map((e) => getCategoryColor(e.category).border)
-			.slice(0, 3);
+		const overflowColors = hiddenEvents.map((e) => getCategoryColor(e).border).slice(0, 3);
 		const numCols = Math.min(columns.length, MAX_COLUMNS);
 
 		for (let c = 0; c < visibleCols.length; c++) {
@@ -147,12 +145,16 @@ export default function WeekView({
 	onSelect,
 	onAddEvent,
 	refreshToken,
+	categories,
+	onClearFilter,
 }: {
 	date: Date;
 	onSelect?: (event: CalendarEvent) => void;
 	onAddEvent?: () => void;
 	/** Bump to refetch the current range without a reload (see useEvents). */
 	refreshToken?: number;
+	categories?: string[];
+	onClearFilter?: () => void;
 }) {
 	const { colors } = useTheme();
 	const scrollRef = useRef<HTMLDivElement>(null);
@@ -165,7 +167,12 @@ export default function WeekView({
 	const startTime = weekDates[0];
 	const endTime = new Date(weekDates[6]);
 	endTime.setHours(23, 59, 59);
-	const { events, isLoading, error, retry } = useEvents(startTime, endTime, refreshToken);
+	const { events, totalCount, isLoading, error, retry } = useEvents(
+		startTime,
+		endTime,
+		refreshToken,
+		categories
+	);
 
 	useEffect(() => {
 		if (scrollRef.current) {
@@ -364,7 +371,7 @@ export default function WeekView({
 												overflow,
 												overflowColors,
 											}) => {
-												const color = getCategoryColor(event.category);
+												const color = getCategoryColor(event);
 												const leftPct = (colIndex / numCols) * 100;
 												const widthPct = (1 / numCols) * 100;
 												const showTime = height > 42;
@@ -471,41 +478,55 @@ export default function WeekView({
 							})}
 
 							{/* ── Current time indicator ── */}
-							<div
-								style={{
-									position: 'absolute',
-									top: currentMinuteOffset,
-									left: `calc(${(100 / 7) * todayIndex}%)`,
-									width: `calc(${100 / 7}%)`,
-									zIndex: 5,
-									pointerEvents: 'none',
-								}}
-							>
+							{todayIndex >= 0 && (
 								<div
 									style={{
 										position: 'absolute',
-										left: -4,
-										top: -4,
-										width: 8,
-										height: 8,
-										borderRadius: '50%',
-										background: colors.red500,
+										top: currentMinuteOffset,
+										left: `calc(${(100 / 7) * todayIndex}%)`,
+										width: `calc(${100 / 7}%)`,
+										zIndex: 5,
+										pointerEvents: 'none',
 									}}
-								/>
-								<div
-									style={{
-										height: 2,
-										background: colors.red500,
-										borderRadius: 1,
-									}}
-								/>
-							</div>
+								>
+									<div
+										style={{
+											position: 'absolute',
+											left: -4,
+											top: -4,
+											width: 8,
+											height: 8,
+											borderRadius: '50%',
+											background: colors.red500,
+										}}
+									/>
+									<div
+										style={{
+											height: 2,
+											background: colors.red500,
+											borderRadius: 1,
+										}}
+									/>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
+
 				{isLoading && <Loading overlay variant='columns' columns={7} />}
 				{error && <ErrorState overlay onRetry={retry} />}
-				{!isLoading && !error && events.length === 0 && (
+				{!isLoading && !error && totalCount > 0 && events.length === 0 && (
+					<Empty
+						overlay
+						message='No events match this filter.'
+						action={
+							onClearFilter
+								? { label: 'Clear filter', onClick: onClearFilter }
+								: undefined
+						}
+					/>
+				)}
+				{!isLoading && !error && totalCount === 0 && (
 					<Empty
 						overlay
 						message='Nothing on the calendar this week.'

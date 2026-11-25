@@ -4,8 +4,9 @@
  * Copyright © 2021-2026 Hoagie Club and affiliates.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 
+import { colorsFor, primaryCategory } from '@/lib/categories';
 import type { CalendarEvent } from '@/types';
 
 const y = new Date().getFullYear();
@@ -29,7 +30,14 @@ const THU = SUN + 4;
 const FRI = SUN + 5;
 const SAT = SUN + 6;
 
-const PLACEHOLDER_EVENTS: CalendarEvent[] = [
+const CATEGORY_NAME_BY_KEY: Record<string, string> = {
+	social: 'Social Events',
+	academic: 'Academic',
+	food: 'Free food',
+	sports: 'Sports',
+};
+
+const RAW_PLACEHOLDER_EVENTS: Omit<CalendarEvent, 'category_names'>[] = [
 	// Ends at exclusive midnight: stays in Thursday's timed grid, not Friday's strip.
 	{
 		id: 'midnight-ending-test',
@@ -841,21 +849,25 @@ const PLACEHOLDER_EVENTS: CalendarEvent[] = [
 	},
 ];
 
-// Light pastel bg, darker solid border/text color
-export const CATEGORY_COLORS: Record<string, { bg: string; border: string }> = {
-	sports: { bg: '#EFF6FF', border: '#3B82F6' },
-	academic: { bg: '#F5F3FF', border: '#7C3AED' },
-	food: { bg: '#FFF7ED', border: '#EA580C' },
-	social: { bg: '#F0FDF4', border: '#16A34A' },
-	default: { bg: '#F9FAFB', border: '#6B7280' },
-};
+const PLACEHOLDER_EVENTS: CalendarEvent[] = RAW_PLACEHOLDER_EVENTS.map((e) => ({
+	...e,
+	category_names: [CATEGORY_NAME_BY_KEY[String(e.category)] ?? 'Other'],
+}));
 
-export function getCategoryColor(category: string): { bg: string; border: string } {
-	return CATEGORY_COLORS[category] ?? CATEGORY_COLORS.default;
+export function getCategoryColor(event: CalendarEvent): { bg: string; border: string } {
+	const { color, bg } = colorsFor(primaryCategory(event.category_names));
+	return { bg, border: color };
+}
+
+export function getCategoryColorByName(name: string): { bg: string; border: string } {
+	const { color, bg } = colorsFor(name);
+	return { bg, border: color };
 }
 
 type UseEventsResult = {
 	events: CalendarEvent[];
+	/** Events in range before the category filter is applied. */
+	totalCount: number;
 	/** True from the moment the range (or attempt) changes until its fetch settles. */
 	isLoading: boolean;
 	error: string | null;
@@ -872,8 +884,14 @@ const USE_FAKE_FALLBACK = process.env.NEXT_PUBLIC_USE_FAKE_EVENTS === 'true';
  *
  * @param refreshToken - Bump this number to refetch the same range, e.g. after creating an
  * event, without a page reload. Defaults to 0.
+ * @param categories - Category names to keep. Empty or undefined keeps every event.
  */
-export function useEvents(startTime: Date, endTime: Date, refreshToken = 0): UseEventsResult {
+export function useEvents(
+	startTime: Date,
+	endTime: Date,
+	refreshToken = 0,
+	categories?: string[]
+): UseEventsResult {
 	const [settled, setSettled] = useState<Settled | null>(null);
 	const [attempt, setAttempt] = useState(0);
 
@@ -921,8 +939,27 @@ export function useEvents(startTime: Date, endTime: Date, refreshToken = 0): Use
 
 	const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
-	if (settled === null || settled.key !== key) {
-		return { events: [], isLoading: true, error: null, retry };
+	const isCurrent = settled !== null && settled.key === key;
+	const settledEvents = isCurrent ? settled.events : null;
+
+	const filtered = useMemo(() => {
+		if (!settledEvents) return [];
+		if (!categories || categories.length === 0) return settledEvents;
+		return settledEvents.filter((e) => {
+			const names =
+				e.category_names && e.category_names.length > 0 ? e.category_names : ['Other'];
+			return names.some((name) => categories.includes(name));
+		});
+	}, [settledEvents, categories]);
+
+	if (!isCurrent) {
+		return { events: [], totalCount: 0, isLoading: true, error: null, retry };
 	}
-	return { events: settled.events, isLoading: false, error: settled.error, retry };
+	return {
+		events: filtered,
+		totalCount: settled.events.length,
+		isLoading: false,
+		error: settled.error,
+		retry,
+	};
 }

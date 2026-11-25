@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Heading, Pane, Text, useTheme } from 'evergreen-ui';
 
+import { colorsFor } from '@/lib/categories';
 import { formatEventTime } from '@/lib/formatEventTime';
 
 export { formatEventTime };
@@ -21,60 +22,6 @@ export const EVENT_CATEGORIES = [
 
 export type EventCategory = (typeof EVENT_CATEGORIES)[number];
 
-const CATEGORY_STYLES: Record<
-	EventCategory,
-	{ background: string; border: string; color: string; label: string }
-> = {
-	'Social Events': {
-		background: '#fff3f1',
-		border: '#ef6b61',
-		color: '#c2473d',
-		label: 'SOCIAL EVENTS',
-	},
-	Academic: {
-		background: '#f2f7ff',
-		border: '#5b87ff',
-		color: '#446fd9',
-		label: 'ACADEMIC',
-	},
-	'Free Food': {
-		background: '#fff6eb',
-		border: '#ef9b3d',
-		color: '#cf7a1f',
-		label: 'FREE FOOD',
-	},
-	'Arts & Culture': {
-		background: '#f7f0ff',
-		border: '#9b6cff',
-		color: '#7d55da',
-		label: 'ARTS & CULTURE',
-	},
-	'Sports & Fitness': {
-		background: '#edf9f1',
-		border: '#66c78d',
-		color: '#439965',
-		label: 'SPORTS & FITNESS',
-	},
-	Career: {
-		background: '#f3f0ff',
-		border: '#7266f0',
-		color: '#5b50cc',
-		label: 'CAREER',
-	},
-	'Housing & Sales': {
-		background: '#fff1f3',
-		border: '#eb5f78',
-		color: '#c94f64',
-		label: 'HOUSING & SALES',
-	},
-	Other: {
-		background: '#f4f5f7',
-		border: '#9aa3b2',
-		color: '#5f6773',
-		label: 'OTHER',
-	},
-};
-
 export type CalendarEvent = {
 	id: number | string;
 	name: string;
@@ -83,7 +30,7 @@ export type CalendarEvent = {
 	location: string;
 	host: string;
 	attendees?: number;
-	category?: EventCategory;
+	category?: string;
 	description?: string;
 };
 
@@ -101,9 +48,13 @@ export function Event({ event, top, left, width, height, onClick }: EventProps) 
 	const showExpandedDetails = height >= 120;
 	const showLocation = height >= 80;
 	const titleLineClamp = height >= 120 ? 2 : 1;
-	const categoryStyle = event.category
-		? CATEGORY_STYLES[event.category]
-		: CATEGORY_STYLES['Other'];
+	const { color, bg } = colorsFor(event.category);
+	const categoryStyle = {
+		background: bg,
+		border: color,
+		color,
+		label: (event.category ?? 'Other').toUpperCase(),
+	};
 	const [isHighlighted, setIsHighlighted] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
 	const [cardWidth, setCardWidth] = useState(999);

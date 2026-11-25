@@ -33,6 +33,7 @@ export type CalendarEvent = {
 	host: string;
 	owner: string;
 	category: string;
+	category_names: string[];
 	from_mail: boolean;
 	ordering: number;
 };
