@@ -81,9 +81,7 @@ function layoutEvents(events: CalendarEvent[]): PositionedEvent[] {
 		const visibleCols = columns.slice(0, MAX_COLUMNS);
 		const hiddenEvents = columns.slice(MAX_COLUMNS).flat();
 		const overflow = hiddenEvents.length;
-		const overflowColors = hiddenEvents
-			.map((e) => getCategoryColor(e.category).border)
-			.slice(0, 3);
+		const overflowColors = hiddenEvents.map((e) => getCategoryColor(e).border).slice(0, 3);
 		const numCols = Math.min(columns.length, MAX_COLUMNS);
 
 		for (let c = 0; c < visibleCols.length; c++) {
@@ -373,7 +371,7 @@ export default function WeekView({
 												overflow,
 												overflowColors,
 											}) => {
-												const color = getCategoryColor(event.category);
+												const color = getCategoryColor(event);
 												const leftPct = (colIndex / numCols) * 100;
 												const widthPct = (1 / numCols) * 100;
 												const showTime = height > 42;

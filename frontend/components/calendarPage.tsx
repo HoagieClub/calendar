@@ -317,6 +317,25 @@ export default function CalendarPage({
 				<button style={iconButtonStyle} title='Settings'>
 					<SettingsIcon />
 				</button>
+				{categories.length > 0 && (
+					<button
+						onClick={() => setIsSidebarOpen(true)}
+						title='Show filters'
+						style={{
+							height: 32,
+							padding: '0 12px',
+							borderRadius: 8,
+							border: `1px solid ${TEAL}`,
+							background: colors.white,
+							color: TEAL,
+							fontSize: 13,
+							fontWeight: 600,
+							cursor: 'pointer',
+						}}
+					>
+						Filter ({categories.length})
+					</button>
+				)}
 
 				{/* View switcher */}
 				<div

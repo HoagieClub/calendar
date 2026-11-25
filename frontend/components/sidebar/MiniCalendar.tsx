@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { ChevronLeftIcon, ChevronRightIcon, useTheme } from 'evergreen-ui';
 
-import { getCategoryColor, useEvents } from '@/lib/hoagie-ui/useEvents';
+import { getCategoryColorByName, useEvents } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent } from '@/types';
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -270,7 +270,7 @@ export default function MiniCalendar({
 											width: 5,
 											height: 5,
 											borderRadius: '50%',
-											background: getCategoryColor(category).border,
+											background: getCategoryColorByName(category).border,
 										}}
 									/>
 								))}

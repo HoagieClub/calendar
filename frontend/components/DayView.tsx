@@ -5,9 +5,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pane, Text, majorScale } from 'evergreen-ui';
 
 import AllDayStrip, { useScrollbarWidth } from '@/components/AllDayStrip';
-import Event, { type CalendarEvent, type EventCategory } from '@/components/Event';
+import Event, { type CalendarEvent } from '@/components/Event';
 import { Empty, ErrorState, Loading } from '@/components/states';
 import { endMinutes, isAllDayEvent } from '@/lib/allDayEvents';
+import { primaryCategory } from '@/lib/categories';
 import { useEvents } from '@/lib/hoagie-ui/useEvents';
 import type { CalendarEvent as ApiEvent } from '@/types';
 
@@ -16,13 +17,6 @@ const TIME_LABEL_WIDTH = 72;
 const INITIAL_SCROLL_PADDING = 160;
 const TOUCHING_EVENT_GAP = 4;
 const EVENT_LANES = 5;
-
-const CATEGORY_MAP: Record<string, EventCategory> = {
-	sports: 'Sports & Fitness',
-	academic: 'Academic',
-	food: 'Free Food',
-	social: 'Social Events',
-};
 
 function toCardEvent(e: ApiEvent): CalendarEvent {
 	const s = new Date(e.start);
@@ -33,7 +27,7 @@ function toCardEvent(e: ApiEvent): CalendarEvent {
 		endHour: endMinutes(e) / 60,
 		location: e.location,
 		host: e.host,
-		category: CATEGORY_MAP[e.category] ?? 'Other',
+		category: primaryCategory(e.category_names),
 	};
 }
 

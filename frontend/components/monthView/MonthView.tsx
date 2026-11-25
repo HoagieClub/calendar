@@ -199,7 +199,7 @@ export default function MonthView({
 												}}
 											>
 												{visibleEvents.map((event) => {
-													const color = getCategoryColor(event.category);
+													const color = getCategoryColor(event);
 													return (
 														<div
 															key={event.id}
